@@ -1,0 +1,41 @@
+# JetBrains IDEs
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/dictionaries
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.xml
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/gradle.xml
+.idea/**/libraries
+.idea/**/mongoSettings.xml
+*.iws
+
+# IntelliJ output
+out/
+.idea_modules/
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Project build dirs
+build/*
+dist/*
+configs/dev*
+
+.DS_Store
+var
+
+# Local environment
+.env
+
+vendor/

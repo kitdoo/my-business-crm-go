@@ -1,0 +1,18 @@
+defaults:
+  all-fields: true
+  type: options
+  output: options_gen.go
+  formatter: >-
+    gci write
+    -s standard
+    -s default
+    -s "prefix(google.golang.org)"
+    -s "prefix(golang.org)"
+    -s "prefix(github.com/altessa-s)"
+    -s "prefix(github.com/altessa-s/go-atlas)"
+    -s "prefix(github.com/kitdoo/my-business-crm-go)"
+    -s blank
+    -s alias
+    {file}
+
+  verbose: false
