@@ -1,0 +1,32 @@
+syntax = "proto3";
+package crm.types.product;
+
+import "types/common/common_localized_string.proto";
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/product;productpb";
+
+// Carries no price or stock — those live in ProductPrice and Inventory.
+message Product {
+  string id = 1;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
+  optional int64 deletedAt = 4;
+  string sku = 5;
+  crm.types.common.LocalizedString name = 6;
+  crm.types.common.LocalizedString description = 7;
+  string brandId = 8;
+  repeated string categoryIds = 9;
+  // Characteristic name -> localized value (material, size, ...).
+  map<string, crm.types.common.LocalizedString> details = 10;
+  // Display order; first is main.
+  repeated string imageIds = 11;
+  ProductStatus status = 12;
+  string etag = 101;
+}
+
+enum ProductStatus {
+  PRODUCT_STATUS_UNSPECIFIED = 0;
+  PRODUCT_STATUS_DRAFT = 1;
+  PRODUCT_STATUS_ACTIVE = 2;
+  PRODUCT_STATUS_INACTIVE = 3;
+}

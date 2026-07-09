@@ -1,0 +1,66 @@
+syntax = "proto3";
+package crm.grpc.report.v1;
+
+import "buf/validate/validate.proto";
+import "types/common/common_period_filter.proto";
+import "types/report/report.proto";
+
+option go_package = ".;reportpb";
+
+service ReportsService {
+  rpc GetSalesReport (GetSalesReportRequest) returns (GetSalesReportResponse) {}
+  rpc GetSalesByStaff (GetSalesByStaffRequest) returns (GetSalesByStaffResponse) {}
+  rpc GetSalesByPartner (GetSalesByPartnerRequest) returns (GetSalesByPartnerResponse) {}
+  rpc GetPopularProducts (GetPopularProductsRequest) returns (GetPopularProductsResponse) {}
+  rpc GetTurnover (GetTurnoverRequest) returns (GetTurnoverResponse) {}
+  rpc GetStockLevels (GetStockLevelsRequest) returns (GetStockLevelsResponse) {}
+}
+
+message GetSalesReportRequest {
+  crm.types.common.PeriodFilter period = 1 [(buf.validate.field).required = true];
+}
+
+message GetSalesReportResponse {
+  repeated crm.types.report.SalesReportRow rows = 1;
+}
+
+message GetSalesByStaffRequest {
+  crm.types.common.PeriodFilter period = 1 [(buf.validate.field).required = true];
+}
+
+message GetSalesByStaffResponse {
+  repeated crm.types.report.SalesByStaffRow rows = 1;
+}
+
+message GetSalesByPartnerRequest {
+  crm.types.common.PeriodFilter period = 1 [(buf.validate.field).required = true];
+}
+
+message GetSalesByPartnerResponse {
+  repeated crm.types.report.SalesByPartnerRow rows = 1;
+}
+
+message GetPopularProductsRequest {
+  crm.types.common.PeriodFilter period = 1 [(buf.validate.field).required = true];
+  int32 limit = 2 [(buf.validate.field).int32.gte = 1, (buf.validate.field).int32.lte = 100];
+}
+
+message GetPopularProductsResponse {
+  repeated crm.types.report.PopularProductRow rows = 1;
+}
+
+message GetTurnoverRequest {
+  crm.types.common.PeriodFilter period = 1 [(buf.validate.field).required = true];
+}
+
+message GetTurnoverResponse {
+  repeated crm.types.report.TurnoverRow rows = 1;
+}
+
+message GetStockLevelsRequest {
+  optional string warehouseId = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetStockLevelsResponse {
+  repeated crm.types.report.StockLevelRow rows = 1;
+}

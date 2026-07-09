@@ -1,0 +1,75 @@
+syntax = "proto3";
+package crm.grpc.price.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/price/product_price.proto";
+
+option go_package = ".;pricepb";
+
+service PricesService {
+  rpc Create (ProductPriceCreateRequest) returns (ProductPriceCreateResponse) {}
+  rpc Get (ProductPriceGetRequest) returns (ProductPriceGetResponse) {}
+  rpc Update (ProductPriceUpdateRequest) returns (ProductPriceUpdateResponse) {}
+  rpc Delete (ProductPriceDeleteRequest) returns (ProductPriceDeleteResponse) {}
+  rpc GetHistory (ProductPriceGetHistoryRequest) returns (ProductPriceGetHistoryResponse) {}
+}
+
+message ProductPriceGetRequest {
+  string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+}
+
+message ProductPriceGetResponse {
+  crm.types.price.ProductPrice price = 1;
+}
+
+message ProductPriceCreateRequest {
+  string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  int64 priceAmount = 2 [(buf.validate.field).required = true, (buf.validate.field).int64.gte = 0];
+  optional int64 discountAmount = 3 [(buf.validate.field).int64.gte = 0];
+}
+
+message ProductPriceCreateResponse {
+  crm.types.price.ProductPrice price = 1;
+}
+
+message ProductPriceUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional int64 priceAmount = 2 [(buf.validate.field).int64.gte = 0];
+  optional int64 discountAmount = 3 [(buf.validate.field).int64.gte = 0];
+  optional Options options = 99;
+}
+
+message ProductPriceUpdateResponse {
+  crm.types.price.ProductPrice price = 1;
+}
+
+message ProductPriceDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message ProductPriceDeleteResponse {}
+
+message ProductPriceGetHistoryRequest {
+  string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  message Filter {
+    optional crm.types.common.PeriodFilter createdAt = 1;
+  }
+  optional Filter filter = 2;
+  optional crm.types.common.Pagination pagination = 3;
+}
+
+message ProductPriceGetHistoryResponse {
+  repeated crm.types.price.ProductPrice items = 1;
+  optional string nextCursor = 2;
+}

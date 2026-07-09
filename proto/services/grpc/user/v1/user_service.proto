@@ -1,0 +1,135 @@
+syntax = "proto3";
+package crm.grpc.user.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/common/common_localized_string.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+import "types/user/user.proto";
+
+option go_package = ".;userpb";
+
+service UsersService {
+  rpc Create (UserCreateRequest) returns (UserCreateResponse) {}
+  rpc Get (UserGetRequest) returns (UserGetResponse) {}
+  rpc List (UsersListRequest) returns (UsersListResponse) {}
+  rpc Update (UserUpdateRequest) returns (UserUpdateResponse) {}
+  rpc Delete (UserDeleteRequest) returns (UserDeleteResponse) {}
+
+  rpc Login (UserLoginRequest) returns (UserLoginResponse) {}
+  rpc ChangePassword (UserChangePasswordRequest) returns (UserChangePasswordResponse) {}
+}
+
+message UserGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message UserGetResponse {
+  crm.types.user.User user = 1;
+}
+
+message UsersListRequest {
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 1;
+  optional crm.types.common.Pagination pagination = 2;
+  message Filter {
+    repeated crm.types.user.UserStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    repeated crm.types.user.UserRole roles = 2 [(buf.validate.field).repeated.unique = true];
+    // Matches name, lastName, phone, email.
+    optional string searchQuery = 3 [(buf.validate.field).string.max_len = 255];
+    optional crm.types.common.PeriodFilter createdAt = 4;
+  }
+  optional Filter filter = 3;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message UsersListResponse {
+  repeated crm.types.user.User items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message UserCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  crm.types.common.LocalizedString name = 1 [(buf.validate.field).required = true];
+  crm.types.common.LocalizedString lastName = 2;
+  string phone = 3 [(buf.validate.field).required = true, (buf.validate.field).string.max_len = 32];
+  string email = 4 [(buf.validate.field).required = true, (buf.validate.field).string.email = true];
+  crm.types.common.LocalizedString description = 5;
+  crm.types.user.UserRole role = 6 [(buf.validate.field).required = true, (buf.validate.field).enum.defined_only = true];
+  // Plaintext — do not send a pre-hashed value.
+  string password = 7 [(buf.validate.field).string.min_len = 8, (buf.validate.field).string.max_len = 128];
+  optional Options options = 99;
+}
+
+message UserCreateResponse {
+  crm.types.user.User user = 1;
+}
+
+message UserUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional crm.types.common.LocalizedString name = 2;
+  optional crm.types.common.LocalizedString lastName = 3;
+  optional string phone = 4 [(buf.validate.field).string.max_len = 32];
+  optional string email = 5 [(buf.validate.field).string.email = true];
+  optional crm.types.common.LocalizedString description = 6;
+  optional crm.types.user.UserRole role = 7 [(buf.validate.field).enum.defined_only = true];
+  optional crm.types.user.UserStatus status = 8 [(buf.validate.field).enum.defined_only = true];
+  optional Options options = 99;
+}
+
+message UserUpdateResponse {
+  crm.types.user.User user = 1;
+}
+
+message UserDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message UserDeleteResponse {}
+
+message UserLoginRequest {
+  // Phone or email.
+  string login = 1 [(buf.validate.field).required = true, (buf.validate.field).string.max_len = 255];
+  string password = 2 [(buf.validate.field).required = true, (buf.validate.field).string.max_len = 128];
+}
+
+message UserLoginResponse {
+  string token = 1;
+  crm.types.user.User user = 2;
+}
+
+message UserChangePasswordRequest {
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string currentPassword = 2 [(buf.validate.field).required = true, (buf.validate.field).string.max_len = 128];
+  string newPassword = 3 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 8, (buf.validate.field).string.max_len = 128];
+}
+
+message UserChangePasswordResponse {}

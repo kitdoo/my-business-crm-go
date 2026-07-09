@@ -1,0 +1,26 @@
+syntax = "proto3";
+package crm.types.inventory_movement;
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/inventory_movement;inventorymovementpb";
+
+// Immutable stock ledger entry — no updatedAt/deletedAt/etag, no Update/Delete.
+message InventoryMovement {
+  string id = 1;
+  int64 createdAt = 2;
+  string productId = 3;
+  string warehouseId = 4;
+  MovementType type = 5;
+  int64 quantity = 6;
+  string comment = 7;
+  string createdBy = 8;
+}
+
+enum MovementType {
+  MOVEMENT_TYPE_UNSPECIFIED = 0;
+  MOVEMENT_TYPE_RECEIPT = 1;
+  MOVEMENT_TYPE_SALE = 2;
+  MOVEMENT_TYPE_WRITE_OFF = 3;
+  MOVEMENT_TYPE_ADJUSTMENT = 4;
+  // Warehouse-to-warehouse; recorded as a paired debit/credit movement.
+  MOVEMENT_TYPE_TRANSFER = 5;
+}

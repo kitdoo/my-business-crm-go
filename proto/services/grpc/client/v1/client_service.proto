@@ -1,0 +1,105 @@
+syntax = "proto3";
+package crm.grpc.client.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/client/client.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+
+option go_package = ".;clientpb";
+
+service ClientsService {
+  rpc Create (ClientCreateRequest) returns (ClientCreateResponse) {}
+  rpc Get (ClientGetRequest) returns (ClientGetResponse) {}
+  rpc List (ClientsListRequest) returns (ClientsListResponse) {}
+  rpc Update (ClientUpdateRequest) returns (ClientUpdateResponse) {}
+  rpc Delete (ClientDeleteRequest) returns (ClientDeleteResponse) {}
+}
+
+message ClientGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message ClientGetResponse {
+  crm.types.client.Client client = 1;
+}
+
+message ClientsListRequest {
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 1;
+  optional crm.types.common.Pagination pagination = 2;
+  message Filter {
+    // Matches name, phone, email, address.
+    optional string searchQuery = 1 [(buf.validate.field).string.max_len = 255];
+    optional crm.types.common.PeriodFilter createdAt = 2;
+  }
+  optional Filter filter = 3;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message ClientsListResponse {
+  repeated crm.types.client.Client items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message ClientCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string name = 1 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 255];
+  string phone = 2 [(buf.validate.field).required = true, (buf.validate.field).string.max_len = 32];
+  string email = 3 [(buf.validate.field).required = true, (buf.validate.field).string.email = true];
+  string address = 4 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 512];
+  string note = 5 [(buf.validate.field).string.max_len = 1024];
+  optional Options options = 99;
+}
+
+message ClientCreateResponse {
+  crm.types.client.Client client = 1;
+}
+
+message ClientUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional string name = 2 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 255];
+  optional string phone = 3 [(buf.validate.field).string.max_len = 32];
+  optional string email = 4 [(buf.validate.field).string.email = true];
+  optional string address = 5 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 512];
+  optional string note = 6 [(buf.validate.field).string.max_len = 1024];
+  optional Options options = 99;
+}
+
+message ClientUpdateResponse {
+  crm.types.client.Client client = 1;
+}
+
+message ClientDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message ClientDeleteResponse {}

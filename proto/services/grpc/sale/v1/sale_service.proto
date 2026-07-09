@@ -1,0 +1,106 @@
+syntax = "proto3";
+package crm.grpc.sale.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+import "types/sale/sale.proto";
+
+option go_package = ".;salepb";
+
+// No generic Update — items are immutable and status moves only through
+// UpdateStatus/Cancel.
+service SalesService {
+  rpc Create (SaleCreateRequest) returns (SaleCreateResponse) {}
+  rpc Get (SaleGetRequest) returns (SaleGetResponse) {}
+  rpc List (SalesListRequest) returns (SalesListResponse) {}
+  rpc UpdateStatus (SaleUpdateStatusRequest) returns (SaleUpdateStatusResponse) {}
+  rpc Cancel (SaleCancelRequest) returns (SaleCancelResponse) {}
+}
+
+message SaleGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message SaleGetResponse {
+  crm.types.sale.Sale sale = 1;
+}
+
+message SalesListRequest {
+  optional string clientId = 1 [(buf.validate.field).string.uuid = true];
+  optional string warehouseId = 2 [(buf.validate.field).string.uuid = true];
+  optional string partnerId = 3 [(buf.validate.field).string.uuid = true];
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 4;
+  optional crm.types.common.Pagination pagination = 5;
+  message Filter {
+    repeated crm.types.sale.SaleStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    optional crm.types.common.PeriodFilter createdAt = 2;
+    repeated string createdBy = 3 [(buf.validate.field).repeated.items.string.uuid = true];
+    repeated string productIds = 4 [(buf.validate.field).repeated.items.string.uuid = true];
+  }
+  optional Filter filter = 6;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message SalesListResponse {
+  repeated crm.types.sale.Sale items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message SaleCreateRequest {
+  message Item {
+    string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+    int64 quantity = 2 [(buf.validate.field).required = true, (buf.validate.field).int64.gt = 0];
+    int32 discountPercentage = 3 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
+  }
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string clientId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional string partnerId = 3 [(buf.validate.field).string.uuid = true];
+  repeated Item items = 4 [(buf.validate.field).required = true, (buf.validate.field).repeated.min_items = 1];
+  optional Options options = 99;
+}
+
+message SaleCreateResponse {
+  crm.types.sale.Sale sale = 1;
+}
+
+message SaleUpdateStatusRequest {
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  crm.types.sale.SaleStatus status = 2 [(buf.validate.field).required = true, (buf.validate.field).enum.defined_only = true];
+  optional string etag = 3;
+}
+
+message SaleUpdateStatusResponse {
+  crm.types.sale.Sale sale = 1;
+}
+
+message SaleCancelRequest {
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional string reason = 2 [(buf.validate.field).string.max_len = 1024];
+  optional string etag = 3;
+}
+
+message SaleCancelResponse {
+  crm.types.sale.Sale sale = 1;
+}

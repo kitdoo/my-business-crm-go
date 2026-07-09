@@ -52,12 +52,14 @@ clean: ## Remove temporary files
 	@rm -rf ${BIN_OUTPUT_DIR}
 
 .PHONY: devtools
-devtools: ## Install dev tools (gci, golangci-lint, dupl, gosec, govulncheck)
+devtools: ## Install dev tools (gci, golangci-lint, dupl, gosec, govulncheck, protoc-gen-go, protoc-gen-go-grpc)
 	@go install github.com/daixiang0/gci@latest
 	@go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 	@go install github.com/mibk/dupl@latest
 	@go install github.com/securego/gosec/v2/cmd/gosec@latest
 	@go install golang.org/x/vuln/cmd/govulncheck@latest
+	@go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 .PHONY: fmt
 fmt: tidy  ## Run go fmt + gci on all go files
@@ -127,6 +129,37 @@ build: clean tidy ## Build project
 			-X github.com/altessa-s/go-atlas/core/runtime/appinfo.Version=${APP_VERSION} \
 			-X github.com/altessa-s/go-atlas/core/runtime/appinfo.Commit=${APP_VERSION_COMMIT}" \
 		-o ${BIN_OUTPUT_DIR}/${APP_NAME} ${PROJECT_ROOT}/cmd/${APP_NAME}
+
+##@ Proto
+
+.PHONY: proto-lint
+proto-lint: ## buf lint (proto/)
+	@cd proto && buf lint
+
+.PHONY: proto-build
+proto-build: ## Validate .proto files compile (buf build, proto/)
+	@cd proto && buf build
+
+.PHONY: proto-format
+proto-format: ## buf format -w (proto/)
+	@cd proto && buf format -w
+
+.PHONY: proto-breaking
+proto-breaking: ## buf breaking against origin/main (proto/)
+	@cd proto && buf breaking --against '.git#branch=main,subdir=proto'
+
+.PHONY: proto-clean
+proto-clean: ## Remove generated proto output (proto/gen/)
+	@rm -rf proto/gen/
+
+.PHONY: proto proto-go proto-js
+proto: proto-go proto-js ## Generate all protobuf bindings into proto/gen/
+
+proto-go: ## Generate Go protobuf bindings into proto/gen/go/
+	@cd proto && buf generate --template buf.gen.go.yaml
+
+proto-js: ## Generate JavaScript protobuf bindings into proto/gen/js/ (requires protoc-gen-es on PATH: npm i -g @bufbuild/protoc-gen-es)
+	@cd proto && NODE_OPTIONS="--no-experimental-webstorage" buf generate --template buf.gen.js.yaml
 
 .PHONY: build-docker-image
 build-docker-image: ## Build and push the docker image

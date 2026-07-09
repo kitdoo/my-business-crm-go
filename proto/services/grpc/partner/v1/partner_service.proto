@@ -1,0 +1,106 @@
+syntax = "proto3";
+package crm.grpc.partner.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+import "types/partner/partner.proto";
+
+option go_package = ".;partnerpb";
+
+service PartnersService {
+  rpc Create (PartnerCreateRequest) returns (PartnerCreateResponse) {}
+  rpc Get (PartnerGetRequest) returns (PartnerGetResponse) {}
+  rpc List (PartnersListRequest) returns (PartnersListResponse) {}
+  rpc Update (PartnerUpdateRequest) returns (PartnerUpdateResponse) {}
+  rpc Delete (PartnerDeleteRequest) returns (PartnerDeleteResponse) {}
+}
+
+message PartnerGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message PartnerGetResponse {
+  crm.types.partner.Partner partner = 1;
+}
+
+message PartnersListRequest {
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 1;
+  optional crm.types.common.Pagination pagination = 2;
+  message Filter {
+    repeated crm.types.partner.PartnerStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
+    optional crm.types.common.PeriodFilter createdAt = 3;
+  }
+  optional Filter filter = 3;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message PartnersListResponse {
+  repeated crm.types.partner.Partner items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message PartnerCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string name = 1 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 255];
+  string phone = 2 [(buf.validate.field).required = true, (buf.validate.field).string.max_len = 32];
+  string email = 3 [(buf.validate.field).required = true, (buf.validate.field).string.email = true];
+  int32 commissionPercentage = 4 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
+  string note = 5 [(buf.validate.field).string.max_len = 1024];
+  optional Options options = 99;
+}
+
+message PartnerCreateResponse {
+  crm.types.partner.Partner partner = 1;
+}
+
+message PartnerUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional string name = 2 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 255];
+  optional string phone = 3 [(buf.validate.field).string.max_len = 32];
+  optional string email = 4 [(buf.validate.field).string.email = true];
+  optional int32 commissionPercentage = 5 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
+  optional string note = 6 [(buf.validate.field).string.max_len = 1024];
+  optional crm.types.partner.PartnerStatus status = 7 [(buf.validate.field).enum.defined_only = true];
+  optional Options options = 99;
+}
+
+message PartnerUpdateResponse {
+  crm.types.partner.Partner partner = 1;
+}
+
+message PartnerDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message PartnerDeleteResponse {}

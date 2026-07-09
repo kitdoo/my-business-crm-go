@@ -1,0 +1,25 @@
+syntax = "proto3";
+package crm.types.warehouse;
+
+import "types/common/common_localized_string.proto";
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/warehouse;warehousepb";
+
+message Warehouse {
+  string id = 1;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
+  optional int64 deletedAt = 4;
+  crm.types.common.LocalizedString name = 5;
+  crm.types.common.LocalizedString description = 6;
+  // Physical address — factual, not localized.
+  string address = 7;
+  WarehouseStatus status = 8;
+  string etag = 101;
+}
+
+enum WarehouseStatus {
+  WAREHOUSE_STATUS_UNSPECIFIED = 0;
+  WAREHOUSE_STATUS_ACTIVE = 1;
+  WAREHOUSE_STATUS_INACTIVE = 2;
+}

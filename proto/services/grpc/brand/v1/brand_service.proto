@@ -1,0 +1,101 @@
+syntax = "proto3";
+package crm.grpc.brand.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/brand/brand.proto";
+import "types/common/common_localized_string.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+
+option go_package = ".;brandpb";
+
+service BrandsService {
+  rpc Create (BrandCreateRequest) returns (BrandCreateResponse) {}
+  rpc Get (BrandGetRequest) returns (BrandGetResponse) {}
+  rpc List (BrandsListRequest) returns (BrandsListResponse) {}
+  rpc Update (BrandUpdateRequest) returns (BrandUpdateResponse) {}
+  rpc Delete (BrandDeleteRequest) returns (BrandDeleteResponse) {}
+}
+
+message BrandGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message BrandGetResponse {
+  crm.types.brand.Brand brand = 1;
+}
+
+message BrandsListRequest {
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 1;
+  optional crm.types.common.Pagination pagination = 2;
+  message Filter {
+    repeated crm.types.brand.BrandStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
+    optional crm.types.common.PeriodFilter createdAt = 3;
+  }
+  optional Filter filter = 3;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message BrandsListResponse {
+  repeated crm.types.brand.Brand items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message BrandCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  crm.types.common.LocalizedString name = 1 [(buf.validate.field).required = true];
+  crm.types.common.LocalizedString description = 2;
+  optional Options options = 99;
+}
+
+message BrandCreateResponse {
+  crm.types.brand.Brand brand = 1;
+}
+
+message BrandUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional crm.types.common.LocalizedString name = 2;
+  optional crm.types.common.LocalizedString description = 3;
+  optional crm.types.brand.BrandStatus status = 4 [(buf.validate.field).enum.defined_only = true];
+  optional Options options = 99;
+}
+
+message BrandUpdateResponse {
+  crm.types.brand.Brand brand = 1;
+}
+
+message BrandDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message BrandDeleteResponse {}

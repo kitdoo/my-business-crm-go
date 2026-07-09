@@ -1,0 +1,10 @@
+syntax = "proto3";
+package crm.types.common;
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/common;commonpb";
+
+// Unix-second range, both bounds inclusive and optional.
+message PeriodFilter {
+  optional int64 from = 1;
+  optional int64 to = 2;
+}

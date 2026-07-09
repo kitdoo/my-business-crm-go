@@ -1,0 +1,62 @@
+syntax = "proto3";
+package crm.grpc.inventory_movement.v1;
+
+import "buf/validate/validate.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/inventory_movement/inventory_movement.proto";
+
+option go_package = ".;inventorymovementpb";
+
+// No Update/Delete — the ledger is append-only.
+service InventoryMovementsService {
+  rpc Create (InventoryMovementCreateRequest) returns (InventoryMovementCreateResponse) {}
+  rpc List (InventoryMovementsListRequest) returns (InventoryMovementsListResponse) {}
+  rpc GetHistory (InventoryMovementGetHistoryRequest) returns (InventoryMovementGetHistoryResponse) {}
+}
+
+message InventoryMovementCreateRequest {
+  string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  crm.types.inventory_movement.MovementType type = 3 [(buf.validate.field).required = true, (buf.validate.field).enum.defined_only = true];
+  // Signed — positive for Receipt, negative for Sale/WriteOff.
+  int64 quantity = 4 [(buf.validate.field).required = true, (buf.validate.field).int64.not_in = 0];
+  optional string comment = 5 [(buf.validate.field).string.max_len = 1024];
+}
+
+message InventoryMovementCreateResponse {
+  crm.types.inventory_movement.InventoryMovement movement = 1;
+}
+
+message InventoryMovementsListRequest {
+  optional string warehouseId = 1 [(buf.validate.field).string.uuid = true];
+  message Filter {
+    repeated crm.types.inventory_movement.MovementType types = 1 [(buf.validate.field).repeated.unique = true];
+    repeated string productIds = 2 [(buf.validate.field).repeated.items.string.uuid = true];
+    repeated string createdBy = 3 [(buf.validate.field).repeated.items.string.uuid = true];
+    optional crm.types.common.PeriodFilter createdAt = 4;
+  }
+  optional Filter filter = 2;
+  optional crm.types.common.Pagination pagination = 3;
+}
+
+message InventoryMovementsListResponse {
+  repeated crm.types.inventory_movement.InventoryMovement items = 1;
+  optional string nextCursor = 2;
+}
+
+message InventoryMovementGetHistoryRequest {
+  string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  message Filter {
+    repeated crm.types.inventory_movement.MovementType types = 1 [(buf.validate.field).repeated.unique = true];
+    optional crm.types.common.PeriodFilter createdAt = 2;
+  }
+  optional Filter filter = 3;
+  optional crm.types.common.Pagination pagination = 4;
+}
+
+message InventoryMovementGetHistoryResponse {
+  repeated crm.types.inventory_movement.InventoryMovement items = 1;
+  optional string nextCursor = 2;
+}

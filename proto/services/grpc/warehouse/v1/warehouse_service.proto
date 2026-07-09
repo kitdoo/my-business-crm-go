@@ -1,0 +1,113 @@
+syntax = "proto3";
+package crm.grpc.warehouse.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/common/common_localized_string.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+import "types/warehouse/warehouse.proto";
+
+option go_package = ".;warehousepb";
+
+service WarehousesService {
+  rpc Create (WarehouseCreateRequest) returns (WarehouseCreateResponse) {}
+  rpc Get (WarehouseGetRequest) returns (WarehouseGetResponse) {}
+  rpc List (WarehousesListRequest) returns (WarehousesListResponse) {}
+  rpc Update (WarehouseUpdateRequest) returns (WarehouseUpdateResponse) {}
+  rpc Delete (WarehouseDeleteRequest) returns (WarehouseDeleteResponse) {}
+
+  rpc Deactivate (WarehouseDeactivateRequest) returns (WarehouseDeactivateResponse) {}
+}
+
+message WarehouseGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message WarehouseGetResponse {
+  crm.types.warehouse.Warehouse warehouse = 1;
+}
+
+message WarehousesListRequest {
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 1;
+  optional crm.types.common.Pagination pagination = 2;
+  message Filter {
+    repeated crm.types.warehouse.WarehouseStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
+    optional crm.types.common.PeriodFilter createdAt = 3;
+  }
+  optional Filter filter = 3;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message WarehousesListResponse {
+  repeated crm.types.warehouse.Warehouse items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message WarehouseCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  crm.types.common.LocalizedString name = 1 [(buf.validate.field).required = true];
+  crm.types.common.LocalizedString description = 2;
+  string address = 3 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 512];
+  optional Options options = 99;
+}
+
+message WarehouseCreateResponse {
+  crm.types.warehouse.Warehouse warehouse = 1;
+}
+
+message WarehouseUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional crm.types.common.LocalizedString name = 2;
+  optional crm.types.common.LocalizedString description = 3;
+  optional string address = 4 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 512];
+  optional Options options = 99;
+}
+
+message WarehouseUpdateResponse {
+  crm.types.warehouse.Warehouse warehouse = 1;
+}
+
+message WarehouseDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message WarehouseDeleteResponse {}
+
+message WarehouseDeactivateRequest {
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional string etag = 2;
+}
+
+message WarehouseDeactivateResponse {
+  crm.types.warehouse.Warehouse warehouse = 1;
+}

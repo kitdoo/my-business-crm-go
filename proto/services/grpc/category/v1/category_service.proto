@@ -1,0 +1,106 @@
+syntax = "proto3";
+package crm.grpc.category.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/category/category.proto";
+import "types/common/common_localized_string.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+
+option go_package = ".;categorypb";
+
+service CategoriesService {
+  rpc Create (CategoryCreateRequest) returns (CategoryCreateResponse) {}
+  rpc Get (CategoryGetRequest) returns (CategoryGetResponse) {}
+  rpc List (CategoriesListRequest) returns (CategoriesListResponse) {}
+  rpc Update (CategoryUpdateRequest) returns (CategoryUpdateResponse) {}
+  rpc Delete (CategoryDeleteRequest) returns (CategoryDeleteResponse) {}
+}
+
+message CategoryGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message CategoryGetResponse {
+  crm.types.category.Category category = 1;
+}
+
+message CategoriesListRequest {
+  optional string parentId = 1 [(buf.validate.field).string.uuid = true];
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 2;
+  optional crm.types.common.Pagination pagination = 3;
+  message Filter {
+    repeated crm.types.category.CategoryStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    // Only categories with at least one active product.
+    optional bool hasProducts = 2;
+    optional string searchQuery = 3 [(buf.validate.field).string.max_len = 255];
+    optional crm.types.common.PeriodFilter createdAt = 4;
+  }
+  optional Filter filter = 4;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message CategoriesListResponse {
+  repeated crm.types.category.Category items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message CategoryCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  crm.types.common.LocalizedString name = 1 [(buf.validate.field).required = true];
+  crm.types.common.LocalizedString description = 2;
+  optional string parentId = 3 [(buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message CategoryCreateResponse {
+  crm.types.category.Category category = 1;
+}
+
+message CategoryUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional crm.types.common.LocalizedString name = 2;
+  optional crm.types.common.LocalizedString description = 3;
+  optional string parentId = 4 [(buf.validate.field).string.uuid = true];
+  optional crm.types.category.CategoryStatus status = 5 [(buf.validate.field).enum.defined_only = true];
+  optional Options options = 99;
+}
+
+message CategoryUpdateResponse {
+  crm.types.category.Category category = 1;
+}
+
+message CategoryDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message CategoryDeleteResponse {}

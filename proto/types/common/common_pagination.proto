@@ -1,0 +1,11 @@
+syntax = "proto3";
+package crm.types.common;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/common;commonpb";
+
+message Pagination {
+  int64 limit = 1 [(buf.validate.field).int64.gte = 1, (buf.validate.field).int64.lte = 1000];
+  optional string cursor = 2;
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package crm.types.common;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/common;commonpb";
+
+// Language code -> text. "sr" is always required.
+message LocalizedString {
+  map<string, string> values = 1 [(buf.validate.field).map.min_pairs = 1];
+}

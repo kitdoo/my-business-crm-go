@@ -1,0 +1,18 @@
+version: v2
+modules:
+  - path: .
+deps:
+  - buf.build/bufbuild/protovalidate
+lint:
+  use:
+    - BASIC
+  except:
+    # This project uses camelCase field names throughout (JS/JSON-friendly,
+    # matches proto3 JSON mapping) — see PROTO_DEVELOPMENT_STANDARD.md.
+    - FIELD_LOWER_SNAKE_CASE
+    # Directories are organized as types/<domain> and services/grpc/<domain>/v1,
+    # not mirrored from the dotted package name — see PROTO_DEVELOPMENT_STANDARD.md.
+    - PACKAGE_DIRECTORY_MATCH
+breaking:
+  use:
+    - FILE

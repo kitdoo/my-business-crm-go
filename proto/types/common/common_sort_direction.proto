@@ -1,0 +1,9 @@
+syntax = "proto3";
+package crm.types.common;
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/common;commonpb";
+
+enum SortDirection {
+  SORT_DIRECTION_ASC = 0;
+  SORT_DIRECTION_DESC = 1;
+}

@@ -1,0 +1,39 @@
+syntax = "proto3";
+package crm.grpc.inventory.v1;
+
+import "buf/validate/validate.proto";
+import "types/common/common_pagination.proto";
+import "types/inventory/inventory.proto";
+
+option go_package = ".;inventorypb";
+
+// Read-only — stock changes only through InventoryMovementsService.
+service InventoryService {
+  rpc Get (InventoryGetRequest) returns (InventoryGetResponse) {}
+  rpc List (InventoryListRequest) returns (InventoryListResponse) {}
+}
+
+message InventoryGetRequest {
+  string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+}
+
+message InventoryGetResponse {
+  crm.types.inventory.Inventory inventory = 1;
+}
+
+message InventoryListRequest {
+  optional string productId = 1 [(buf.validate.field).string.uuid = true];
+  optional string warehouseId = 2 [(buf.validate.field).string.uuid = true];
+  message Filter {
+    optional int64 minQuantity = 1 [(buf.validate.field).int64.gte = 0];
+    optional int64 maxQuantity = 2 [(buf.validate.field).int64.gte = 0];
+  }
+  optional Filter filter = 3;
+  optional crm.types.common.Pagination pagination = 4;
+}
+
+message InventoryListResponse {
+  repeated crm.types.inventory.Inventory items = 1;
+  optional string nextCursor = 2;
+}

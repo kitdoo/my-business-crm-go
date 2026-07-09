@@ -17,7 +17,6 @@
 
 **Исключения из общего правила [изменено]:**
 - `InventoryMovement` — неизменяемый лог. Нет `UpdatedAt`, `DeletedAt`, `ETag`, нет методов `Update`/`SoftDelete`.
-- `ProductImage` — дочерняя сущность, hard delete. Нет `DeletedAt`/`ETag`.
 
 **ETag добавлен туда, где раньше отсутствовал:**
 - `Inventory` — критично, т.к. это самая горячая точка гонок записи (несколько продаж одновременно меняют остаток).
@@ -195,6 +194,10 @@ type Product struct {
 
     Details map[string]LocalizedString // [изменено] значения характеристик локализуются
 
+    // Image identifiers returned by the HTTP upload endpoint, in display
+    // order. First entry is the main image. [изменено]
+    ImageIDs []string
+
     Status ProductStatus
 
     CreatedAt int64
@@ -220,40 +223,11 @@ Create, Get, List, Update, SoftDelete
 - `SKU` уникален глобально.
 - `CategoryIDs` — товар может принадлежать нескольким категориям, категории параллельны друг другу (не нужно указывать "главную").
 - `Details` — характеристики товара (материал, размер и т.п.), значения локализуются, т.к. показываются пользователю.
+- **Изображения — без отдельной сущности [изменено]**: обычный HTTP-эндпоинт принимает файл, сохраняет его на диск под именем `{id}` (расширение и MIME определяются при отдаче) и возвращает `id`. Клиент прикрепляет полученные `id` к `Product.ImageIDs` через `Update`. Никакого отдельного хранилища метаданных, никаких gRPC-методов на изображение.
 
 ---
 
-## 5. Product Images
-
-```go
-type ProductImage struct {
-    ID uuid.UUID
-
-    ProductID uuid.UUID
-
-    FileName string
-    Path     string
-    MimeType string
-    Size     int64
-
-    IsMain    bool
-    SortOrder int
-
-    CreatedAt int64
-}
-```
-
-### Methods
-Upload, List, Delete, SetMain
-
-### Logic
-- Хранение: файл физически на диске (`/storage/products/{product_id}/...`), в Mongo — только metadata.
-- **Допустимые форматы: JPG, PNG** (ограничено через конфиг, список расширяем) **[изменено]**.
-- **Максимальный размер файла — задаётся через конфиг** (дефолт предлагается 5 MB, изменяемо без пересборки) **[best practice — дефолтное значение]**.
-
----
-
-## 6. Prices
+## 5. Prices
 
 ```go
 type ProductPrice struct {
@@ -286,7 +260,7 @@ Create, Get, Update, History
 
 ---
 
-## 7. Inventory
+## 6. Inventory
 
 ```go
 type Inventory struct {
@@ -312,7 +286,7 @@ Get, List
 
 ---
 
-## 8. Inventory Movements
+## 7. Inventory Movements
 
 ```go
 type InventoryMovement struct {
@@ -347,7 +321,7 @@ Create, List, GetHistory
 
 ---
 
-## 9. Clients
+## 8. Clients
 
 ```go
 type Client struct {
@@ -376,7 +350,7 @@ Create, Get, List, Update, SoftDelete
 
 ---
 
-## 10. Sales
+## 9. Sales
 
 ```go
 type Sale struct {
@@ -433,7 +407,7 @@ Create, Get, List, UpdateStatus, Cancel
 
 ---
 
-## 11. Partners
+## 10. Partners
 
 ```go
 type Partner struct {
@@ -472,7 +446,7 @@ Create, Get, List, Update, SoftDelete
 
 ---
 
-## 12. Reports (computed)
+## 11. Reports (computed)
 
 Отдельных коллекций нет. Данные собираются из `Sales`, `SaleItems`, `InventoryMovements`.
 
@@ -487,7 +461,7 @@ Create, Get, List, Update, SoftDelete
 
 ---
 
-## 13. Warehouses
+## 12. Warehouses
 
 ```go
 type Warehouse struct {
@@ -527,7 +501,7 @@ Create, Get, List, Update, SoftDelete
 
 ---
 
-## 14. Списки и пагинация [изменено, новый раздел]
+## 13. Списки и пагинация [изменено, новый раздел]
 
 Все методы `List` во всех сущностях поддерживают:
 - пагинацию (формат — limit/offset или cursor — будет предоставлен отдельно заказчиком);
@@ -538,7 +512,7 @@ Create, Get, List, Update, SoftDelete
 
 ---
 
-## 15. Redis — назначение [изменено, новый раздел]
+## 14. Redis — назначение [изменено, новый раздел]
 
 Redis используется **только для кеша `Inventory`** (быстрое чтение остатков). Отчёты и прочие сущности в Redis не кешируются — источник истины для них MongoDB.
 
@@ -551,7 +525,6 @@ Redis используется **только для кеша `Inventory`** (б�
 ```
 Category *---* Product
 Brand     1---* Product
-Product   1---* ProductImage
 Product   1---* ProductPrice
 Product   1---* Inventory
 Warehouse 1---* Inventory

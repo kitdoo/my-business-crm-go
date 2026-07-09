@@ -1,0 +1,117 @@
+syntax = "proto3";
+package crm.grpc.product.v1;
+
+import "google/protobuf/field_mask.proto";
+import "buf/validate/validate.proto";
+import "types/common/common_localized_string.proto";
+import "types/common/common_pagination.proto";
+import "types/common/common_period_filter.proto";
+import "types/common/common_sort_direction.proto";
+import "types/product/product.proto";
+
+option go_package = ".;productpb";
+
+service ProductsService {
+  rpc Create (ProductCreateRequest) returns (ProductCreateResponse) {}
+  rpc Get (ProductGetRequest) returns (ProductGetResponse) {}
+  rpc List (ProductsListRequest) returns (ProductsListResponse) {}
+  rpc Update (ProductUpdateRequest) returns (ProductUpdateResponse) {}
+  rpc Delete (ProductDeleteRequest) returns (ProductDeleteResponse) {}
+}
+
+message ProductGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message ProductGetResponse {
+  crm.types.product.Product product = 1;
+}
+
+message ProductsListRequest {
+  optional string brandId = 1 [(buf.validate.field).string.uuid = true];
+  optional string categoryId = 2 [(buf.validate.field).string.uuid = true];
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 3;
+  optional crm.types.common.Pagination pagination = 4;
+  message Filter {
+    repeated crm.types.product.ProductStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
+    repeated string brandIds = 3 [(buf.validate.field).repeated.items.string.uuid = true];
+    repeated string categoryIds = 4 [(buf.validate.field).repeated.items.string.uuid = true];
+    repeated string skus = 5;
+    optional crm.types.common.PeriodFilter createdAt = 6;
+  }
+  optional Filter filter = 5;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message ProductsListResponse {
+  repeated crm.types.product.Product items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message ProductCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string sku = 1 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 64];
+  crm.types.common.LocalizedString name = 2 [(buf.validate.field).required = true];
+  crm.types.common.LocalizedString description = 3;
+  string brandId = 4 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  repeated string categoryIds = 5 [(buf.validate.field).repeated.items.string.uuid = true];
+  map<string, crm.types.common.LocalizedString> details = 6;
+  optional Options options = 99;
+}
+
+message ProductCreateResponse {
+  crm.types.product.Product product = 1;
+}
+
+// sku is immutable and does not appear here.
+message ProductUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional crm.types.common.LocalizedString name = 2;
+  optional crm.types.common.LocalizedString description = 3;
+  optional string brandId = 4 [(buf.validate.field).string.uuid = true];
+  repeated string categoryIds = 5 [(buf.validate.field).repeated.items.string.uuid = true];
+  map<string, crm.types.common.LocalizedString> details = 6;
+  // Full replacement, in display order; applied only when "imageIds" is in
+  // options.updateMask (a repeated field has no wire-level presence).
+  repeated string imageIds = 7 [(buf.validate.field).repeated.items.string.min_len = 1];
+  optional crm.types.product.ProductStatus status = 8 [(buf.validate.field).enum.defined_only = true];
+  optional Options options = 99;
+}
+
+message ProductUpdateResponse {
+  crm.types.product.Product product = 1;
+}
+
+message ProductDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional Options options = 99;
+}
+
+message ProductDeleteResponse {}

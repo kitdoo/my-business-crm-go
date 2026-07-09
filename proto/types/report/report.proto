@@ -1,0 +1,44 @@
+syntax = "proto3";
+package crm.types.report;
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/report;reportpb";
+
+// Read-only rows — no backing collection, no id/etag/timestamps.
+
+message SalesReportRow {
+  int64 periodStart = 1;
+  int64 periodEnd = 2;
+  int64 salesCount = 3;
+  int64 totalAmount = 4;
+}
+
+message SalesByStaffRow {
+  string userId = 1;
+  int64 salesCount = 2;
+  int64 totalAmount = 3;
+}
+
+message SalesByPartnerRow {
+  string partnerId = 1;
+  int64 salesCount = 2;
+  int64 totalAmount = 3;
+  int64 commissionAmount = 4;
+}
+
+message PopularProductRow {
+  string productId = 1;
+  int64 quantitySold = 2;
+  int64 totalAmount = 3;
+}
+
+message TurnoverRow {
+  int64 periodStart = 1;
+  int64 periodEnd = 2;
+  int64 totalAmount = 3;
+}
+
+message StockLevelRow {
+  string productId = 1;
+  string warehouseId = 2;
+  int64 quantity = 3;
+}

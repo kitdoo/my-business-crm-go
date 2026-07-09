@@ -1,0 +1,23 @@
+syntax = "proto3";
+package crm.types.brand;
+
+import "types/common/common_localized_string.proto";
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/brand;brandpb";
+
+message Brand {
+  string id = 1;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
+  optional int64 deletedAt = 4;
+  crm.types.common.LocalizedString name = 5;
+  crm.types.common.LocalizedString description = 6;
+  BrandStatus status = 7;
+  string etag = 101;
+}
+
+enum BrandStatus {
+  BRAND_STATUS_UNSPECIFIED = 0;
+  BRAND_STATUS_ACTIVE = 1;
+  BRAND_STATUS_INACTIVE = 2;
+}
