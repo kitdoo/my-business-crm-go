@@ -99,6 +99,17 @@ var (
 	// quantity below zero.
 	ErrInsufficientStock = errors.New("insufficient stock")
 
+	// ErrSaleNotFound is returned when a sale lookup finds no row.
+	ErrSaleNotFound = errors.New("sale not found")
+
+	// ErrSaleWarehouseInactive is returned when Create targets a warehouse
+	// whose status is not active.
+	ErrSaleWarehouseInactive = errors.New("sale warehouse inactive")
+
+	// ErrSaleTerminalStatus is returned when UpdateStatus or Cancel is
+	// attempted on a sale already in a terminal status (cancelled/refunded).
+	ErrSaleTerminalStatus = errors.New("sale already in a terminal status")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")

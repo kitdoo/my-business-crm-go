@@ -20,6 +20,8 @@ import (
 	priceservice "github.com/kitdoo/my-business-crm-go/internal/services/price/price"
 	"github.com/kitdoo/my-business-crm-go/internal/services/product"
 	productservice "github.com/kitdoo/my-business-crm-go/internal/services/product/product"
+	salesvc "github.com/kitdoo/my-business-crm-go/internal/services/sale"
+	saleservice "github.com/kitdoo/my-business-crm-go/internal/services/sale/sale"
 	"github.com/kitdoo/my-business-crm-go/internal/services/user"
 	userservice "github.com/kitdoo/my-business-crm-go/internal/services/user/user"
 	"github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
@@ -40,6 +42,8 @@ import (
 	pricesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/prices/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
 	productsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/products/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/sales"
+	salesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/sales/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/users"
 	usersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/users/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
@@ -52,6 +56,7 @@ import (
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
 	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
+	salehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/sale"
 	userhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/user"
 	warehousehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/warehouse"
 )
@@ -100,6 +105,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(pricesmongo.New, fx.As(new(prices.Storage)))),
 		fx.Provide(fx.Annotate(newPriceService, fx.As(new(price.Service)))),
 		fx.Provide(AsGRPCHandler(pricehandler.New)),
+
+		fx.Provide(fx.Annotate(salesmongo.New, fx.As(new(sales.Storage)))),
+		fx.Provide(fx.Annotate(saleservice.New, fx.As(new(salesvc.Service)))),
+		fx.Provide(AsGRPCHandler(salehandler.New)),
 	)
 }
 
