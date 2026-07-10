@@ -68,6 +68,21 @@ var (
 	// whose status is not active.
 	ErrUserInactive = errors.New("user inactive")
 
+	// ErrProductNotFound is returned when a product lookup finds no active row.
+	ErrProductNotFound = errors.New("product not found")
+
+	// ErrProductSKUConflict is returned when a product's SKU collides with
+	// another active product's SKU.
+	ErrProductSKUConflict = errors.New("product sku conflict")
+
+	// ErrProductBrandNotFound is returned when a product's brandId does not
+	// reference an existing brand.
+	ErrProductBrandNotFound = errors.New("product brand not found")
+
+	// ErrProductCategoryNotFound is returned when one of a product's
+	// categoryIds does not reference an existing category.
+	ErrProductCategoryNotFound = errors.New("product category not found")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")

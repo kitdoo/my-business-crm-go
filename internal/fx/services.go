@@ -11,6 +11,8 @@ import (
 	clientservice "github.com/kitdoo/my-business-crm-go/internal/services/client/client"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	partnerservice "github.com/kitdoo/my-business-crm-go/internal/services/partner/partner"
+	"github.com/kitdoo/my-business-crm-go/internal/services/product"
+	productservice "github.com/kitdoo/my-business-crm-go/internal/services/product/product"
 	"github.com/kitdoo/my-business-crm-go/internal/services/user"
 	userservice "github.com/kitdoo/my-business-crm-go/internal/services/user/user"
 	"github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
@@ -23,6 +25,8 @@ import (
 	clientsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/clients/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/partners"
 	partnersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/partners/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
+	productsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/products/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/users"
 	usersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/users/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
@@ -31,6 +35,7 @@ import (
 	categoryhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/category"
 	clienthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/client"
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
+	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
 	userhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/user"
 	warehousehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/warehouse"
 )
@@ -63,22 +68,24 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(userservice.New, fx.As(new(user.Service)))),
 		fx.Provide(AsGRPCHandler(userhandler.New)),
 		fx.Invoke(registerBootstrapAdmin),
+
+		fx.Provide(fx.Annotate(productsmongo.New, fx.As(new(products.Storage)))),
+		fx.Provide(fx.Annotate(productservice.New, fx.As(new(product.Service)))),
+		fx.Provide(AsGRPCHandler(producthandler.New)),
 	)
 }
 
-// newBrandService wires brand.Service without a ProductsExistenceChecker:
-// the products aggregate does not exist yet in this codebase, so there is no
-// implementation to provide here. Service.Delete treats a nil checker as
-// "no products aggregate to guard against" and skips the check; wire a real
-// checker once the products aggregate lands.
-func newBrandService(storage brands.Storage) *brandservice.Service {
-	return brandservice.New(storage, nil)
+// newBrandService wires brand.Service with products.Storage as its
+// ProductsExistenceChecker: products.Storage.ExistsForBrand satisfies that
+// interface directly, so the Delete guard is real once a product exists.
+func newBrandService(storage brands.Storage, productsStorage products.Storage) *brandservice.Service {
+	return brandservice.New(storage, productsStorage)
 }
 
-// newCategoryService wires category.Service without a
+// newCategoryService wires category.Service with products.Storage as its
 // ProductsExistenceChecker; see newBrandService for the rationale.
-func newCategoryService(storage categories.Storage) *categoryservice.Service {
-	return categoryservice.New(storage, nil)
+func newCategoryService(storage categories.Storage, productsStorage products.Storage) *categoryservice.Service {
+	return categoryservice.New(storage, productsStorage)
 }
 
 // newWarehouseService wires warehouse.Service without an InventoryChecker:

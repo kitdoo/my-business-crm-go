@@ -46,6 +46,7 @@ message ProductsListRequest {
   optional crm.types.common.Pagination pagination = 4;
   message Filter {
     repeated crm.types.product.ProductStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    // Reserved for a future version; not implemented yet.
     optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
     repeated string brandIds = 3 [(buf.validate.field).repeated.items.string.uuid = true];
     repeated string categoryIds = 4 [(buf.validate.field).repeated.items.string.uuid = true];
