@@ -44,6 +44,7 @@ message BrandsListRequest {
   optional crm.types.common.Pagination pagination = 2;
   message Filter {
     repeated crm.types.brand.BrandStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
+    // searchQuery is reserved for a future version; not implemented yet.
     optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
     optional crm.types.common.PeriodFilter createdAt = 3;
   }

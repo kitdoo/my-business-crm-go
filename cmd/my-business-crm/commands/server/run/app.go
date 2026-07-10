@@ -123,6 +123,7 @@ func (srv *App) run(ctx context.Context) error {
 		fx.Supply(slog.Default()),
 
 		fxmodules.InfrastructureModule(),
+		fxmodules.ServicesModule(),
 		fxmodules.TransportsModule(),
 
 		fx.Populate(&srv.healthCoordinator),
