@@ -9,6 +9,8 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/altessa-s/go-atlas/config"
+	"github.com/altessa-s/go-atlas/data/cache"
+	cacheredis "github.com/altessa-s/go-atlas/data/cache/providers/redis"
 	"github.com/altessa-s/go-atlas/data/idempotency"
 	"github.com/altessa-s/go-atlas/data/limiters"
 	"github.com/altessa-s/go-atlas/observability/health"
@@ -40,6 +42,7 @@ func InfrastructureModule() fx.Option {
 	return fx.Module("infrastructure",
 		fx.Provide(newMongo),
 		fx.Provide(newRedis),
+		fx.Provide(newRedisCache),
 		fx.Provide(newTLSProviders),
 		fx.Provide(newMetricsCollector),
 		fx.Provide(newTracer),
@@ -87,6 +90,16 @@ func newRedis(cfg *appconfig.Config, hc *health.Coordinator, lc fx.Lifecycle) (r
 
 	lc.Append(fx.StopHook(client.Close))
 	return client, nil
+}
+
+// newRedisCache adapts the shared Redis client into a go-atlas cache.Cache
+// for cache-aside reads (currently only Inventory.Get uses it). Falls back
+// to a no-op cache when Redis is not configured, so callers never nil-check.
+func newRedisCache(client redis.UniversalClient) *cache.Cache {
+	if client == nil {
+		return cache.NewNoop()
+	}
+	return cache.New(cacheredis.New(client))
 }
 
 func newTLSProviders(cfg *appconfig.Config, lc fx.Lifecycle) (*tlsproviders.Providers, error) {

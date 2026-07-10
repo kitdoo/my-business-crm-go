@@ -91,6 +91,14 @@ var (
 	// product that already has an active price.
 	ErrProductPriceExists = errors.New("product price already exists")
 
+	// ErrInventoryNotFound is returned when no inventory row exists yet for
+	// a (productId, warehouseId) pair.
+	ErrInventoryNotFound = errors.New("inventory not found")
+
+	// ErrInsufficientStock is returned when a movement's delta would drive
+	// quantity below zero.
+	ErrInsufficientStock = errors.New("insufficient stock")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")

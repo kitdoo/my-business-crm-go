@@ -10,6 +10,8 @@ import (
 	categoryservice "github.com/kitdoo/my-business-crm-go/internal/services/category/category"
 	"github.com/kitdoo/my-business-crm-go/internal/services/client"
 	clientservice "github.com/kitdoo/my-business-crm-go/internal/services/client/client"
+	invsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
+	invservice "github.com/kitdoo/my-business-crm-go/internal/services/inventory/inventory"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	partnerservice "github.com/kitdoo/my-business-crm-go/internal/services/partner/partner"
 	"github.com/kitdoo/my-business-crm-go/internal/services/price"
@@ -26,6 +28,8 @@ import (
 	categoriesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/categories/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/clients"
 	clientsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/clients/mongo"
+	invstorage "github.com/kitdoo/my-business-crm-go/internal/storages/inventory"
+	invmongo "github.com/kitdoo/my-business-crm-go/internal/storages/inventory/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/partners"
 	partnersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/partners/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
@@ -39,6 +43,7 @@ import (
 	brandhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/brand"
 	categoryhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/category"
 	clienthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/client"
+	invhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/inventory"
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
 	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
@@ -57,6 +62,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(categoriesmongo.New, fx.As(new(categories.Storage)))),
 		fx.Provide(fx.Annotate(newCategoryService, fx.As(new(category.Service)))),
 		fx.Provide(AsGRPCHandler(categoryhandler.New)),
+
+		fx.Provide(fx.Annotate(invmongo.New, fx.As(new(invstorage.Storage)))),
+		fx.Provide(fx.Annotate(invservice.New, fx.As(new(invsvc.Service)))),
+		fx.Provide(AsGRPCHandler(invhandler.New)),
 
 		fx.Provide(fx.Annotate(warehousesmongo.New, fx.As(new(warehouses.Storage)))),
 		fx.Provide(fx.Annotate(newWarehouseService, fx.As(new(warehouse.Service)))),
@@ -113,11 +122,10 @@ func newPriceService(storage prices.Storage, productsStorage products.Storage, c
 	return priceservice.New(storage, productsStorage, currency)
 }
 
-// newWarehouseService wires warehouse.Service without an InventoryChecker:
-// the inventory aggregate does not exist yet in this codebase, so there is
-// no implementation to provide here. Service treats a nil checker as "no
-// inventory aggregate to guard against" and skips the stock guard; wire a
-// real checker once the inventory aggregate lands.
-func newWarehouseService(storage warehouses.Storage) *warehouseservice.Service {
-	return warehouseservice.New(storage, nil)
+// newWarehouseService wires warehouse.Service with invstorage.Storage as
+// its InventoryChecker: invstorage.Storage.HasStock satisfies that
+// interface directly, so the Delete/Deactivate guards are real now that
+// Inventory exists (the nil placeholder used since Warehouse landed).
+func newWarehouseService(storage warehouses.Storage, inventoryStorage invstorage.Storage) *warehouseservice.Service {
+	return warehouseservice.New(storage, inventoryStorage)
 }
