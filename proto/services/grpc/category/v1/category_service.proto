@@ -45,8 +45,10 @@ message CategoriesListRequest {
   optional crm.types.common.Pagination pagination = 3;
   message Filter {
     repeated crm.types.category.CategoryStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
-    // Only categories with at least one active product.
+    // Only categories with at least one active product. Reserved for a
+    // future version: not implemented until the Products aggregate exists.
     optional bool hasProducts = 2;
+    // Reserved for a future version; not implemented yet.
     optional string searchQuery = 3 [(buf.validate.field).string.max_len = 255];
     optional crm.types.common.PeriodFilter createdAt = 4;
   }

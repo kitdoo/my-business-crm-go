@@ -12,6 +12,21 @@ var (
 	// products still reference it.
 	ErrBrandHasProducts = errors.New("brand has products")
 
+	// ErrCategoryNotFound is returned when a category lookup finds no active row.
+	ErrCategoryNotFound = errors.New("category not found")
+
+	// ErrCategoryHasProducts is returned when a category delete is attempted
+	// while products still reference it.
+	ErrCategoryHasProducts = errors.New("category has products")
+
+	// ErrCategoryParentNotFound is returned when a category's parentId does
+	// not reference an existing category.
+	ErrCategoryParentNotFound = errors.New("category parent not found")
+
+	// ErrCategorySelfParent is returned when a category's parentId points to
+	// itself.
+	ErrCategorySelfParent = errors.New("category cannot be its own parent")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")
