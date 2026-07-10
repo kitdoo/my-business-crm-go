@@ -35,6 +35,13 @@ var (
 	// is attempted while it still carries inventory.
 	ErrWarehouseHasStock = errors.New("warehouse has stock")
 
+	// ErrPartnerNotFound is returned when a partner lookup finds no active row.
+	ErrPartnerNotFound = errors.New("partner not found")
+
+	// ErrPartnerPhoneConflict is returned when a partner's phone collides
+	// with another active partner's phone.
+	ErrPartnerPhoneConflict = errors.New("partner phone conflict")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")

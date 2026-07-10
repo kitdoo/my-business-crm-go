@@ -7,16 +7,21 @@ import (
 	brandservice "github.com/kitdoo/my-business-crm-go/internal/services/brand/brand"
 	"github.com/kitdoo/my-business-crm-go/internal/services/category"
 	categoryservice "github.com/kitdoo/my-business-crm-go/internal/services/category/category"
+	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
+	partnerservice "github.com/kitdoo/my-business-crm-go/internal/services/partner/partner"
 	"github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	warehouseservice "github.com/kitdoo/my-business-crm-go/internal/services/warehouse/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/brands"
 	brandsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/brands/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/categories"
 	categoriesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/categories/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/partners"
+	partnersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/partners/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
 	warehousesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/warehouses/mongo"
 	brandhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/brand"
 	categoryhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/category"
+	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
 	warehousehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/warehouse"
 )
 
@@ -35,6 +40,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(warehousesmongo.New, fx.As(new(warehouses.Storage)))),
 		fx.Provide(fx.Annotate(newWarehouseService, fx.As(new(warehouse.Service)))),
 		fx.Provide(AsGRPCHandler(warehousehandler.New)),
+
+		fx.Provide(fx.Annotate(partnersmongo.New, fx.As(new(partners.Storage)))),
+		fx.Provide(fx.Annotate(partnerservice.New, fx.As(new(partner.Service)))),
+		fx.Provide(AsGRPCHandler(partnerhandler.New)),
 	)
 }
 
