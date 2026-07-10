@@ -6,8 +6,10 @@ require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260415201107-50325440f8f2.1
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/altessa-s/go-atlas v0.0.0-20260610115405-84cc9ec0a9dd
+	github.com/altessa-s/proto-gen-go v0.1.2
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redis/go-redis/v9 v9.19.0
@@ -25,7 +27,6 @@ require (
 	cel.dev/expr v0.25.1 // indirect
 	github.com/adrg/postcode v0.1.0 // indirect
 	github.com/altessa-s/ozzo-rules v1.16.0 // indirect
-	github.com/altessa-s/proto-gen-go v0.1.2 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/aohorodnyk/mimeheader v0.0.6 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
@@ -57,7 +58,6 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/cel-go v0.28.1 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect

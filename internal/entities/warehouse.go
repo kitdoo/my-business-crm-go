@@ -32,8 +32,10 @@ type Warehouse struct {
 }
 
 // WarehouseNew creates a Warehouse with a fresh ID, timestamps, and etag.
+// Status defaults to Active — Create has no status field on the wire, so
+// this is the only place a newly created warehouse's status is set.
 func WarehouseNew(init ...func(*Warehouse)) *Warehouse {
-	w := &Warehouse{ID: uuid.NewString()}
+	w := &Warehouse{ID: uuid.NewString(), Status: WarehouseStatusActive}
 	if len(init) > 0 {
 		init[0](w)
 	}

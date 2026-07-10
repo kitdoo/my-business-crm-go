@@ -110,6 +110,16 @@ var (
 	// attempted on a sale already in a terminal status (cancelled/refunded).
 	ErrSaleTerminalStatus = errors.New("sale already in a terminal status")
 
+	// ErrUnauthenticated is returned when a request carries no valid session
+	// token (missing, malformed, or not matching an active user). Generic
+	// across every non-gRPC endpoint that needs auth (currently only image
+	// upload); gRPC handlers have their own sentinels for this.
+	ErrUnauthenticated = errors.New("unauthenticated")
+
+	// ErrForbidden is returned when an authenticated caller's role does not
+	// permit the requested action.
+	ErrForbidden = errors.New("forbidden")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")

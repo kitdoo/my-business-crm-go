@@ -37,9 +37,11 @@ type Brand struct {
 	Etag        string     // OCC token; rolled on every write
 }
 
-// BrandNew creates a Brand with a fresh ID, timestamps, and etag.
+// BrandNew creates a Brand with a fresh ID, timestamps, and etag. Status
+// defaults to Active — Create has no status field on the wire, so this is
+// the only place a newly created brand's status is set.
 func BrandNew(init ...func(*Brand)) *Brand {
-	b := &Brand{ID: uuid.NewString()}
+	b := &Brand{ID: uuid.NewString(), Status: BrandStatusActive}
 	if len(init) > 0 {
 		init[0](b)
 	}

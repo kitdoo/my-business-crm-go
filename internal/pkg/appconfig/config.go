@@ -11,9 +11,14 @@ import (
 	"github.com/altessa-s/go-atlas/core/runtime/appinfo"
 )
 
-// Config is the top-level configuration of the service. Only Logger, Node,
-// MongoDB, and Grpc are required at boot — every other subsystem is
-// optional and is silently skipped when its section is absent.
+// Config is the top-level configuration of the service. Logger, Node,
+// MongoDB, Grpc, Http, and CRM are required at boot: Http because the
+// product-image upload/serve endpoint (internal/transports/http/handlers/image)
+// is a plain-HTTP-only, always-on feature, and CRM because it carries
+// CRMConfig.Auth — the session-token signing key user.Service (and so
+// every authenticated gRPC/HTTP request) cannot function without. Every
+// other subsystem is genuinely optional and is silently skipped when its
+// section is absent.
 type Config struct {
 	// Logger configuration for the service.
 	Logger *config.Logger `yaml:"logger" default:"-"`
@@ -27,7 +32,9 @@ type Config struct {
 	// Grpc is the gRPC server configuration.
 	Grpc *config.Grpc `yaml:"grpc"`
 
-	// Http is the HTTP server configuration (probes, metrics, public API).
+	// Http is the HTTP server configuration. Required: it is not just
+	// probes/metrics — the product-image upload/serve endpoint is plain
+	// HTTP only and is always registered (internal/fx/images.go).
 	Http *config.Http `yaml:"http" default:"-"`
 
 	// Redis is the optional cache / shared-state backend.
@@ -45,7 +52,10 @@ type Config struct {
 	// Observability bundles metrics + tracing collectors.
 	Observability *config.Observability `yaml:"observability" default:"-"`
 
-	// CRM holds business-domain configuration (bootstrap admin, RBAC).
+	// CRM holds business-domain configuration (bootstrap admin, RBAC,
+	// session-token signing). Required: CRM.Auth.SigningKey is required in
+	// turn (see CRMConfig.Validate), and user.Service cannot be built
+	// without it.
 	CRM *CRMConfig `yaml:"crm" default:"-"`
 }
 
@@ -84,12 +94,12 @@ func (c *Config) Validate() error {
 		validation.Field(&c.Node, validation.Required),
 		validation.Field(&c.MongoDB, validation.Required),
 		validation.Field(&c.Grpc, validation.Required),
-		validation.Field(&c.Http, validation.NilOrNotEmpty),
+		validation.Field(&c.Http, validation.Required),
 		validation.Field(&c.Redis, validation.NilOrNotEmpty),
 		validation.Field(&c.Limiter, validation.NilOrNotEmpty),
 		validation.Field(&c.Idempotency, validation.NilOrNotEmpty),
 		validation.Field(&c.Observability, validation.NilOrNotEmpty),
-		validation.Field(&c.CRM, validation.NilOrNotEmpty),
+		validation.Field(&c.CRM, validation.Required),
 	)
 }
 

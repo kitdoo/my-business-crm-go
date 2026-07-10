@@ -3,8 +3,6 @@ package user
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -12,7 +10,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	corehash "github.com/altessa-s/go-atlas/core/encoding/hash"
 	"github.com/altessa-s/go-atlas/domain/normalizer"
 	slogx "github.com/altessa-s/go-atlas/observability/slog"
 
@@ -24,19 +21,37 @@ import (
 
 var _ usersvc.Service = (*Service)(nil)
 
-// Service is the user.Service implementation.
+// Service is the user.Service implementation. Session tokens are
+// self-contained HMAC-signed bearer tokens (see token.go) — no session
+// state (raw token, hash, or otherwise) is ever persisted to storage.
 type Service struct {
-	storage users.Storage
-	logger  *slog.Logger
+	storage    users.Storage
+	logger     *slog.Logger
+	signingKey []byte
+	tokenTTL   time.Duration
 }
 
-// New builds a Service.
-func New(storage users.Storage) *Service {
-	return &Service{
-		storage: storage,
-		logger:  slog.Default().With(slogx.Module("service:user")),
+// New builds a Service. signingKey must be non-empty — it is the HMAC-SHA256
+// secret used to sign and verify session tokens issued by Login; every
+// process that must accept those tokens (every gRPC/HTTP node) needs the
+// same key. tokenTTL <= 0 falls back to defaultTokenTTL.
+func New(storage users.Storage, signingKey []byte, tokenTTL time.Duration) (*Service, error) {
+	if len(signingKey) == 0 {
+		return nil, fmt.Errorf("%w: user session signing key must be configured", errs.ErrInvalidArgument)
 	}
+	if tokenTTL <= 0 {
+		tokenTTL = defaultTokenTTL
+	}
+	return &Service{
+		storage:    storage,
+		logger:     slog.Default().With(slogx.Module("service:user")),
+		signingKey: signingKey,
+		tokenTTL:   tokenTTL,
+	}, nil
 }
+
+// defaultTokenTTL is used when the configured tokenTTL is unset.
+const defaultTokenTTL = 72 * time.Hour
 
 // hashPassword bcrypts plaintext, translating bcrypt's own length guard into
 // the domain's invalid-argument sentinel.
@@ -46,18 +61,6 @@ func hashPassword(plaintext string) (string, error) {
 		return "", fmt.Errorf("%w: %s", errs.ErrInvalidArgument, err.Error())
 	}
 	return string(hash), nil
-}
-
-// newSessionToken returns a fresh random token and the hash stored on the
-// user document. Only the hash is persisted; the raw token is returned to
-// the caller once and never stored.
-func newSessionToken() (token, hash string, err error) {
-	raw := make([]byte, 32)
-	if _, err := rand.Read(raw); err != nil {
-		return "", "", fmt.Errorf("generate session token: %w", err)
-	}
-	token = base64.RawURLEncoding.EncodeToString(raw)
-	return token, corehash.SHA256HexString(token), nil
 }
 
 func (s *Service) Create(ctx context.Context, in *entities.UserCreate) (*entities.User, error) {
@@ -151,19 +154,35 @@ func (s *Service) Login(ctx context.Context, in *entities.UserLogin) (string, *e
 		return "", nil, errs.ErrUserInvalidCredentials
 	}
 
-	token, hash, err := newSessionToken()
-	if err != nil {
-		return "", nil, err
+	return s.issueToken(u.ID), u, nil
+}
+
+// Authenticate verifies token's signature and expiry (see token.go — no
+// storage lookup is needed for that part, since nothing is persisted) and
+// then loads the current user record to confirm it still exists and is
+// active. This is what lets ChangePassword/Delete/deactivation take effect
+// immediately even though the token itself remains valid until it expires.
+func (s *Service) Authenticate(ctx context.Context, token string) (*entities.User, error) {
+	if token == "" {
+		return nil, errs.ErrUnauthenticated
 	}
 
-	oldEtag := u.Etag
-	u.TokenHash = &hash
-	u.BeforeUpdate()
-	if err := s.storage.Update(ctx, u, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "persist login token failed", slog.String("id", u.ID), slogx.Error(err))
-		return "", nil, err
+	userID, ok := s.verifyToken(token)
+	if !ok {
+		return nil, errs.ErrUnauthenticated
 	}
-	return token, u, nil
+
+	u, err := s.storage.Get(ctx, userID)
+	if err != nil {
+		if errors.Is(err, errs.ErrUserNotFound) {
+			return nil, errs.ErrUnauthenticated
+		}
+		return nil, err
+	}
+	if u.Status != entities.UserStatusActive {
+		return nil, errs.ErrUnauthenticated
+	}
+	return u, nil
 }
 
 func (s *Service) ChangePassword(ctx context.Context, in *entities.UserChangePassword) error {

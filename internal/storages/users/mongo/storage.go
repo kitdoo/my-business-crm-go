@@ -50,7 +50,6 @@ type model struct {
 	Role         entities.UserRole        `bson:"role"`
 	Status       entities.UserStatus      `bson:"status"`
 	PasswordHash string                   `bson:"password_hash"`
-	TokenHash    *string                  `bson:"token_hash"`
 	CreatedAt    time.Time                `bson:"created_at,omitonupdate"`
 	UpdatedAt    time.Time                `bson:"updated_at"`
 	DeletedAt    *time.Time               `bson:"deleted_at,omitonupdate"`

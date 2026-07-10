@@ -40,8 +40,10 @@ type Product struct {
 }
 
 // ProductNew creates a Product with a fresh ID, timestamps, and etag.
+// Status defaults to Draft — Create has no status field on the wire, and a
+// new product is not yet ready to sell until an admin flips it to Active.
 func ProductNew(init ...func(*Product)) *Product {
-	p := &Product{ID: uuid.NewString()}
+	p := &Product{ID: uuid.NewString(), Status: ProductStatusDraft}
 	if len(init) > 0 {
 		init[0](p)
 	}

@@ -1,6 +1,8 @@
 package fx
 
 import (
+	"time"
+
 	"go.uber.org/fx"
 
 	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
@@ -99,9 +101,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(AsGRPCHandler(clienthandler.New)),
 
 		fx.Provide(fx.Annotate(usersmongo.New, fx.As(new(users.Storage)))),
-		fx.Provide(fx.Annotate(userservice.New, fx.As(new(user.Service)))),
+		fx.Provide(fx.Annotate(newUserService, fx.As(new(user.Service)))),
 		fx.Provide(AsGRPCHandler(userhandler.New)),
 		fx.Invoke(registerBootstrapAdmin),
+		imagesModule(),
 
 		fx.Provide(fx.Annotate(productsmongo.New, fx.As(new(products.Storage)))),
 		fx.Provide(fx.Annotate(productservice.New, fx.As(new(product.Service)))),
@@ -132,6 +135,20 @@ func newBrandService(storage brands.Storage, productsStorage products.Storage) *
 // ProductsExistenceChecker; see newBrandService for the rationale.
 func newCategoryService(storage categories.Storage, productsStorage products.Storage) *categoryservice.Service {
 	return categoryservice.New(storage, productsStorage)
+}
+
+// newUserService resolves the session-token signing key/TTL from
+// cfg.CRM.Auth. There is no fallback for the signing key — userservice.New
+// fails construction (and so app boot) if it is empty, rather than starting
+// with tokens nobody can verify or, worse, a predictable default key.
+func newUserService(storage users.Storage, cfg *appconfig.Config) (*userservice.Service, error) {
+	var signingKey string
+	var tokenTTL time.Duration
+	if cfg.CRM != nil && cfg.CRM.Auth != nil {
+		signingKey = cfg.CRM.Auth.SigningKey.Expose()
+		tokenTTL = cfg.CRM.Auth.TokenTTL
+	}
+	return userservice.New(storage, []byte(signingKey), tokenTTL)
 }
 
 // defaultCurrency is used when the crm config section (or its currency

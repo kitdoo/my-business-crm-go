@@ -1,8 +1,9 @@
 // Package rbac provides a config-driven role -> permission lookup. The TD
 // requires role permissions to be configurable without code changes; this
-// table is that lookup. Wiring it into a gRPC interceptor that enforces it
-// per-request is a separate cross-cutting task shared by every handler, not
-// specific to any one aggregate, and is left for that follow-up.
+// table is that lookup. It is enforced per-request by the gRPC RBAC
+// interceptor (internal/transports/grpc/interceptors/rbac), which maps
+// every authenticated method to a permission string and checks the
+// caller's role against this table.
 package rbac
 
 // Table maps a role name to the permission strings it grants. A "*" entry

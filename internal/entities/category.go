@@ -34,8 +34,10 @@ type Category struct {
 }
 
 // CategoryNew creates a Category with a fresh ID, timestamps, and etag.
+// Status defaults to Active — Create has no status field on the wire, so
+// this is the only place a newly created category's status is set.
 func CategoryNew(init ...func(*Category)) *Category {
-	c := &Category{ID: uuid.NewString()}
+	c := &Category{ID: uuid.NewString(), Status: CategoryStatusActive}
 	if len(init) > 0 {
 		init[0](c)
 	}

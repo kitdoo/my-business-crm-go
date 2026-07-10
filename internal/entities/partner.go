@@ -37,8 +37,10 @@ type Partner struct {
 }
 
 // PartnerNew creates a Partner with a fresh ID, timestamps, and etag.
+// Status defaults to Active — Create has no status field on the wire, so
+// this is the only place a newly created partner's status is set.
 func PartnerNew(init ...func(*Partner)) *Partner {
-	p := &Partner{ID: uuid.NewString()}
+	p := &Partner{ID: uuid.NewString(), Status: PartnerStatusActive}
 	if len(init) > 0 {
 		init[0](p)
 	}

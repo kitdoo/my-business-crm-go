@@ -1,17 +1,25 @@
 # CRM business-domain configuration.
-# Defines the bootstrap admin account, RBAC permission table, and the
-# system-wide currency.
+# Defines the bootstrap admin account, RBAC permission table, session-token
+# signing, the system-wide currency, and the product-image upload endpoint.
 # All parameters are commented out by default (template mode).
 # Uncomment and configure as needed for your environment.
 
 #crm:
-#  # <string> ISO 4217 code the whole system prices in. Defaults to "RSD"
-#  # when this section (or just this field) is absent.
+#  # <string> ISO 4217 code the whole system prices in.
+#  # Default value: "RSD"
 #  currency: "RSD"
 #
-#  # <object> Created on first boot if no user with this phone/email exists
-#  # yet. The TD requires the initial admin to come from config, never from
-#  # the regular User Create RPC.
+#  # <object> Session-token signing for User Login/Authenticate.
+#  auth:
+#    # <string> HMAC-SHA256 secret used to sign and verify session tokens.
+#    # Default value: not set (required)
+#    signingKey: "change-me-before-boot"
+#
+#    # <duration> How long a session token stays valid after Login.
+#    # Default value: 72h
+#    tokenTTL: "72h"
+#
+#  # <object> Created on first boot if no user with this phone/email exists yet.
 #  bootstrapAdmin:
 #    name: "Admin"
 #    phone: "+000000000000"
@@ -19,8 +27,7 @@
 #    password: "change-me-before-boot"
 #
 #  # <map<string, []string>> Role -> permission strings ("*" grants
-#  # everything for that role). Looked up via internal/rbac.Table; not yet
-#  # enforced by a gRPC interceptor (see internal/rbac package doc).
+#  # everything for that role).
 #  rbac:
 #    admin:
 #      - "*"
@@ -33,3 +40,13 @@
 #      - "brands:create"
 #      - "sales:create"
 #    guest: []
+#
+#  # <object> Product-image upload endpoint (plain HTTP, not gRPC).
+#  images:
+#    # <string> Directory files are saved under, one per id.
+#    # Default value: "<var-dir>/images"
+#    dir: "/var/lib/my-business-crm/images"
+#
+#    # <int> Max accepted upload size in bytes.
+#    # Default value: 10485760 (10 MiB)
+#    maxSizeBytes: 10485760

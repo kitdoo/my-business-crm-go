@@ -19,6 +19,22 @@ const (
 	UserRoleGuest
 )
 
+// String returns the lowercase role name used as the role key in
+// CRMConfig.RBAC / internal/rbac.Table (e.g. "admin"), matching the TD's
+// role names. UserRoleUnspecified returns "".
+func (r UserRole) String() string {
+	switch r {
+	case UserRoleAdmin:
+		return "admin"
+	case UserRoleEmployee:
+		return "employee"
+	case UserRoleGuest:
+		return "guest"
+	default:
+		return ""
+	}
+}
+
 // UserStatus is int32-aligned with crm.types.user.UserStatus so
 // converter.Convert maps it both ways as a plain scalar.
 type UserStatus int32
@@ -29,9 +45,12 @@ const (
 	UserStatusInactive
 )
 
-// User is a staff account. PasswordHash and TokenHash have no proto
-// counterpart on crm.types.user.User and are never serialized to the wire;
-// converter.Convert skips fields absent from the destination type.
+// User is a staff account. PasswordHash has no proto counterpart on
+// crm.types.user.User and is never serialized to the wire; converter.Convert
+// skips fields absent from the destination type. There is no stored
+// session-token field: session tokens are self-contained HMAC-signed
+// bearer tokens (see services/user/user.Service.Login/Authenticate) that
+// are verified against a server-side signing key, never persisted.
 type User struct {
 	ID          string
 	Name        LocalizedString
@@ -43,19 +62,18 @@ type User struct {
 	Status      UserStatus
 	// PasswordHash is a bcrypt hash; never logged or returned.
 	PasswordHash string
-	// TokenHash is the SHA-256 hex digest of the current session token
-	// (see services/user.Service.Login); nil when the user has no active
-	// session. The raw token itself is never stored.
-	TokenHash *string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time // nil = active
-	Etag      string     // OCC token; rolled on every write
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    *time.Time // nil = active
+	Etag         string     // OCC token; rolled on every write
 }
 
-// UserNew creates a User with a fresh ID, timestamps, and etag.
+// UserNew creates a User with a fresh ID, timestamps, and etag. Status
+// defaults to Active — Create has no status field on the wire (there is no
+// email-verification/self-activation flow in this system), so this is the
+// only place a newly created user's status is set.
 func UserNew(init ...func(*User)) *User {
-	u := &User{ID: uuid.NewString()}
+	u := &User{ID: uuid.NewString(), Status: UserStatusActive}
 	if len(init) > 0 {
 		init[0](u)
 	}

@@ -16,6 +16,9 @@ import (
 	"github.com/altessa-s/go-atlas/transport/grpc/interceptors"
 
 	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
+	"github.com/kitdoo/my-business-crm-go/internal/rbac"
+	grpcauth "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/interceptors/auth"
+	grpcrbac "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/interceptors/rbac"
 
 	coreerrs "github.com/altessa-s/go-atlas/core/errors"
 	obshealth "github.com/altessa-s/go-atlas/observability/health"
@@ -44,6 +47,10 @@ func TransportsModule() fx.Option {
 		fx.Provide(AsGRPCHandler(newServiceInfoHandler)),
 		fx.Provide(AsGRPCHandler(health.New)),
 
+		fx.Provide(AsGRPCInterceptor(grpcauth.New)),
+		fx.Provide(newRBACTable),
+		fx.Provide(AsGRPCInterceptor(grpcrbac.New)),
+
 		fx.Invoke(fx.Annotate(registerGRPCHandlers, fx.ParamTags(`group:"grpc-interceptors"`, `group:"grpc-handlers"`))),
 
 		// Force HTTP server construction even when no other consumer depends on it.
@@ -64,6 +71,14 @@ func registerGRPCHandlers(intrs []interceptors.ServerInterceptor, handlers []grp
 func AsGRPCHandler(f any) any {
 	return fx.Annotate(f, fx.As(new(grpcserver.Handler)),
 		fx.ResultTags(`group:"grpc-handlers"`))
+}
+
+// AsGRPCInterceptor annotates a constructor function to provide a gRPC
+// server interceptor into the `grpc-interceptors` group consumed by
+// [registerGRPCHandlers].
+func AsGRPCInterceptor(f any) any {
+	return fx.Annotate(f, fx.As(new(interceptors.ServerInterceptor)),
+		fx.ResultTags(`group:"grpc-interceptors"`))
 }
 
 func newGRPCServer(
@@ -105,7 +120,11 @@ func newHTTPServer(
 	lc fx.Lifecycle,
 ) (*httpserver.Server, error) {
 	if cfg.Http == nil {
-		return nil, nil //nolint:nilnil // HTTP is optional
+		// appconfig.Config.Validate requires Http on any config produced by
+		// appconfig.Load; this guard only protects callers (tests, DI graph
+		// validation) that build a *Config by hand without going through
+		// Load/Validate.
+		return nil, nil //nolint:nilnil
 	}
 
 	builder := httpfactory.New(cfg.Http).
@@ -152,4 +171,17 @@ func prometheusMetrics(rw httpwriter.ReadWriter) {
 
 func newServiceInfoHandler(sid *atlasid.Service) *serviceinfo.Handler {
 	return serviceinfo.New(serviceinfo.WithServiceID(sid.ID()))
+}
+
+// newRBACTable resolves the role -> permission grants from cfg.CRM.RBAC.
+// cfg.CRM is required by appconfig.Config.Validate on any config produced
+// by appconfig.Load; the nil check only protects a hand-built *Config
+// that bypassed it (e.g. in tests). An absent/empty rbac section yields a
+// nil Table, under which every non-wildcard role is denied every
+// permission-gated method (see rbac.Table.Allowed) — fail closed.
+func newRBACTable(cfg *appconfig.Config) rbac.Table {
+	if cfg.CRM == nil {
+		return nil
+	}
+	return rbac.Table(cfg.CRM.RBAC)
 }
