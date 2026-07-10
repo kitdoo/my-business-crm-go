@@ -3,6 +3,7 @@ package fx
 import (
 	"go.uber.org/fx"
 
+	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
 	"github.com/kitdoo/my-business-crm-go/internal/services/brand"
 	brandservice "github.com/kitdoo/my-business-crm-go/internal/services/brand/brand"
 	"github.com/kitdoo/my-business-crm-go/internal/services/category"
@@ -11,6 +12,8 @@ import (
 	clientservice "github.com/kitdoo/my-business-crm-go/internal/services/client/client"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	partnerservice "github.com/kitdoo/my-business-crm-go/internal/services/partner/partner"
+	"github.com/kitdoo/my-business-crm-go/internal/services/price"
+	priceservice "github.com/kitdoo/my-business-crm-go/internal/services/price/price"
 	"github.com/kitdoo/my-business-crm-go/internal/services/product"
 	productservice "github.com/kitdoo/my-business-crm-go/internal/services/product/product"
 	"github.com/kitdoo/my-business-crm-go/internal/services/user"
@@ -25,6 +28,8 @@ import (
 	clientsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/clients/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/partners"
 	partnersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/partners/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
+	pricesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/prices/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
 	productsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/products/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/users"
@@ -35,6 +40,7 @@ import (
 	categoryhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/category"
 	clienthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/client"
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
+	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
 	userhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/user"
 	warehousehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/warehouse"
@@ -72,6 +78,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(productsmongo.New, fx.As(new(products.Storage)))),
 		fx.Provide(fx.Annotate(productservice.New, fx.As(new(product.Service)))),
 		fx.Provide(AsGRPCHandler(producthandler.New)),
+
+		fx.Provide(fx.Annotate(pricesmongo.New, fx.As(new(prices.Storage)))),
+		fx.Provide(fx.Annotate(newPriceService, fx.As(new(price.Service)))),
+		fx.Provide(AsGRPCHandler(pricehandler.New)),
 	)
 }
 
@@ -86,6 +96,21 @@ func newBrandService(storage brands.Storage, productsStorage products.Storage) *
 // ProductsExistenceChecker; see newBrandService for the rationale.
 func newCategoryService(storage categories.Storage, productsStorage products.Storage) *categoryservice.Service {
 	return categoryservice.New(storage, productsStorage)
+}
+
+// defaultCurrency is used when the crm config section (or its currency
+// field) is absent, matching the TD's own example ("RSD").
+const defaultCurrency = "RSD"
+
+// newPriceService resolves the system-wide currency from cfg.CRM.Currency,
+// falling back to defaultCurrency when the optional crm config section (or
+// just its currency field) is absent.
+func newPriceService(storage prices.Storage, productsStorage products.Storage, cfg *appconfig.Config) *priceservice.Service {
+	currency := defaultCurrency
+	if cfg.CRM != nil && cfg.CRM.Currency != "" {
+		currency = cfg.CRM.Currency
+	}
+	return priceservice.New(storage, productsStorage, currency)
 }
 
 // newWarehouseService wires warehouse.Service without an InventoryChecker:

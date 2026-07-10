@@ -1,0 +1,129 @@
+// Package price implements the price.Service interface.
+package price
+
+import (
+	"context"
+	"log/slog"
+	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/altessa-s/go-atlas/domain/normalizer"
+	slogx "github.com/altessa-s/go-atlas/observability/slog"
+
+	"github.com/kitdoo/my-business-crm-go/internal/entities"
+	"github.com/kitdoo/my-business-crm-go/internal/errs"
+	pricesvc "github.com/kitdoo/my-business-crm-go/internal/services/price"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
+)
+
+var _ pricesvc.Service = (*Service)(nil)
+
+// Service is the price.Service implementation.
+type Service struct {
+	storage  prices.Storage
+	products products.Storage
+	// currency is the system-wide ISO 4217 code from config, stamped onto
+	// every price created; see PROTO_DEVELOPMENT_STANDARD.md's currency
+	// note on crm.types.price.ProductPrice.
+	currency string
+	logger   *slog.Logger
+}
+
+// New builds a Service.
+func New(storage prices.Storage, products products.Storage, currency string) *Service {
+	return &Service{
+		storage:  storage,
+		products: products,
+		currency: currency,
+		logger:   slog.Default().With(slogx.Module("service:price")),
+	}
+}
+
+func (s *Service) Create(ctx context.Context, in *entities.ProductPriceCreate) (*entities.ProductPrice, error) {
+	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if _, err := s.products.Get(ctx, in.ProductID); err != nil {
+		return nil, err
+	}
+	in.Currency = s.currency
+
+	p := entities.ProductPriceNew()
+	in.Merge(p)
+
+	if err := s.storage.Insert(ctx, p); err != nil {
+		s.logger.DebugContext(ctx, "insert product price failed", slog.String("productId", p.ProductID), slogx.Error(err))
+		return nil, err
+	}
+	return p, nil
+}
+
+func (s *Service) Get(ctx context.Context, productID string) (*entities.ProductPrice, error) {
+	return s.storage.GetByProductID(ctx, productID)
+}
+
+func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (*entities.ProductPrice, error) {
+	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	p, err := s.storage.Get(ctx, in.ID)
+	if err != nil {
+		return nil, err
+	}
+	if in.Etag != nil && *in.Etag != p.Etag {
+		return nil, errs.ErrStaleEntity
+	}
+
+	snapshot := &entities.ProductPrice{
+		ID:             uuid.NewString(),
+		ProductID:      p.ProductID,
+		PriceAmount:    p.PriceAmount,
+		Currency:       p.Currency,
+		DiscountAmount: p.DiscountAmount,
+		CreatedAt:      p.CreatedAt,
+	}
+	if err := s.storage.AppendHistory(ctx, snapshot); err != nil {
+		s.logger.DebugContext(ctx, "append product price history failed", slog.String("id", p.ID), slogx.Error(err))
+		return nil, err
+	}
+
+	oldEtag := p.Etag
+	in.Merge(p)
+	p.BeforeUpdate()
+	if err := s.storage.Update(ctx, p, oldEtag); err != nil {
+		s.logger.DebugContext(ctx, "update product price failed", slog.String("id", p.ID), slogx.Error(err))
+		return nil, err
+	}
+	return p, nil
+}
+
+func (s *Service) Delete(ctx context.Context, in *entities.ProductPriceDelete) error {
+	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	p, err := s.storage.Get(ctx, in.ID)
+	if err != nil {
+		return err
+	}
+	if in.Etag != nil && *in.Etag != p.Etag {
+		return errs.ErrStaleEntity
+	}
+
+	oldEtag := p.Etag
+	now := time.Now().UTC()
+	p.DeletedAt = &now
+	p.BeforeUpdate()
+	if err := s.storage.SoftDelete(ctx, &entities.SoftDelete{
+		ID:           p.ID,
+		Etag:         oldEtag,
+		NewUpdatedAt: *p.DeletedAt,
+		NewEtag:      p.Etag,
+	}); err != nil {
+		s.logger.DebugContext(ctx, "soft delete product price failed", slog.String("id", p.ID), slogx.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (s *Service) GetHistory(ctx context.Context, in *entities.ProductPriceGetHistory) (*entities.List[entities.ProductPrice], error) {
+	return s.storage.GetHistory(ctx, in)
+}

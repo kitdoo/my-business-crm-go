@@ -1,9 +1,14 @@
 # CRM business-domain configuration.
-# Defines the bootstrap admin account and the RBAC permission table.
+# Defines the bootstrap admin account, RBAC permission table, and the
+# system-wide currency.
 # All parameters are commented out by default (template mode).
 # Uncomment and configure as needed for your environment.
 
 #crm:
+#  # <string> ISO 4217 code the whole system prices in. Defaults to "RSD"
+#  # when this section (or just this field) is absent.
+#  currency: "RSD"
+#
 #  # <object> Created on first boot if no user with this phone/email exists
 #  # yet. The TD requires the initial admin to come from config, never from
 #  # the regular User Create RPC.

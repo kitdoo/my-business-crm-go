@@ -83,6 +83,14 @@ var (
 	// categoryIds does not reference an existing category.
 	ErrProductCategoryNotFound = errors.New("product category not found")
 
+	// ErrProductPriceNotFound is returned when a price lookup finds no
+	// active row.
+	ErrProductPriceNotFound = errors.New("product price not found")
+
+	// ErrProductPriceExists is returned when Create is attempted for a
+	// product that already has an active price.
+	ErrProductPriceExists = errors.New("product price already exists")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")

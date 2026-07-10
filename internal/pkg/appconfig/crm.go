@@ -12,6 +12,10 @@ type CRMConfig struct {
 	// strings it grants ("*" grants everything). Not enforced by an
 	// interceptor yet — see internal/rbac.Table for the lookup helper.
 	RBAC map[string][]string `yaml:"rbac" default:"-"`
+
+	// Currency is the single ISO 4217 code the whole system prices in (e.g.
+	// "RSD"). Per the TD, it is set here, not chosen per-price.
+	Currency string `yaml:"currency" default:"RSD"`
 }
 
 // BootstrapAdminConfig is the plaintext admin account materialized on boot.
