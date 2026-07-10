@@ -42,7 +42,8 @@ message ClientsListRequest {
   optional Sort sort = 1;
   optional crm.types.common.Pagination pagination = 2;
   message Filter {
-    // Matches name, phone, email, address.
+    // Matches name, phone, email, address. Reserved for a future version;
+    // not implemented yet.
     optional string searchQuery = 1 [(buf.validate.field).string.max_len = 255];
     optional crm.types.common.PeriodFilter createdAt = 2;
   }

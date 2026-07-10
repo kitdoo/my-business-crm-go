@@ -42,6 +42,13 @@ var (
 	// with another active partner's phone.
 	ErrPartnerPhoneConflict = errors.New("partner phone conflict")
 
+	// ErrClientNotFound is returned when a client lookup finds no active row.
+	ErrClientNotFound = errors.New("client not found")
+
+	// ErrClientPhoneConflict is returned when a client's phone collides with
+	// another active client's phone.
+	ErrClientPhoneConflict = errors.New("client phone conflict")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")
