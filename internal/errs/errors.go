@@ -27,6 +27,14 @@ var (
 	// itself.
 	ErrCategorySelfParent = errors.New("category cannot be its own parent")
 
+	// ErrWarehouseNotFound is returned when a warehouse lookup finds no
+	// active row.
+	ErrWarehouseNotFound = errors.New("warehouse not found")
+
+	// ErrWarehouseHasStock is returned when a warehouse delete or deactivate
+	// is attempted while it still carries inventory.
+	ErrWarehouseHasStock = errors.New("warehouse has stock")
+
 	// ErrStaleEntity is returned when a write's OCC precondition (etag) no
 	// longer matches the stored row.
 	ErrStaleEntity = errors.New("stale entity")

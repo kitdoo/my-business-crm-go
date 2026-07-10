@@ -7,12 +7,17 @@ import (
 	brandservice "github.com/kitdoo/my-business-crm-go/internal/services/brand/brand"
 	"github.com/kitdoo/my-business-crm-go/internal/services/category"
 	categoryservice "github.com/kitdoo/my-business-crm-go/internal/services/category/category"
+	"github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
+	warehouseservice "github.com/kitdoo/my-business-crm-go/internal/services/warehouse/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/brands"
 	brandsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/brands/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/categories"
 	categoriesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/categories/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
+	warehousesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/warehouses/mongo"
 	brandhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/brand"
 	categoryhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/category"
+	warehousehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/warehouse"
 )
 
 // ServicesModule wires the domain aggregates: storage, service, and gRPC
@@ -26,6 +31,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(categoriesmongo.New, fx.As(new(categories.Storage)))),
 		fx.Provide(fx.Annotate(newCategoryService, fx.As(new(category.Service)))),
 		fx.Provide(AsGRPCHandler(categoryhandler.New)),
+
+		fx.Provide(fx.Annotate(warehousesmongo.New, fx.As(new(warehouses.Storage)))),
+		fx.Provide(fx.Annotate(newWarehouseService, fx.As(new(warehouse.Service)))),
+		fx.Provide(AsGRPCHandler(warehousehandler.New)),
 	)
 }
 
@@ -42,4 +51,13 @@ func newBrandService(storage brands.Storage) *brandservice.Service {
 // ProductsExistenceChecker; see newBrandService for the rationale.
 func newCategoryService(storage categories.Storage) *categoryservice.Service {
 	return categoryservice.New(storage, nil)
+}
+
+// newWarehouseService wires warehouse.Service without an InventoryChecker:
+// the inventory aggregate does not exist yet in this codebase, so there is
+// no implementation to provide here. Service treats a nil checker as "no
+// inventory aggregate to guard against" and skips the stock guard; wire a
+// real checker once the inventory aggregate lands.
+func newWarehouseService(storage warehouses.Storage) *warehouseservice.Service {
+	return warehouseservice.New(storage, nil)
 }
