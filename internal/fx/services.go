@@ -12,6 +12,8 @@ import (
 	clientservice "github.com/kitdoo/my-business-crm-go/internal/services/client/client"
 	invsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
 	invservice "github.com/kitdoo/my-business-crm-go/internal/services/inventory/inventory"
+	invmovementsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
+	invmovementservice "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement/inventorymovement"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	partnerservice "github.com/kitdoo/my-business-crm-go/internal/services/partner/partner"
 	"github.com/kitdoo/my-business-crm-go/internal/services/price"
@@ -30,6 +32,8 @@ import (
 	clientsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/clients/mongo"
 	invstorage "github.com/kitdoo/my-business-crm-go/internal/storages/inventory"
 	invmongo "github.com/kitdoo/my-business-crm-go/internal/storages/inventory/mongo"
+	invmovements "github.com/kitdoo/my-business-crm-go/internal/storages/inventorymovements"
+	invmovementsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/inventorymovements/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/partners"
 	partnersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/partners/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
@@ -44,6 +48,7 @@ import (
 	categoryhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/category"
 	clienthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/client"
 	invhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/inventory"
+	invmovementhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/inventorymovement"
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
 	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
@@ -66,6 +71,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(invmongo.New, fx.As(new(invstorage.Storage)))),
 		fx.Provide(fx.Annotate(invservice.New, fx.As(new(invsvc.Service)))),
 		fx.Provide(AsGRPCHandler(invhandler.New)),
+
+		fx.Provide(fx.Annotate(invmovementsmongo.New, fx.As(new(invmovements.Storage)))),
+		fx.Provide(fx.Annotate(invmovementservice.New, fx.As(new(invmovementsvc.Service)))),
+		fx.Provide(AsGRPCHandler(invmovementhandler.New)),
 
 		fx.Provide(fx.Annotate(warehousesmongo.New, fx.As(new(warehouses.Storage)))),
 		fx.Provide(fx.Annotate(newWarehouseService, fx.As(new(warehouse.Service)))),
