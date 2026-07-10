@@ -1,0 +1,30 @@
+# CRM business-domain configuration.
+# Defines the bootstrap admin account and the RBAC permission table.
+# All parameters are commented out by default (template mode).
+# Uncomment and configure as needed for your environment.
+
+#crm:
+#  # <object> Created on first boot if no user with this phone/email exists
+#  # yet. The TD requires the initial admin to come from config, never from
+#  # the regular User Create RPC.
+#  bootstrapAdmin:
+#    name: "Admin"
+#    phone: "+000000000000"
+#    email: "admin@example.com"
+#    password: "change-me-before-boot"
+#
+#  # <map<string, []string>> Role -> permission strings ("*" grants
+#  # everything for that role). Looked up via internal/rbac.Table; not yet
+#  # enforced by a gRPC interceptor (see internal/rbac package doc).
+#  rbac:
+#    admin:
+#      - "*"
+#    employee:
+#      - "products:read"
+#      - "products:create"
+#      - "categories:read"
+#      - "categories:create"
+#      - "brands:read"
+#      - "brands:create"
+#      - "sales:create"
+#    guest: []

@@ -11,6 +11,8 @@ import (
 	clientservice "github.com/kitdoo/my-business-crm-go/internal/services/client/client"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	partnerservice "github.com/kitdoo/my-business-crm-go/internal/services/partner/partner"
+	"github.com/kitdoo/my-business-crm-go/internal/services/user"
+	userservice "github.com/kitdoo/my-business-crm-go/internal/services/user/user"
 	"github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	warehouseservice "github.com/kitdoo/my-business-crm-go/internal/services/warehouse/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/brands"
@@ -21,12 +23,15 @@ import (
 	clientsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/clients/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/partners"
 	partnersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/partners/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/users"
+	usersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/users/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
 	warehousesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/warehouses/mongo"
 	brandhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/brand"
 	categoryhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/category"
 	clienthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/client"
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
+	userhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/user"
 	warehousehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/warehouse"
 )
 
@@ -53,6 +58,11 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(clientsmongo.New, fx.As(new(clients.Storage)))),
 		fx.Provide(fx.Annotate(clientservice.New, fx.As(new(client.Service)))),
 		fx.Provide(AsGRPCHandler(clienthandler.New)),
+
+		fx.Provide(fx.Annotate(usersmongo.New, fx.As(new(users.Storage)))),
+		fx.Provide(fx.Annotate(userservice.New, fx.As(new(user.Service)))),
+		fx.Provide(AsGRPCHandler(userhandler.New)),
+		fx.Invoke(registerBootstrapAdmin),
 	)
 }
 

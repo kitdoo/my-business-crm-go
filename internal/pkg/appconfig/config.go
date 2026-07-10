@@ -44,6 +44,9 @@ type Config struct {
 
 	// Observability bundles metrics + tracing collectors.
 	Observability *config.Observability `yaml:"observability" default:"-"`
+
+	// CRM holds business-domain configuration (bootstrap admin, RBAC).
+	CRM *CRMConfig `yaml:"crm" default:"-"`
 }
 
 // Load reads YAML configuration from filePath (file or directory) and
@@ -86,6 +89,7 @@ func (c *Config) Validate() error {
 		validation.Field(&c.Limiter, validation.NilOrNotEmpty),
 		validation.Field(&c.Idempotency, validation.NilOrNotEmpty),
 		validation.Field(&c.Observability, validation.NilOrNotEmpty),
+		validation.Field(&c.CRM, validation.NilOrNotEmpty),
 	)
 }
 
