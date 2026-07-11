@@ -163,7 +163,25 @@
     "add": "Добавить",
     "openFullPage": "Открыть на отдельной странице",
     "next": "Далее",
-    "back": "Назад"
+    "back": "Назад",
+    "retry": "Повторить"
+  },
+  "dashboard": {
+    "turnover": "Оборот",
+    "salesReport": "Продажи за период",
+    "salesCount": "Количество продаж",
+    "popularProducts": "Топ товаров",
+    "salesByStaff": "Продажи по сотрудникам",
+    "salesByPartner": "Продажи по партнёрам",
+    "commission": "Комиссия",
+    "stockLevels": "Остатки",
+    "viewAllInventory": "Смотреть все остатки",
+    "noAccess": "Нет доступа к отчётам"
+  },
+  "periodFilter": {
+    "today": "Сегодня",
+    "7d": "7 дней",
+    "30d": "30 дней"
   },
   "products": {
     "mainImage": "Главное",

@@ -163,7 +163,25 @@
     "add": "Dodaj",
     "openFullPage": "Otvori celu stranicu",
     "next": "Dalje",
-    "back": "Nazad"
+    "back": "Nazad",
+    "retry": "Pokušaj ponovo"
+  },
+  "dashboard": {
+    "turnover": "Promet",
+    "salesReport": "Prodaja za period",
+    "salesCount": "Broj prodaja",
+    "popularProducts": "Najprodavaniji proizvodi",
+    "salesByStaff": "Prodaja po zaposlenima",
+    "salesByPartner": "Prodaja po partnerima",
+    "commission": "Provizija",
+    "stockLevels": "Zalihe",
+    "viewAllInventory": "Prikaži sve zalihe",
+    "noAccess": "Nema pristupa izveštajima"
+  },
+  "periodFilter": {
+    "today": "Danas",
+    "7d": "7 dana",
+    "30d": "30 dana"
   },
   "products": {
     "mainImage": "Glavna",

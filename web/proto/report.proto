@@ -1,0 +1,106 @@
+syntax = "proto3";
+package crm.grpc.report.v1;
+
+import "common.proto";
+
+// Mirrors proto/services/grpc/report/v1/report_service.proto and
+// proto/types/report/report.proto on the backend. Read-only rows — no
+// backing collection, no id/etag. Six independent methods, one per
+// dashboard widget (TD §8.4) — none of this is a generic EntityRegistry
+// entity.
+
+message SalesReportRow {
+  int64 periodStart = 1;
+  int64 periodEnd = 2;
+  int64 salesCount = 3;
+  int64 totalAmount = 4;
+}
+
+message SalesByStaffRow {
+  string userId = 1;
+  int64 salesCount = 2;
+  int64 totalAmount = 3;
+}
+
+message SalesByPartnerRow {
+  string partnerId = 1;
+  int64 salesCount = 2;
+  int64 totalAmount = 3;
+  int64 commissionAmount = 4;
+}
+
+message PopularProductRow {
+  string productId = 1;
+  int64 quantitySold = 2;
+  int64 totalAmount = 3;
+}
+
+message TurnoverRow {
+  int64 periodStart = 1;
+  int64 periodEnd = 2;
+  int64 totalAmount = 3;
+}
+
+message StockLevelRow {
+  string productId = 1;
+  string warehouseId = 2;
+  int64 quantity = 3;
+}
+
+service ReportsService {
+  rpc GetSalesReport (GetSalesReportRequest) returns (GetSalesReportResponse) {}
+  rpc GetSalesByStaff (GetSalesByStaffRequest) returns (GetSalesByStaffResponse) {}
+  rpc GetSalesByPartner (GetSalesByPartnerRequest) returns (GetSalesByPartnerResponse) {}
+  rpc GetPopularProducts (GetPopularProductsRequest) returns (GetPopularProductsResponse) {}
+  rpc GetTurnover (GetTurnoverRequest) returns (GetTurnoverResponse) {}
+  rpc GetStockLevels (GetStockLevelsRequest) returns (GetStockLevelsResponse) {}
+}
+
+message GetSalesReportRequest {
+  crm.types.common.PeriodFilter period = 1;
+}
+
+message GetSalesReportResponse {
+  repeated SalesReportRow rows = 1;
+}
+
+message GetSalesByStaffRequest {
+  crm.types.common.PeriodFilter period = 1;
+}
+
+message GetSalesByStaffResponse {
+  repeated SalesByStaffRow rows = 1;
+}
+
+message GetSalesByPartnerRequest {
+  crm.types.common.PeriodFilter period = 1;
+}
+
+message GetSalesByPartnerResponse {
+  repeated SalesByPartnerRow rows = 1;
+}
+
+message GetPopularProductsRequest {
+  crm.types.common.PeriodFilter period = 1;
+  int32 limit = 2;
+}
+
+message GetPopularProductsResponse {
+  repeated PopularProductRow rows = 1;
+}
+
+message GetTurnoverRequest {
+  crm.types.common.PeriodFilter period = 1;
+}
+
+message GetTurnoverResponse {
+  repeated TurnoverRow rows = 1;
+}
+
+message GetStockLevelsRequest {
+  optional string warehouseId = 1;
+}
+
+message GetStockLevelsResponse {
+  repeated StockLevelRow rows = 1;
+}

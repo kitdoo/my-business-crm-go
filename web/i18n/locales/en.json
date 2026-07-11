@@ -163,7 +163,25 @@
     "add": "Add",
     "openFullPage": "Open full page",
     "next": "Next",
-    "back": "Back"
+    "back": "Back",
+    "retry": "Retry"
+  },
+  "dashboard": {
+    "turnover": "Turnover",
+    "salesReport": "Sales for period",
+    "salesCount": "Sales count",
+    "popularProducts": "Top products",
+    "salesByStaff": "Sales by staff",
+    "salesByPartner": "Sales by partner",
+    "commission": "Commission",
+    "stockLevels": "Stock levels",
+    "viewAllInventory": "View all inventory",
+    "noAccess": "No access to reports"
+  },
+  "periodFilter": {
+    "today": "Today",
+    "7d": "7 days",
+    "30d": "30 days"
   },
   "products": {
     "mainImage": "Main",
