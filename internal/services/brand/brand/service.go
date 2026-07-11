@@ -19,22 +19,31 @@ var _ brandsvc.Service = (*Service)(nil)
 
 // Service is the brand.Service implementation.
 type Service struct {
-	storage  brands.Storage
-	products brandsvc.ProductsExistenceChecker // optional; nil until the products aggregate exists
-	logger   *slog.Logger
+	storage        brands.Storage
+	products       brandsvc.ProductsExistenceChecker // optional; nil until the products aggregate exists
+	requiredLocale string
+	logger         *slog.Logger
 }
 
 // New builds a Service. products may be nil (see ProductsExistenceChecker).
-func New(storage brands.Storage, products brandsvc.ProductsExistenceChecker) *Service {
+// requiredLocale is the locale every non-empty LocalizedString field must
+// include (see entities.LocalizedString.Validate); it comes from
+// CRMConfig.DefaultLocale.
+func New(storage brands.Storage, products brandsvc.ProductsExistenceChecker, requiredLocale string) *Service {
 	return &Service{
-		storage:  storage,
-		products: products,
-		logger:   slog.Default().With(slogx.Module("service:brand")),
+		storage:        storage,
+		products:       products,
+		requiredLocale: requiredLocale,
+		logger:         slog.Default().With(slogx.Module("service:brand")),
 	}
 }
 
 func (s *Service) Create(ctx context.Context, in *entities.BrandCreate) (*entities.Brand, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	b := entities.BrandNew()
 	in.Merge(b)
@@ -56,6 +65,10 @@ func (s *Service) List(ctx context.Context, in *entities.BrandsList) (*entities.
 
 func (s *Service) Update(ctx context.Context, in *entities.BrandUpdate) (*entities.Brand, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	b, err := s.storage.Get(ctx, in.ID)
 	if err != nil {

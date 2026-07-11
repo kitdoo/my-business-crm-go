@@ -12,29 +12,40 @@ import (
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
+	brandsvc "github.com/kitdoo/my-business-crm-go/internal/services/brand"
+	categorysvc "github.com/kitdoo/my-business-crm-go/internal/services/category"
 	productsvc "github.com/kitdoo/my-business-crm-go/internal/services/product"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/brands"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/categories"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
 )
 
 var _ productsvc.Service = (*Service)(nil)
 
-// Service is the product.Service implementation.
+// Service is the product.Service implementation. brands/categories are the
+// respective entities' Service, not their Storage — see
+// SERVICE_DEVELOPMENT_STANDARD.md's "A service controls only its own
+// storage" rule. (The reverse checks, brand/category.Service.Delete asking
+// whether a product still exists, stay Storage-shaped on the other side —
+// wiring both directions through the Service layer would be a circular
+// dependency: this service already needs brand/category to construct.)
 type Service struct {
-	storage    products.Storage
-	brands     brands.Storage
-	categories categories.Storage
-	logger     *slog.Logger
+	storage        products.Storage
+	brands         brandsvc.Service
+	categories     categorysvc.Service
+	requiredLocale string
+	logger         *slog.Logger
 }
 
-// New builds a Service.
-func New(storage products.Storage, brands brands.Storage, categories categories.Storage) *Service {
+// New builds a Service. requiredLocale is the locale every non-empty
+// LocalizedString field must include (see
+// entities.LocalizedString.Validate); it comes from
+// CRMConfig.DefaultLocale.
+func New(storage products.Storage, brands brandsvc.Service, categories categorysvc.Service, requiredLocale string) *Service {
 	return &Service{
-		storage:    storage,
-		brands:     brands,
-		categories: categories,
-		logger:     slog.Default().With(slogx.Module("service:product")),
+		storage:        storage,
+		brands:         brands,
+		categories:     categories,
+		requiredLocale: requiredLocale,
+		logger:         slog.Default().With(slogx.Module("service:product")),
 	}
 }
 
@@ -67,6 +78,10 @@ func (s *Service) checkCategories(ctx context.Context, categoryIDs []string) err
 func (s *Service) Create(ctx context.Context, in *entities.ProductCreate) (*entities.Product, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
+
 	if err := s.checkBrand(ctx, in.BrandID); err != nil {
 		return nil, err
 	}
@@ -94,6 +109,10 @@ func (s *Service) List(ctx context.Context, in *entities.ProductsList) (*entitie
 
 func (s *Service) Update(ctx context.Context, in *entities.ProductUpdate) (*entities.Product, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {

@@ -28,3 +28,11 @@ func (s *Service) Get(ctx context.Context, productID, warehouseID string) (*enti
 func (s *Service) List(ctx context.Context, in *entities.InventoryList) (*entities.List[entities.Inventory], error) {
 	return s.storage.List(ctx, in)
 }
+
+func (s *Service) ApplyMovement(ctx context.Context, productID, warehouseID string, delta int64) (*entities.Inventory, error) {
+	return s.storage.ApplyMovement(ctx, productID, warehouseID, delta)
+}
+
+func (s *Service) HasStock(ctx context.Context, warehouseID string) (bool, error) {
+	return s.storage.HasStock(ctx, warehouseID)
+}

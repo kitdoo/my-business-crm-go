@@ -12,28 +12,31 @@ import (
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
+	clientsvc "github.com/kitdoo/my-business-crm-go/internal/services/client"
+	inventorysvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
 	invmovementsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
+	partnersvc "github.com/kitdoo/my-business-crm-go/internal/services/partner"
+	pricesvc "github.com/kitdoo/my-business-crm-go/internal/services/price"
+	productsvc "github.com/kitdoo/my-business-crm-go/internal/services/product"
 	salesvc "github.com/kitdoo/my-business-crm-go/internal/services/sale"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/clients"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/inventory"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/partners"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
+	warehousesvc "github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/sales"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
 )
 
 var _ salesvc.Service = (*Service)(nil)
 
-// Service is the sale.Service implementation.
+// Service is the sale.Service implementation. clients/warehouses/partners/
+// products/prices/inventory are the respective entities' Service, not
+// their Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A service
+// controls only its own storage" rule.
 type Service struct {
 	storage    sales.Storage
-	clients    clients.Storage
-	warehouses warehouses.Storage
-	partners   partners.Storage
-	products   products.Storage
-	prices     prices.Storage
-	inventory  inventory.Storage
+	clients    clientsvc.Service
+	warehouses warehousesvc.Service
+	partners   partnersvc.Service
+	products   productsvc.Service
+	prices     pricesvc.Service
+	inventory  inventorysvc.Service
 	movements  invmovementsvc.Service
 	logger     *slog.Logger
 }
@@ -41,12 +44,12 @@ type Service struct {
 // New builds a Service.
 func New(
 	storage sales.Storage,
-	clients clients.Storage,
-	warehouses warehouses.Storage,
-	partners partners.Storage,
-	products products.Storage,
-	prices prices.Storage,
-	inventory inventory.Storage,
+	clients clientsvc.Service,
+	warehouses warehousesvc.Service,
+	partners partnersvc.Service,
+	products productsvc.Service,
+	prices pricesvc.Service,
+	inventory inventorysvc.Service,
 	movements invmovementsvc.Service,
 ) *Service {
 	return &Service{
@@ -135,7 +138,7 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 			return nil, 0, err
 		}
 
-		price, err := s.prices.GetByProductID(ctx, req.ProductID)
+		price, err := s.prices.Get(ctx, req.ProductID)
 		if err != nil {
 			return nil, 0, err
 		}

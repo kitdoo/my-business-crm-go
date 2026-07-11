@@ -75,6 +75,15 @@ func (c *WarehouseCreate) Merge(dst *Warehouse) *Warehouse {
 	return dst
 }
 
+// Validate checks the LocalizedString fields for the required locale (see
+// LocalizedString.Validate).
+func (c *WarehouseCreate) Validate(requiredLocale string) error {
+	if err := c.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return c.Description.Validate(requiredLocale)
+}
+
 // WarehouseUpdate is the Update input. Nil fields mean "leave unchanged".
 type WarehouseUpdate struct {
 	ID          string `normalize:"trim"`
@@ -90,6 +99,15 @@ func (u *WarehouseUpdate) Merge(dst *Warehouse) *Warehouse {
 	}
 	converter.Convert(u, dst, converter.WithIgnoreNilValues())
 	return dst
+}
+
+// Validate checks the LocalizedString fields for the required locale (see
+// LocalizedString.Validate).
+func (u *WarehouseUpdate) Validate(requiredLocale string) error {
+	if err := u.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return u.Description.Validate(requiredLocale)
 }
 
 // WarehouseDelete is the Delete input.

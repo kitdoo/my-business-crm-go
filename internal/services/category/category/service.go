@@ -20,17 +20,22 @@ var _ categorysvc.Service = (*Service)(nil)
 
 // Service is the category.Service implementation.
 type Service struct {
-	storage  categories.Storage
-	products categorysvc.ProductsExistenceChecker // optional; nil until the products aggregate exists
-	logger   *slog.Logger
+	storage        categories.Storage
+	products       categorysvc.ProductsExistenceChecker // optional; nil until the products aggregate exists
+	requiredLocale string
+	logger         *slog.Logger
 }
 
 // New builds a Service. products may be nil (see ProductsExistenceChecker).
-func New(storage categories.Storage, products categorysvc.ProductsExistenceChecker) *Service {
+// requiredLocale is the locale every non-empty LocalizedString field must
+// include (see entities.LocalizedString.Validate); it comes from
+// CRMConfig.DefaultLocale.
+func New(storage categories.Storage, products categorysvc.ProductsExistenceChecker, requiredLocale string) *Service {
 	return &Service{
-		storage:  storage,
-		products: products,
-		logger:   slog.Default().With(slogx.Module("service:category")),
+		storage:        storage,
+		products:       products,
+		requiredLocale: requiredLocale,
+		logger:         slog.Default().With(slogx.Module("service:category")),
 	}
 }
 
@@ -57,6 +62,10 @@ func (s *Service) validateParent(ctx context.Context, id string, parentID *strin
 func (s *Service) Create(ctx context.Context, in *entities.CategoryCreate) (*entities.Category, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
+
 	c := entities.CategoryNew()
 	if err := s.validateParent(ctx, c.ID, in.ParentID); err != nil {
 		return nil, err
@@ -80,6 +89,10 @@ func (s *Service) List(ctx context.Context, in *entities.CategoriesList) (*entit
 
 func (s *Service) Update(ctx context.Context, in *entities.CategoryUpdate) (*entities.Category, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	c, err := s.storage.Get(ctx, in.ID)
 	if err != nil {

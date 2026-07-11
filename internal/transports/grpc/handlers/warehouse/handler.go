@@ -212,6 +212,8 @@ func MapError(err error) error {
 		return status.Error(codes.Aborted, errs.ErrStaleEntity.Error())
 	case errors.Is(err, errs.ErrInvalidListCursor):
 		return status.Error(codes.InvalidArgument, errs.ErrInvalidListCursor.Error())
+	case errors.Is(err, errs.ErrLocalizedStringMissingRequiredLocale):
+		return status.Error(codes.InvalidArgument, errs.ErrLocalizedStringMissingRequiredLocale.Error())
 	case errors.Is(err, errs.ErrInvalidArgument):
 		return status.Error(codes.InvalidArgument, errs.ErrInvalidArgument.Error())
 	case errors.Is(err, errs.ErrNotImplemented):

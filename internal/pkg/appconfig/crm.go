@@ -1,13 +1,52 @@
 package appconfig
 
 import (
+	"fmt"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 
 	"github.com/altessa-s/go-atlas/config"
 	"github.com/altessa-s/go-atlas/core/types/redacted"
+
+	"github.com/kitdoo/my-business-crm-go/internal/entities"
+	grpcrbac "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/interceptors/rbac"
 )
+
+// knownRBACRoles are the only role names the RBAC interceptor ever checks
+// a caller's role against (see entities.UserRole.String()) — any other
+// key in CRMConfig.RBAC can never match a real caller and is almost
+// certainly a typo.
+var knownRBACRoles = map[string]bool{
+	entities.UserRoleAdmin.String():    true,
+	entities.UserRoleEmployee.String(): true,
+	entities.UserRoleGuest.String():    true,
+}
+
+// validateRBAC rejects an unknown role key or an unknown, non-wildcard
+// permission string in CRMConfig.RBAC — see grpcrbac.KnownPermissions.
+func validateRBAC(value any) error {
+	table, ok := value.(map[string][]string)
+	if !ok {
+		return nil
+	}
+
+	knownPermissions := grpcrbac.KnownPermissions()
+	for role, perms := range table {
+		if !knownRBACRoles[role] {
+			return fmt.Errorf("unknown role %q (expected one of admin/employee/guest)", role)
+		}
+		for _, perm := range perms {
+			if perm == "*" {
+				continue
+			}
+			if !knownPermissions[perm] {
+				return fmt.Errorf("role %q grants unknown permission %q", role, perm)
+			}
+		}
+	}
+	return nil
+}
 
 // CRMConfig holds business-domain configuration that has no go-atlas infra
 // counterpart (bootstrap admin, RBAC permission table).
@@ -28,6 +67,13 @@ type CRMConfig struct {
 	// "RSD"). Per the TD, it is set here, not chosen per-price.
 	Currency string `yaml:"currency" default:"RSD"`
 
+	// DefaultLocale is the locale code every non-empty LocalizedString
+	// value (Brand/Category/Warehouse/User/Product name/description
+	// fields) must include — see entities.LocalizedString.Validate. Sort
+	// keys and the frontend's display fallback both rely on this locale
+	// always being present.
+	DefaultLocale string `yaml:"defaultLocale" default:"sr"`
+
 	// Images configures the product-image upload endpoint (plain HTTP, not
 	// gRPC — see internal/transports/http/handlers/image).
 	Images *ImagesConfig `yaml:"images" default:"-"`
@@ -46,6 +92,7 @@ func (c *CRMConfig) Validate() error {
 		validation.Field(&c.BootstrapAdmin, validation.NilOrNotEmpty),
 		validation.Field(&c.Images, validation.NilOrNotEmpty),
 		validation.Field(&c.Auth, validation.Required),
+		validation.Field(&c.RBAC, validation.By(validateRBAC)),
 	)
 }
 

@@ -77,6 +77,15 @@ func (c *CategoryCreate) Merge(dst *Category) *Category {
 	return dst
 }
 
+// Validate checks the LocalizedString fields for the required locale (see
+// LocalizedString.Validate).
+func (c *CategoryCreate) Validate(requiredLocale string) error {
+	if err := c.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return c.Description.Validate(requiredLocale)
+}
+
 // CategoryUpdate is the Update input. Nil fields mean "leave unchanged".
 type CategoryUpdate struct {
 	ID          string `normalize:"trim"`
@@ -93,6 +102,15 @@ func (u *CategoryUpdate) Merge(dst *Category) *Category {
 	}
 	converter.Convert(u, dst, converter.WithIgnoreNilValues())
 	return dst
+}
+
+// Validate checks the LocalizedString fields for the required locale (see
+// LocalizedString.Validate).
+func (u *CategoryUpdate) Validate(requiredLocale string) error {
+	if err := u.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return u.Description.Validate(requiredLocale)
 }
 
 // CategoryDelete is the Delete input.

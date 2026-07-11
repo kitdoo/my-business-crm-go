@@ -11,30 +11,44 @@ import (
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
+	inventorysvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
 	warehousesvc "github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
 )
 
 var _ warehousesvc.Service = (*Service)(nil)
 
-// Service is the warehouse.Service implementation.
+// Service is the warehouse.Service implementation. inventory is
+// inventory.Service, not inventory.Storage — see
+// SERVICE_DEVELOPMENT_STANDARD.md's "A service controls only its own
+// storage" rule.
 type Service struct {
-	storage   warehouses.Storage
-	inventory warehousesvc.InventoryChecker // optional; nil until the inventory aggregate exists
-	logger    *slog.Logger
+	storage        warehouses.Storage
+	inventory      inventorysvc.Service // nil is treated as "no inventory aggregate to check against"
+	requiredLocale string
+	logger         *slog.Logger
 }
 
-// New builds a Service. inventory may be nil (see InventoryChecker).
-func New(storage warehouses.Storage, inventory warehousesvc.InventoryChecker) *Service {
+// New builds a Service. inventory may be nil, in which case the
+// stock-guard on Delete/Deactivate is skipped. requiredLocale is the
+// locale every non-empty LocalizedString field must include (see
+// entities.LocalizedString.Validate); it comes from
+// CRMConfig.DefaultLocale.
+func New(storage warehouses.Storage, inventory inventorysvc.Service, requiredLocale string) *Service {
 	return &Service{
-		storage:   storage,
-		inventory: inventory,
-		logger:    slog.Default().With(slogx.Module("service:warehouse")),
+		storage:        storage,
+		inventory:      inventory,
+		requiredLocale: requiredLocale,
+		logger:         slog.Default().With(slogx.Module("service:warehouse")),
 	}
 }
 
 func (s *Service) Create(ctx context.Context, in *entities.WarehouseCreate) (*entities.Warehouse, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	w := entities.WarehouseNew()
 	in.Merge(w)
@@ -56,6 +70,10 @@ func (s *Service) List(ctx context.Context, in *entities.WarehousesList) (*entit
 
 func (s *Service) Update(ctx context.Context, in *entities.WarehouseUpdate) (*entities.Warehouse, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	w, err := s.storage.Get(ctx, in.ID)
 	if err != nil {

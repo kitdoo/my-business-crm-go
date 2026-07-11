@@ -131,6 +131,17 @@ var (
 	// validation.
 	ErrInvalidArgument = errors.New("invalid argument")
 
+	// ErrLocalizedStringMissingRequiredLocale is returned when a
+	// LocalizedString value is set but does not include the configured
+	// required locale (CRMConfig.DefaultLocale), which every entity with a
+	// LocalizedString field requires (see
+	// entities.LocalizedString.Validate). The message deliberately does
+	// not name the locale itself — every gRPC handler's MapError returns
+	// this sentinel's own static text verbatim, discarding anything
+	// wrapped around it, so the specific locale could never reach the
+	// caller through that path anyway.
+	ErrLocalizedStringMissingRequiredLocale = errors.New("localized string missing required locale")
+
 	// ErrNotImplemented marks a method whose body is a skeleton per the
 	// service development standard.
 	ErrNotImplemented = errors.New("not implemented")

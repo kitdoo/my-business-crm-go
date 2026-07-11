@@ -13,17 +13,20 @@ import (
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
+	productsvc "github.com/kitdoo/my-business-crm-go/internal/services/product"
+
 	pricesvc "github.com/kitdoo/my-business-crm-go/internal/services/price"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
 )
 
 var _ pricesvc.Service = (*Service)(nil)
 
-// Service is the price.Service implementation.
+// Service is the price.Service implementation. products is product.Service,
+// not products.Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A service
+// controls only its own storage" rule.
 type Service struct {
 	storage  prices.Storage
-	products products.Storage
+	products productsvc.Service
 	// currency is the system-wide ISO 4217 code from config, stamped onto
 	// every price created; see PROTO_DEVELOPMENT_STANDARD.md's currency
 	// note on crm.types.price.ProductPrice.
@@ -32,7 +35,7 @@ type Service struct {
 }
 
 // New builds a Service.
-func New(storage prices.Storage, products products.Storage, currency string) *Service {
+func New(storage prices.Storage, products productsvc.Service, currency string) *Service {
 	return &Service{
 		storage:  storage,
 		products: products,

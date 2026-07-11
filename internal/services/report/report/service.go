@@ -5,21 +5,24 @@ import (
 	"context"
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
+	inventorysvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
 	reportsvc "github.com/kitdoo/my-business-crm-go/internal/services/report"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/inventory"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/reports"
 )
 
 var _ reportsvc.Service = (*Service)(nil)
 
-// Service is the report.Service implementation.
+// Service is the report.Service implementation. inventory is
+// inventory.Service, not inventory.Storage — see
+// SERVICE_DEVELOPMENT_STANDARD.md's "A service controls only its own
+// storage" rule.
 type Service struct {
 	storage   reports.Storage
-	inventory inventory.Storage
+	inventory inventorysvc.Service
 }
 
 // New builds a Service.
-func New(storage reports.Storage, inv inventory.Storage) *Service {
+func New(storage reports.Storage, inv inventorysvc.Service) *Service {
 	return &Service{storage: storage, inventory: inv}
 }
 

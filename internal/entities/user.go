@@ -120,6 +120,18 @@ func (c *UserCreate) Merge(dst *User) *User {
 	return dst
 }
 
+// Validate checks the LocalizedString fields for the required locale (see
+// LocalizedString.Validate).
+func (c *UserCreate) Validate(requiredLocale string) error {
+	if err := c.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	if err := c.LastName.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return c.Description.Validate(requiredLocale)
+}
+
 // UserUpdate is the Update input. Nil fields mean "leave unchanged".
 type UserUpdate struct {
 	ID          string `normalize:"trim"`
@@ -139,6 +151,18 @@ func (u *UserUpdate) Merge(dst *User) *User {
 	}
 	converter.Convert(u, dst, converter.WithIgnoreNilValues())
 	return dst
+}
+
+// Validate checks the LocalizedString fields for the required locale (see
+// LocalizedString.Validate).
+func (u *UserUpdate) Validate(requiredLocale string) error {
+	if err := u.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	if err := u.LastName.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return u.Description.Validate(requiredLocale)
 }
 
 // UserDelete is the Delete input.

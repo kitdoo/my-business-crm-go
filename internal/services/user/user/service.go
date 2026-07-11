@@ -25,17 +25,20 @@ var _ usersvc.Service = (*Service)(nil)
 // self-contained HMAC-signed bearer tokens (see token.go) — no session
 // state (raw token, hash, or otherwise) is ever persisted to storage.
 type Service struct {
-	storage    users.Storage
-	logger     *slog.Logger
-	signingKey []byte
-	tokenTTL   time.Duration
+	storage        users.Storage
+	logger         *slog.Logger
+	signingKey     []byte
+	tokenTTL       time.Duration
+	requiredLocale string
 }
 
 // New builds a Service. signingKey must be non-empty — it is the HMAC-SHA256
 // secret used to sign and verify session tokens issued by Login; every
 // process that must accept those tokens (every gRPC/HTTP node) needs the
-// same key. tokenTTL <= 0 falls back to defaultTokenTTL.
-func New(storage users.Storage, signingKey []byte, tokenTTL time.Duration) (*Service, error) {
+// same key. tokenTTL <= 0 falls back to defaultTokenTTL. requiredLocale is
+// the locale every non-empty LocalizedString field must include (see
+// entities.LocalizedString.Validate); it comes from CRMConfig.DefaultLocale.
+func New(storage users.Storage, signingKey []byte, tokenTTL time.Duration, requiredLocale string) (*Service, error) {
 	if len(signingKey) == 0 {
 		return nil, fmt.Errorf("%w: user session signing key must be configured", errs.ErrInvalidArgument)
 	}
@@ -43,10 +46,11 @@ func New(storage users.Storage, signingKey []byte, tokenTTL time.Duration) (*Ser
 		tokenTTL = defaultTokenTTL
 	}
 	return &Service{
-		storage:    storage,
-		logger:     slog.Default().With(slogx.Module("service:user")),
-		signingKey: signingKey,
-		tokenTTL:   tokenTTL,
+		storage:        storage,
+		logger:         slog.Default().With(slogx.Module("service:user")),
+		signingKey:     signingKey,
+		tokenTTL:       tokenTTL,
+		requiredLocale: requiredLocale,
 	}, nil
 }
 
@@ -65,6 +69,10 @@ func hashPassword(plaintext string) (string, error) {
 
 func (s *Service) Create(ctx context.Context, in *entities.UserCreate) (*entities.User, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	hash, err := hashPassword(in.Password)
 	if err != nil {
@@ -92,6 +100,10 @@ func (s *Service) List(ctx context.Context, in *entities.UsersList) (*entities.L
 
 func (s *Service) Update(ctx context.Context, in *entities.UserUpdate) (*entities.User, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
+
+	if err := in.Validate(s.requiredLocale); err != nil {
+		return nil, err
+	}
 
 	u, err := s.storage.Get(ctx, in.ID)
 	if err != nil {

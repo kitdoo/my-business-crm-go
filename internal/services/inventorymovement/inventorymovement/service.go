@@ -10,26 +10,31 @@ import (
 	slogx "github.com/altessa-s/go-atlas/observability/slog"
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
+	inventorysvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
 	invsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/inventory"
+	productsvc "github.com/kitdoo/my-business-crm-go/internal/services/product"
+	warehousesvc "github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/inventorymovements"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/warehouses"
 )
 
 var _ invsvc.Service = (*Service)(nil)
 
-// Service is the inventorymovement.Service implementation.
+// Service is the inventorymovement.Service implementation. inventory,
+// products, and warehouses are the respective entities' Service, not
+// their Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A service
+// controls only its own storage" rule. inventory.Service.ApplyMovement in
+// particular is the sanctioned write path into Inventory; every other
+// stock change should go through recording a movement here first.
 type Service struct {
 	storage    inventorymovements.Storage
-	inventory  inventory.Storage
-	products   products.Storage
-	warehouses warehouses.Storage
+	inventory  inventorysvc.Service
+	products   productsvc.Service
+	warehouses warehousesvc.Service
 	logger     *slog.Logger
 }
 
 // New builds a Service.
-func New(storage inventorymovements.Storage, inv inventory.Storage, products products.Storage, warehouses warehouses.Storage) *Service {
+func New(storage inventorymovements.Storage, inv inventorysvc.Service, products productsvc.Service, warehouses warehousesvc.Service) *Service {
 	return &Service{
 		storage:    storage,
 		inventory:  inv,

@@ -127,3 +127,21 @@ var permissions = map[string]string{
 	// Diagnostic endpoint, no business data: any authenticated caller.
 	serviceinfopb.ServiceInfoService_Get_FullMethodName: permissionAuthenticatedOnly,
 }
+
+// KnownPermissions returns every distinct non-wildcard, non-self-service
+// permission string a role can be granted (i.e. every value that can
+// legally appear under a role in CRMConfig.RBAC / configs/crm.yaml,
+// besides the universal "*" wildcard). Used by appconfig.CRMConfig.Validate
+// to catch a typo'd permission string (e.g. "prodcuts:read") at
+// config-load time — otherwise it would silently deny every role that
+// wasn't supposed to hold that permission anyway, and nobody would notice
+// until a caller who genuinely needed it hit PermissionDenied.
+func KnownPermissions() map[string]bool {
+	known := make(map[string]bool, len(permissions))
+	for _, perm := range permissions {
+		if perm != permissionAuthenticatedOnly {
+			known[perm] = true
+		}
+	}
+	return known
+}

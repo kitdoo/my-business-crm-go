@@ -20,10 +20,14 @@ type Service interface {
 }
 
 // ProductsExistenceChecker reports whether any active product still
-// references a category. The products aggregate does not exist yet in this
-// codebase, so no implementation is wired in fx today; Service.Delete
-// treats a nil checker as "no products aggregate to check against" and
-// skips the guard entirely.
+// references a category. This is satisfied by products.Storage directly
+// (not product.Service) as a deliberate, narrow exception to "depend on
+// the foreign entity's Service" (see SERVICE_DEVELOPMENT_STANDARD.md,
+// Services Layer §1): product.Service already depends on category.Service
+// for its own Create/Update FK validation, so wiring this direction
+// through product.Service too would be a circular dependency. A nil
+// checker is treated as "no products aggregate to check against" and
+// skips the guard entirely (used only where fx cannot wire a real one).
 type ProductsExistenceChecker interface {
 	ExistsForCategory(ctx context.Context, categoryID string) (bool, error)
 }

@@ -86,6 +86,18 @@ func (c *ProductCreate) Merge(dst *Product) *Product {
 	return dst
 }
 
+// Validate checks the LocalizedString fields (including every value of
+// Details) for the required locale (see LocalizedString.Validate).
+func (c *ProductCreate) Validate(requiredLocale string) error {
+	if err := c.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	if err := c.Description.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return ValidateLocalizedStringMap(c.Details, requiredLocale)
+}
+
 // ProductUpdate is the Update input. Nil fields mean "leave unchanged". SKU
 // is immutable and has no field here. CategoryIDs/ImageIDs are full
 // replacements applied only when present in the request's update mask (a
@@ -109,6 +121,18 @@ func (u *ProductUpdate) Merge(dst *Product) *Product {
 	}
 	converter.Convert(u, dst, converter.WithIgnoreNilValues())
 	return dst
+}
+
+// Validate checks the LocalizedString fields (including every value of
+// Details) for the required locale (see LocalizedString.Validate).
+func (u *ProductUpdate) Validate(requiredLocale string) error {
+	if err := u.Name.Validate(requiredLocale); err != nil {
+		return err
+	}
+	if err := u.Description.Validate(requiredLocale); err != nil {
+		return err
+	}
+	return ValidateLocalizedStringMap(u.Details, requiredLocale)
 }
 
 // ProductDelete is the Delete input.

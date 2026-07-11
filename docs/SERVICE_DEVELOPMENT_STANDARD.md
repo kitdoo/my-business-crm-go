@@ -641,17 +641,74 @@ Options: mongooptions.Index().
 `internal/services/<name>/` — interface in parent, impl in `<name>/`. The
 service is the only layer that **rolls the etag** and orchestrates dependencies.
 
-### 1. Struct, constructor, logger, metrics
+### 1. A service controls only its own storage
+
+A service holds exactly one `Storage` — its own. Any interaction with
+another entity's data (an existence check, a lookup, a mutation) goes
+through **that entity's Service**, never through its `Storage` directly.
+Reaching into a sibling entity's storage skips that entity's own
+validation, error mapping, and any future logic added there — the whole
+point of the service layer is to be the one place that logic lives.
+
+```go
+// Wrong — product depends on brands.Storage directly.
+type Service struct {
+    storage products.Storage
+    brands  brands.Storage
+}
+
+// Right — product depends on brand.Service.
+type Service struct {
+    storage products.Storage
+    brands  brandsvc.Service
+}
+```
+
+Since the dependency is a real capability, not a raw data-access shape,
+declare the **narrowest interface the consumer actually needs** in the
+consumer's own `interface.go` (not the foreign service's own `Service`
+interface) — e.g. a `ProductGetter interface { Get(ctx, id string)
+(*entities.Product, error) }` rather than the full `product.Service`.
+This is the same narrow-interface pattern already used for
+`brand.ProductsExistenceChecker` / `warehouse.InventoryChecker`: it keeps
+the dependency to exactly the method(s) used, and — critically — it lets
+the foreign service satisfy the interface **structurally**, with no
+import of the foreign service's package required. That structural typing
+is what makes the next rule possible.
+
+**Exception — genuine circular dependencies.** Two services can each
+legitimately need to ask the other something (e.g. `Product.Create`
+needs `Brand.Get`/`Category.Get` to validate the FK it's about to write;
+`Brand.Delete`/`Category.Delete` need to know whether any `Product` still
+references them). Wiring **both** directions through the Service layer is
+not possible — the DI container cannot construct two services that each
+require the other to exist first. When this happens:
+- Pick **one** direction to go through the Service (normally the
+  direction doing FK validation on write — the more security/correctness
+  -sensitive one).
+- The other direction (normally a read-only existence check gating a
+  Delete) is the **one sanctioned case** where depending on the foreign
+  entity's `Storage` directly is acceptable — but only for a narrow,
+  named, read-only capability (an `ExistsForX(ctx, id) (bool, error)`
+  shape, never a general `Get`/mutation), and the constructor doc comment
+  must say *why* in one sentence ("would otherwise cycle with
+  `product.Service`, which itself depends on this service").
+- This is intentionally rare. If you find yourself reaching for it for a
+  third or fourth dependency on the same service, the FK-validation
+  direction is probably wired backwards — reconsider which side should
+  own the check before adding another exception.
+
+### 2. Struct, constructor, logger, metrics
 
 ```go
 type Service struct {
     storage   products.Storage
-    brands    brands.Storage
+    brands    brandsvc.Service
     collector metrics.Collector
     logger    *slog.Logger
 }
 
-func New(storage products.Storage, brands brands.Storage, collector metrics.Collector) *Service {
+func New(storage products.Storage, brands brandsvc.Service, collector metrics.Collector) *Service {
     return &Service{
         storage:   storage,
         brands:    brands,
@@ -664,9 +721,11 @@ func New(storage products.Storage, brands brands.Storage, collector metrics.Coll
 Rules:
 - Mandatory dependencies are positional constructor args, in dependency-then-collector order.
 - The logger is `slog.Default().With(slogx.Module("service:<name>"))`.
-- Accept interfaces (`products.Storage`), store interfaces, never concrete `*mongo.Storage`.
+- Accept interfaces (`products.Storage`, `brandsvc.Service` or a narrower
+  consumer-defined interface — see §1), store interfaces, never concrete
+  `*mongo.Storage` or a foreign service's concrete implementation type.
 
-### 2. Create / Update / Delete flow
+### 3. Create / Update / Delete flow
 
 ```go
 func (s *Service) Create(ctx context.Context, in *entities.ProductCreate) (*entities.Product, error) {
@@ -735,7 +794,7 @@ Rules:
 - Log failures at `Debug` with `slog.String` context + `slogx.Error(err)`; return the
   error unchanged (the handler maps it).
 
-### 3. Transport-only concerns stay out of the service
+### 4. Transport-only concerns stay out of the service
 
 Read masks, update masks, and `includeTotalCount` are resolved in the
 handler. The service sees only business inputs.
@@ -1131,6 +1190,7 @@ func (h *Handler) Update(ctx context.Context, in *resourcepb.ResourceUpdateReque
 - [ ] Partial indexes use `{deleted_at: null}`, never `$exists: false`.
 
 ### ✅ Service
+- [ ] Service holds only its own `Storage`; foreign-entity access goes through that entity's `Service` (or a narrow consumer-owned interface it satisfies) — no unjustified foreign `Storage` dependency (see Services Layer §1).
 - [ ] `normalizer.Normalize(in)` first on mutating inputs.
 - [ ] Dependencies validated before write (e.g. referenced aggregate existence).
 - [ ] `oldEtag` captured before `Merge`/`BeforeUpdate`.

@@ -107,7 +107,7 @@ func ServicesModule() fx.Option {
 		imagesModule(),
 
 		fx.Provide(fx.Annotate(productsmongo.New, fx.As(new(products.Storage)))),
-		fx.Provide(fx.Annotate(productservice.New, fx.As(new(product.Service)))),
+		fx.Provide(fx.Annotate(newProductService, fx.As(new(product.Service)))),
 		fx.Provide(AsGRPCHandler(producthandler.New)),
 
 		fx.Provide(fx.Annotate(pricesmongo.New, fx.As(new(prices.Storage)))),
@@ -124,17 +124,35 @@ func ServicesModule() fx.Option {
 	)
 }
 
+// defaultLocale is used when the crm config section (or its defaultLocale
+// field) is absent, matching CRMConfig.DefaultLocale's own default tag.
+const defaultLocale = "sr"
+
+// resolveDefaultLocale resolves the locale every non-empty LocalizedString
+// field must include (see entities.LocalizedString.Validate) from
+// cfg.CRM.DefaultLocale, falling back to defaultLocale when the optional
+// crm config section (or just this field) is absent. Shared by every
+// service that validates a LocalizedString field.
+func resolveDefaultLocale(cfg *appconfig.Config) string {
+	if cfg.CRM != nil && cfg.CRM.DefaultLocale != "" {
+		return cfg.CRM.DefaultLocale
+	}
+	return defaultLocale
+}
+
 // newBrandService wires brand.Service with products.Storage as its
-// ProductsExistenceChecker: products.Storage.ExistsForBrand satisfies that
-// interface directly, so the Delete guard is real once a product exists.
-func newBrandService(storage brands.Storage, productsStorage products.Storage) *brandservice.Service {
-	return brandservice.New(storage, productsStorage)
+// ProductsExistenceChecker. This stays Storage-shaped rather than
+// depending on product.Service — see brand.ProductsExistenceChecker's doc
+// for why (product.Service already depends on brand.Service, so the
+// reverse direction through the Service layer would be circular).
+func newBrandService(storage brands.Storage, productsStorage products.Storage, cfg *appconfig.Config) *brandservice.Service {
+	return brandservice.New(storage, productsStorage, resolveDefaultLocale(cfg))
 }
 
 // newCategoryService wires category.Service with products.Storage as its
 // ProductsExistenceChecker; see newBrandService for the rationale.
-func newCategoryService(storage categories.Storage, productsStorage products.Storage) *categoryservice.Service {
-	return categoryservice.New(storage, productsStorage)
+func newCategoryService(storage categories.Storage, productsStorage products.Storage, cfg *appconfig.Config) *categoryservice.Service {
+	return categoryservice.New(storage, productsStorage, resolveDefaultLocale(cfg))
 }
 
 // newUserService resolves the session-token signing key/TTL from
@@ -148,7 +166,7 @@ func newUserService(storage users.Storage, cfg *appconfig.Config) (*userservice.
 		signingKey = cfg.CRM.Auth.SigningKey.Expose()
 		tokenTTL = cfg.CRM.Auth.TokenTTL
 	}
-	return userservice.New(storage, []byte(signingKey), tokenTTL)
+	return userservice.New(storage, []byte(signingKey), tokenTTL, resolveDefaultLocale(cfg))
 }
 
 // defaultCurrency is used when the crm config section (or its currency
@@ -158,18 +176,23 @@ const defaultCurrency = "RSD"
 // newPriceService resolves the system-wide currency from cfg.CRM.Currency,
 // falling back to defaultCurrency when the optional crm config section (or
 // just its currency field) is absent.
-func newPriceService(storage prices.Storage, productsStorage products.Storage, cfg *appconfig.Config) *priceservice.Service {
+func newPriceService(storage prices.Storage, productsSvc product.Service, cfg *appconfig.Config) *priceservice.Service {
 	currency := defaultCurrency
 	if cfg.CRM != nil && cfg.CRM.Currency != "" {
 		currency = cfg.CRM.Currency
 	}
-	return priceservice.New(storage, productsStorage, currency)
+	return priceservice.New(storage, productsSvc, currency)
 }
 
-// newWarehouseService wires warehouse.Service with invstorage.Storage as
-// its InventoryChecker: invstorage.Storage.HasStock satisfies that
-// interface directly, so the Delete/Deactivate guards are real now that
-// Inventory exists (the nil placeholder used since Warehouse landed).
-func newWarehouseService(storage warehouses.Storage, inventoryStorage invstorage.Storage) *warehouseservice.Service {
-	return warehouseservice.New(storage, inventoryStorage)
+// newWarehouseService wires warehouse.Service with inventory.Service as
+// its stock-guard dependency for Delete/Deactivate.
+func newWarehouseService(storage warehouses.Storage, inventorySvc invsvc.Service, cfg *appconfig.Config) *warehouseservice.Service {
+	return warehouseservice.New(storage, inventorySvc, resolveDefaultLocale(cfg))
+}
+
+// newProductService wires product.Service with brand.Service/
+// category.Service for FK validation (Create/Update), and resolves the
+// required LocalizedString locale from cfg.CRM.DefaultLocale.
+func newProductService(storage products.Storage, brandSvc brand.Service, categorySvc category.Service, cfg *appconfig.Config) *productservice.Service {
+	return productservice.New(storage, brandSvc, categorySvc, resolveDefaultLocale(cfg))
 }

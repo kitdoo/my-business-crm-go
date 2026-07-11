@@ -14,19 +14,11 @@ type Service interface {
 	Get(ctx context.Context, id string) (*entities.Warehouse, error)
 	List(ctx context.Context, in *entities.WarehousesList) (*entities.List[entities.Warehouse], error)
 	Update(ctx context.Context, in *entities.WarehouseUpdate) (*entities.Warehouse, error)
-	// Delete soft-deletes a warehouse. Returns errs.ErrWarehouseHasStock if an
-	// InventoryChecker is configured and reports non-zero stock.
+	// Delete soft-deletes a warehouse. Returns errs.ErrWarehouseHasStock if
+	// inventory.Service reports non-zero stock.
 	Delete(ctx context.Context, in *entities.WarehouseDelete) error
 	// Deactivate flips status to Inactive. Returns errs.ErrWarehouseHasStock
-	// if an InventoryChecker is configured and reports non-zero stock; the
-	// caller is expected to have transferred stock away first.
+	// if inventory.Service reports non-zero stock; the caller is expected
+	// to have transferred stock away first.
 	Deactivate(ctx context.Context, in *entities.WarehouseDeactivate) (*entities.Warehouse, error)
-}
-
-// InventoryChecker reports whether a warehouse still carries any stock. The
-// inventory aggregate does not exist yet in this codebase, so no
-// implementation is wired in fx today; Service treats a nil checker as "no
-// inventory aggregate to check against" and skips the guard entirely.
-type InventoryChecker interface {
-	HasStock(ctx context.Context, warehouseID string) (bool, error)
 }
