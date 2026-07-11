@@ -10,6 +10,7 @@ const props = defineProps({
   label: { type: String, default: '' },
   multiline: { type: Boolean, default: false },
   error: { type: String, default: '' },
+  required: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -36,7 +37,7 @@ function updateLocale(locale, text) {
 </script>
 
 <template>
-  <UFormField :label="label" :error="error" :required="true">
+  <UFormField :label="label" :error="error" :required="required">
     <UTabs v-model="activeTab" :items="tabItems" class="w-full">
       <template #content="{ item }">
         <UTextarea

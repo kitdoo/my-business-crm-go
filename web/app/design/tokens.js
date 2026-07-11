@@ -72,4 +72,10 @@ export const STATUS_COLOR_MAP = {
     USER_STATUS_INACTIVE: 'inactive',
     USER_STATUS_UNSPECIFIED: 'inactive',
   },
+  product: {
+    PRODUCT_STATUS_DRAFT: 'warning',
+    PRODUCT_STATUS_ACTIVE: 'active',
+    PRODUCT_STATUS_INACTIVE: 'inactive',
+    PRODUCT_STATUS_UNSPECIFIED: 'inactive',
+  },
 }

@@ -22,6 +22,10 @@ export const ENUMS = {
     values: ['USER_ROLE_ADMIN', 'USER_ROLE_EMPLOYEE', 'USER_ROLE_GUEST'],
     labelKey: (value) => `enums.userRole.${value}`,
   },
+  ProductStatus: {
+    values: ['PRODUCT_STATUS_DRAFT', 'PRODUCT_STATUS_ACTIVE', 'PRODUCT_STATUS_INACTIVE'],
+    labelKey: (value) => `enums.productStatus.${value}`,
+  },
 }
 
 export function getEnumOptions(enumName) {

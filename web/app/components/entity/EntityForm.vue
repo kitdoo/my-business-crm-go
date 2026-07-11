@@ -129,6 +129,7 @@ function fieldsToRender() {
             :required-locale="'sr'"
             :label="t(field.label)"
             :error="fieldErrors[field.key]"
+            :required="field.required"
           />
           <UFormField v-else-if="field.type === 'enum'" :label="t(field.label)" :error="fieldErrors[field.key]">
             <USelect
@@ -149,6 +150,7 @@ function fieldsToRender() {
               :type="field.inputType || 'text'"
               :required="field.required"
               :maxlength="field.maxLength"
+              :disabled="field.immutableOnEdit && !isCreate"
             />
           </UFormField>
           <UFormField
@@ -169,6 +171,22 @@ function fieldsToRender() {
             :tree="field.tree"
             :exclude-id="field.tree && !isCreate ? props.id : null"
           />
+          <RelationMultiSelect
+            v-else-if="field.type === 'relationMulti'"
+            v-model="form[field.key]"
+            :relation="field.relation"
+            :label="t(field.label)"
+            :error="fieldErrors[field.key]"
+          />
+          <KeyValueLocalizedInput
+            v-else-if="field.type === 'keyValueLocalized'"
+            v-model="form[field.key]"
+            :locales="runtimeConfig.public.supportedLocales"
+            :label="t(field.label)"
+          />
+          <UFormField v-else-if="field.type === 'images'" :label="t(field.label)" class="md:col-span-2">
+            <ProductImageUploader v-model="form[field.key]" />
+          </UFormField>
         </template>
       </FormGrid>
 

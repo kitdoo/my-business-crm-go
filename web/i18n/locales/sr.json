@@ -36,6 +36,11 @@
       "label": "Korisnici",
       "create": "Novi korisnik",
       "edit": "Izmena korisnika"
+    },
+    "products": {
+      "label": "Proizvodi",
+      "create": "Novi proizvod",
+      "edit": "Izmena proizvoda"
     }
   },
   "fields": {
@@ -53,7 +58,14 @@
     "role": "Uloga",
     "password": "Lozinka",
     "currentPassword": "Trenutna lozinka",
-    "newPassword": "Nova lozinka"
+    "newPassword": "Nova lozinka",
+    "sku": "Šifra artikla",
+    "brand": "Brend",
+    "categories": "Kategorije",
+    "details": "Karakteristike",
+    "images": "Slike",
+    "detailKey": "Naziv karakteristike",
+    "detailValue": "Vrednost"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -79,7 +91,11 @@
       "USER_ROLE_ADMIN": "Administrator",
       "USER_ROLE_EMPLOYEE": "Zaposleni",
       "USER_ROLE_GUEST": "Gost",
-      "USER_ROLE_UNSPECIFIED": "Nepoznato"
+      "USER_ROLE_UNSPECIFIED": "Nepoznato",
+      "PRODUCT_STATUS_DRAFT": "Nacrt",
+      "PRODUCT_STATUS_ACTIVE": "Aktivan",
+      "PRODUCT_STATUS_INACTIVE": "Neaktivan",
+      "PRODUCT_STATUS_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {
@@ -95,7 +111,13 @@
     "loading": "Učitavanje...",
     "empty": "Nema podataka",
     "loadMore": "Učitaj još",
-    "none": "Nijedna"
+    "none": "Nijedna",
+    "add": "Dodaj"
+  },
+  "products": {
+    "mainImage": "Glavna",
+    "imageTooLarge": "Fajl je prevelik",
+    "imageUnsupportedType": "Nepodržan tip fajla (samo JPEG, PNG, GIF, WEBP)"
   },
   "login": {
     "title": "Prijava",

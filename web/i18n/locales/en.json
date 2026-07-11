@@ -36,6 +36,11 @@
       "label": "Users",
       "create": "New user",
       "edit": "Edit user"
+    },
+    "products": {
+      "label": "Products",
+      "create": "New product",
+      "edit": "Edit product"
     }
   },
   "fields": {
@@ -53,7 +58,14 @@
     "role": "Role",
     "password": "Password",
     "currentPassword": "Current password",
-    "newPassword": "New password"
+    "newPassword": "New password",
+    "sku": "SKU",
+    "brand": "Brand",
+    "categories": "Categories",
+    "details": "Details",
+    "images": "Images",
+    "detailKey": "Characteristic name",
+    "detailValue": "Value"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -79,7 +91,11 @@
       "USER_ROLE_ADMIN": "Admin",
       "USER_ROLE_EMPLOYEE": "Employee",
       "USER_ROLE_GUEST": "Guest",
-      "USER_ROLE_UNSPECIFIED": "Unspecified"
+      "USER_ROLE_UNSPECIFIED": "Unspecified",
+      "PRODUCT_STATUS_DRAFT": "Draft",
+      "PRODUCT_STATUS_ACTIVE": "Active",
+      "PRODUCT_STATUS_INACTIVE": "Inactive",
+      "PRODUCT_STATUS_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {
@@ -95,7 +111,13 @@
     "loading": "Loading...",
     "empty": "No data",
     "loadMore": "Load more",
-    "none": "None"
+    "none": "None",
+    "add": "Add"
+  },
+  "products": {
+    "mainImage": "Main",
+    "imageTooLarge": "File is too large",
+    "imageUnsupportedType": "Unsupported file type (JPEG, PNG, GIF, WEBP only)"
   },
   "login": {
     "title": "Sign in",

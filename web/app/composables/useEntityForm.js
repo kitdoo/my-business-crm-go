@@ -23,11 +23,22 @@ export function useEntityForm(entityKey, id) {
   // field intentionally absent from the editable form (TD §12.2).
   const record = ref(null)
 
+  // Per-type blank value, so a field's shape is always what its input
+  // component expects — never bare `null` for something a v-model expects
+  // to be an array/object (relationMulti/images want [], keyValueLocalized
+  // wants {}), or the input has to null-guard on every read.
+  function blankValue(field) {
+    if (field.type === 'localizedString') return { values: {} }
+    if (field.type === 'relationMulti' || field.type === 'images') return []
+    if (field.type === 'keyValueLocalized') return {}
+    return null
+  }
+
   function blankForm(cfg) {
     const state = {}
     for (const field of cfg.form.fields) {
       if (field.editOnly) continue
-      state[field.key] = field.type === 'localizedString' ? { values: {} } : null
+      state[field.key] = blankValue(field)
     }
     return state
   }
@@ -38,7 +49,7 @@ export function useEntityForm(entityKey, id) {
       // createOnly fields (e.g. User.password) don't exist on the fetched
       // record and aren't editable — never part of the update FieldMask.
       if (field.createOnly) continue
-      state[field.key] = rec[field.key] ?? (field.type === 'localizedString' ? { values: {} } : null)
+      state[field.key] = rec[field.key] ?? blankValue(field)
     }
     form.value = state
     original.value = state

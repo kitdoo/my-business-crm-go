@@ -36,6 +36,11 @@
       "label": "Пользователи",
       "create": "Новый пользователь",
       "edit": "Редактирование пользователя"
+    },
+    "products": {
+      "label": "Товары",
+      "create": "Новый товар",
+      "edit": "Редактирование товара"
     }
   },
   "fields": {
@@ -53,7 +58,14 @@
     "role": "Роль",
     "password": "Пароль",
     "currentPassword": "Текущий пароль",
-    "newPassword": "Новый пароль"
+    "newPassword": "Новый пароль",
+    "sku": "Артикул",
+    "brand": "Бренд",
+    "categories": "Категории",
+    "details": "Характеристики",
+    "images": "Изображения",
+    "detailKey": "Название характеристики",
+    "detailValue": "Значение"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -79,7 +91,11 @@
       "USER_ROLE_ADMIN": "Администратор",
       "USER_ROLE_EMPLOYEE": "Сотрудник",
       "USER_ROLE_GUEST": "Гость",
-      "USER_ROLE_UNSPECIFIED": "Не указано"
+      "USER_ROLE_UNSPECIFIED": "Не указано",
+      "PRODUCT_STATUS_DRAFT": "Черновик",
+      "PRODUCT_STATUS_ACTIVE": "Активен",
+      "PRODUCT_STATUS_INACTIVE": "Неактивен",
+      "PRODUCT_STATUS_UNSPECIFIED": "Не указано"
     }
   },
   "common": {
@@ -95,7 +111,13 @@
     "loading": "Загрузка...",
     "empty": "Нет данных",
     "loadMore": "Загрузить ещё",
-    "none": "Нет"
+    "none": "Нет",
+    "add": "Добавить"
+  },
+  "products": {
+    "mainImage": "Главное",
+    "imageTooLarge": "Файл слишком большой",
+    "imageUnsupportedType": "Неподдерживаемый тип файла (допустимы JPEG, PNG, GIF, WEBP)"
   },
   "login": {
     "title": "Вход",
