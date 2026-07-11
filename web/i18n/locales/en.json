@@ -65,7 +65,9 @@
     "details": "Details",
     "images": "Images",
     "detailKey": "Characteristic name",
-    "detailValue": "Value"
+    "detailValue": "Value",
+    "priceAmount": "Price",
+    "discountAmount": "Discount"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -112,12 +114,19 @@
     "empty": "No data",
     "loadMore": "Load more",
     "none": "None",
-    "add": "Add"
+    "add": "Add",
+    "openFullPage": "Open full page"
   },
   "products": {
     "mainImage": "Main",
     "imageTooLarge": "File is too large",
     "imageUnsupportedType": "Unsupported file type (JPEG, PNG, GIF, WEBP only)"
+  },
+  "prices": {
+    "tabLabel": "Price",
+    "noPriceYet": "No price set yet",
+    "discount": "Discount",
+    "history": "Price history"
   },
   "login": {
     "title": "Sign in",

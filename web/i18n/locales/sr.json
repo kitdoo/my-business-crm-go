@@ -65,7 +65,9 @@
     "details": "Karakteristike",
     "images": "Slike",
     "detailKey": "Naziv karakteristike",
-    "detailValue": "Vrednost"
+    "detailValue": "Vrednost",
+    "priceAmount": "Cena",
+    "discountAmount": "Popust"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -112,12 +114,19 @@
     "empty": "Nema podataka",
     "loadMore": "Učitaj još",
     "none": "Nijedna",
-    "add": "Dodaj"
+    "add": "Dodaj",
+    "openFullPage": "Otvori celu stranicu"
   },
   "products": {
     "mainImage": "Glavna",
     "imageTooLarge": "Fajl je prevelik",
     "imageUnsupportedType": "Nepodržan tip fajla (samo JPEG, PNG, GIF, WEBP)"
+  },
+  "prices": {
+    "tabLabel": "Cena",
+    "noPriceYet": "Cena još nije podešena",
+    "discount": "Popust",
+    "history": "Istorija cena"
   },
   "login": {
     "title": "Prijava",

@@ -65,7 +65,9 @@
     "details": "Характеристики",
     "images": "Изображения",
     "detailKey": "Название характеристики",
-    "detailValue": "Значение"
+    "detailValue": "Значение",
+    "priceAmount": "Цена",
+    "discountAmount": "Скидка"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -112,12 +114,19 @@
     "empty": "Нет данных",
     "loadMore": "Загрузить ещё",
     "none": "Нет",
-    "add": "Добавить"
+    "add": "Добавить",
+    "openFullPage": "Открыть на отдельной странице"
   },
   "products": {
     "mainImage": "Главное",
     "imageTooLarge": "Файл слишком большой",
     "imageUnsupportedType": "Неподдерживаемый тип файла (допустимы JPEG, PNG, GIF, WEBP)"
+  },
+  "prices": {
+    "tabLabel": "Цена",
+    "noPriceYet": "Цена ещё не задана",
+    "discount": "Скидка",
+    "history": "История цен"
   },
   "login": {
     "title": "Вход",

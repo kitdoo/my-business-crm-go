@@ -7,6 +7,10 @@ export default {
   label: 'entities.products.label',
   icon: 'i-lucide-box',
   route: '/products',
+  // Has a tabbed full-page view (General/Price — TD §12.1) beyond the
+  // generic form: EntityForm's drawer shows a link to it instead of
+  // trying to cram tabs into the drawer.
+  detailPage: true,
   permissions: {
     read: 'products:read',
     create: 'products:create',
