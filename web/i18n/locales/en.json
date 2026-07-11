@@ -41,6 +41,9 @@
       "label": "Products",
       "create": "New product",
       "edit": "Edit product"
+    },
+    "inventory": {
+      "label": "Inventory"
     }
   },
   "fields": {
@@ -67,7 +70,13 @@
     "detailKey": "Characteristic name",
     "detailValue": "Value",
     "priceAmount": "Price",
-    "discountAmount": "Discount"
+    "discountAmount": "Discount",
+    "product": "Product",
+    "warehouse": "Warehouse",
+    "quantity": "Quantity",
+    "updatedAt": "Updated",
+    "minQuantity": "Min quantity",
+    "maxQuantity": "Max quantity"
   },
   "sort": {
     "createdAt": "By creation date",

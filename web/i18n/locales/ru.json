@@ -41,6 +41,9 @@
       "label": "Товары",
       "create": "Новый товар",
       "edit": "Редактирование товара"
+    },
+    "inventory": {
+      "label": "Остатки"
     }
   },
   "fields": {
@@ -67,7 +70,13 @@
     "detailKey": "Название характеристики",
     "detailValue": "Значение",
     "priceAmount": "Цена",
-    "discountAmount": "Скидка"
+    "discountAmount": "Скидка",
+    "product": "Товар",
+    "warehouse": "Склад",
+    "quantity": "Количество",
+    "updatedAt": "Обновлён",
+    "minQuantity": "Мин. количество",
+    "maxQuantity": "Макс. количество"
   },
   "sort": {
     "createdAt": "По дате создания",

@@ -41,6 +41,9 @@
       "label": "Proizvodi",
       "create": "Novi proizvod",
       "edit": "Izmena proizvoda"
+    },
+    "inventory": {
+      "label": "Zalihe"
     }
   },
   "fields": {
@@ -67,7 +70,13 @@
     "detailKey": "Naziv karakteristike",
     "detailValue": "Vrednost",
     "priceAmount": "Cena",
-    "discountAmount": "Popust"
+    "discountAmount": "Popust",
+    "product": "Proizvod",
+    "warehouse": "Magacin",
+    "quantity": "Količina",
+    "updatedAt": "Ažurirano",
+    "minQuantity": "Min. količina",
+    "maxQuantity": "Maks. količina"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",

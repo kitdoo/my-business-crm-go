@@ -1,13 +1,14 @@
 <script setup>
 // TD §12.1 describes a tabbed detail page (General/Price/Inventory/
-// Movements) — the Inventory/Movements tabs land once those entities
-// exist (tasks #10-#11); General + Price are wired up here.
+// Movements) — the Movements tab lands once InventoryMovements exists
+// (task #11).
 const route = useRoute()
 const { t } = useI18n()
 
 const tabItems = computed(() => [
   { label: t('entities.products.edit'), value: 'general' },
   { label: t('prices.tabLabel'), value: 'price' },
+  { label: t('entities.inventory.label'), value: 'inventory' },
 ])
 const activeTab = ref('general')
 </script>
@@ -20,6 +21,7 @@ const activeTab = ref('general')
         <div class="pt-4">
           <EntityForm v-if="item.value === 'general'" entity="products" :id="route.params.id" />
           <ProductPriceTab v-else-if="item.value === 'price'" :product-id="route.params.id" />
+          <EntityDataTable v-else-if="item.value === 'inventory'" entity="inventory" :fixed-filter="{ productId: route.params.id }" />
         </div>
       </template>
     </UTabs>

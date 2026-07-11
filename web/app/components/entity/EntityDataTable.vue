@@ -74,6 +74,7 @@ async function load(reset = true) {
 }
 
 function onEdit(item) {
+  if (!canUpdate.value) return
   emit('edit', item)
 }
 
@@ -123,7 +124,8 @@ onMounted(() => load(true))
           <tr
             v-for="item in items"
             :key="item.id"
-            class="border-b border-neutral-100 hover:bg-neutral-50 cursor-pointer"
+            class="border-b border-neutral-100"
+            :class="canUpdate ? 'hover:bg-neutral-50 cursor-pointer' : ''"
             @click="onEdit(item)"
           >
             <td v-for="col in config.list.columns" :key="col.key" class="py-2 px-3">
@@ -161,7 +163,8 @@ onMounted(() => load(true))
         <div
           v-for="item in items"
           :key="item.id"
-          class="rounded-lg border border-neutral-200 p-3 space-y-1 cursor-pointer"
+          class="rounded-lg border border-neutral-200 p-3 space-y-1"
+          :class="canUpdate ? 'cursor-pointer' : ''"
           @click="onEdit(item)"
         >
           <div v-for="col in config.list.columns" :key="col.key" class="flex justify-between text-sm">

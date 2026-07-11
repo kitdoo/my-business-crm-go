@@ -1,6 +1,7 @@
 import brands from './brands.js'
 import categories from './categories.js'
 import clients from './clients.js'
+import inventory from './inventory.js'
 import partners from './partners.js'
 import products from './products.js'
 import users from './users.js'
@@ -13,6 +14,7 @@ const ENTITIES = {
   brands,
   categories,
   clients,
+  inventory,
   partners,
   products,
   users,

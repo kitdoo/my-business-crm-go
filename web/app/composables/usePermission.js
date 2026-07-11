@@ -17,7 +17,11 @@ export function usePermission() {
   const { user } = useAuth()
 
   function can(permission) {
-    if (!user.value) return false
+    // No permission key at all means the action doesn't exist for this
+    // entity (e.g. Inventory has no create/update/delete on the backend,
+    // full stop) — not "admin can do it via the wildcard". A falsy
+    // permission is never granted, regardless of role.
+    if (!permission || !user.value) return false
     const role = normalizeRole(user.value.role)
     const perms = ROLE_PERMISSIONS[role] ?? []
     return perms.includes('*') || perms.includes(permission)
