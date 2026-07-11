@@ -31,6 +31,11 @@
       "deactivate": "Деактивировать",
       "deactivateConfirmTitle": "Деактивация склада",
       "deactivateConfirmBody": "Склад станет неактивным и будет недоступен для новых операций."
+    },
+    "users": {
+      "label": "Пользователи",
+      "create": "Новый пользователь",
+      "edit": "Редактирование пользователя"
     }
   },
   "fields": {
@@ -43,7 +48,12 @@
     "address": "Адрес",
     "note": "Заметка",
     "commissionPercentage": "Комиссия, %",
-    "parentCategory": "Родительская категория"
+    "parentCategory": "Родительская категория",
+    "lastName": "Фамилия",
+    "role": "Роль",
+    "password": "Пароль",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Новый пароль"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -62,7 +72,14 @@
       "CATEGORY_STATUS_UNSPECIFIED": "Не указано",
       "WAREHOUSE_STATUS_ACTIVE": "Активен",
       "WAREHOUSE_STATUS_INACTIVE": "Неактивен",
-      "WAREHOUSE_STATUS_UNSPECIFIED": "Не указано"
+      "WAREHOUSE_STATUS_UNSPECIFIED": "Не указано",
+      "USER_STATUS_ACTIVE": "Активен",
+      "USER_STATUS_INACTIVE": "Неактивен",
+      "USER_STATUS_UNSPECIFIED": "Не указано",
+      "USER_ROLE_ADMIN": "Администратор",
+      "USER_ROLE_EMPLOYEE": "Сотрудник",
+      "USER_ROLE_GUEST": "Гость",
+      "USER_ROLE_UNSPECIFIED": "Не указано"
     }
   },
   "common": {
@@ -89,6 +106,7 @@
   },
   "topbar": {
     "changePassword": "Сменить пароль",
+    "changePasswordSuccess": "Пароль изменён",
     "logout": "Выйти"
   },
   "errors": {

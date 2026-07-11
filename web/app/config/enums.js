@@ -14,6 +14,14 @@ export const ENUMS = {
     values: ['CATEGORY_STATUS_ACTIVE', 'CATEGORY_STATUS_INACTIVE'],
     labelKey: (value) => `enums.categoryStatus.${value}`,
   },
+  UserStatus: {
+    values: ['USER_STATUS_ACTIVE', 'USER_STATUS_INACTIVE'],
+    labelKey: (value) => `enums.userStatus.${value}`,
+  },
+  UserRole: {
+    values: ['USER_ROLE_ADMIN', 'USER_ROLE_EMPLOYEE', 'USER_ROLE_GUEST'],
+    labelKey: (value) => `enums.userRole.${value}`,
+  },
 }
 
 export function getEnumOptions(enumName) {

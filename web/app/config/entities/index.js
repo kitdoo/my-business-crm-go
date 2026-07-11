@@ -2,6 +2,7 @@ import brands from './brands.js'
 import categories from './categories.js'
 import clients from './clients.js'
 import partners from './partners.js'
+import users from './users.js'
 import warehouses from './warehouses.js'
 
 // Registry of all entities (TD §9.1). Add a new file + one import line
@@ -12,6 +13,7 @@ const ENTITIES = {
   categories,
   clients,
   partners,
+  users,
   warehouses,
 }
 

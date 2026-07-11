@@ -31,6 +31,11 @@
       "deactivate": "Deaktiviraj",
       "deactivateConfirmTitle": "Deaktivacija magacina",
       "deactivateConfirmBody": "Magacin će postati neaktivan i nedostupan za nove operacije."
+    },
+    "users": {
+      "label": "Korisnici",
+      "create": "Novi korisnik",
+      "edit": "Izmena korisnika"
     }
   },
   "fields": {
@@ -43,7 +48,12 @@
     "address": "Adresa",
     "note": "Napomena",
     "commissionPercentage": "Provizija, %",
-    "parentCategory": "Nadređena kategorija"
+    "parentCategory": "Nadređena kategorija",
+    "lastName": "Prezime",
+    "role": "Uloga",
+    "password": "Lozinka",
+    "currentPassword": "Trenutna lozinka",
+    "newPassword": "Nova lozinka"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -62,7 +72,14 @@
       "CATEGORY_STATUS_UNSPECIFIED": "Nepoznato",
       "WAREHOUSE_STATUS_ACTIVE": "Aktivan",
       "WAREHOUSE_STATUS_INACTIVE": "Neaktivan",
-      "WAREHOUSE_STATUS_UNSPECIFIED": "Nepoznato"
+      "WAREHOUSE_STATUS_UNSPECIFIED": "Nepoznato",
+      "USER_STATUS_ACTIVE": "Aktivan",
+      "USER_STATUS_INACTIVE": "Neaktivan",
+      "USER_STATUS_UNSPECIFIED": "Nepoznato",
+      "USER_ROLE_ADMIN": "Administrator",
+      "USER_ROLE_EMPLOYEE": "Zaposleni",
+      "USER_ROLE_GUEST": "Gost",
+      "USER_ROLE_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {
@@ -89,6 +106,7 @@
   },
   "topbar": {
     "changePassword": "Promeni lozinku",
+    "changePasswordSuccess": "Lozinka je promenjena",
     "logout": "Odjava"
   },
   "errors": {

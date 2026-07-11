@@ -109,7 +109,10 @@ async function onDelete() {
 }
 
 function fieldsToRender() {
-  return config.form.fields.filter((f) => !f.editOnly || !isCreate)
+  // editOnly: hidden while creating (e.g. Brand.status — not settable on
+  // Create). createOnly: hidden while editing (e.g. User.password — set
+  // once at Create, changed only through the separate ChangePassword flow).
+  return config.form.fields.filter((f) => (!f.editOnly || !isCreate) && (!f.createOnly || isCreate))
 }
 </script>
 

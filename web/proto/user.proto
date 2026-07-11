@@ -1,12 +1,12 @@
 syntax = "proto3";
 package crm.grpc.user.v1;
 
+import "google/protobuf/field_mask.proto";
 import "common.proto";
 
-// Trimmed mirror of proto/services/grpc/user/v1/user_service.proto —
-// only what the BFF login/session flow needs (see docs TD §4.1). Extend
-// with Create/Update/Delete/List/ChangePassword when the Users entity
-// screens are implemented.
+// Mirrors proto/services/grpc/user/v1/user_service.proto and
+// proto/types/user/user.proto on the backend. Password hash is never
+// exposed on User — it's write-only (Create.password, ChangePassword).
 
 enum UserRole {
   USER_ROLE_UNSPECIFIED = 0;
@@ -37,10 +37,110 @@ message User {
 }
 
 service UsersService {
+  rpc Create (UserCreateRequest) returns (UserCreateResponse) {}
+  rpc Get (UserGetRequest) returns (UserGetResponse) {}
+  rpc List (UsersListRequest) returns (UsersListResponse) {}
+  rpc Update (UserUpdateRequest) returns (UserUpdateResponse) {}
+  rpc Delete (UserDeleteRequest) returns (UserDeleteResponse) {}
+
   rpc Login (UserLoginRequest) returns (UserLoginResponse) {}
+  rpc ChangePassword (UserChangePasswordRequest) returns (UserChangePasswordResponse) {}
 }
 
+message UserGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1;
+  optional Options options = 99;
+}
+
+message UserGetResponse {
+  User user = 1;
+}
+
+message UsersListRequest {
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1;
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 1;
+  optional crm.types.common.Pagination pagination = 2;
+  message Filter {
+    repeated UserStatus statuses = 1;
+    repeated UserRole roles = 2;
+    optional string searchQuery = 3;
+    optional crm.types.common.PeriodFilter createdAt = 4;
+  }
+  optional Filter filter = 3;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message UsersListResponse {
+  repeated User items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message UserCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  crm.types.common.LocalizedString name = 1;
+  crm.types.common.LocalizedString lastName = 2;
+  string phone = 3;
+  string email = 4;
+  crm.types.common.LocalizedString description = 5;
+  UserRole role = 6;
+  // Plaintext — do not send a pre-hashed value.
+  string password = 7;
+  optional Options options = 99;
+}
+
+message UserCreateResponse {
+  User user = 1;
+}
+
+message UserUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1;
+  optional crm.types.common.LocalizedString name = 2;
+  optional crm.types.common.LocalizedString lastName = 3;
+  optional string phone = 4;
+  optional string email = 5;
+  optional crm.types.common.LocalizedString description = 6;
+  optional UserRole role = 7;
+  optional UserStatus status = 8;
+  optional Options options = 99;
+}
+
+message UserUpdateResponse {
+  User user = 1;
+}
+
+message UserDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1;
+  optional Options options = 99;
+}
+
+message UserDeleteResponse {}
+
 message UserLoginRequest {
+  // Phone or email.
   string login = 1;
   string password = 2;
 }
@@ -49,3 +149,11 @@ message UserLoginResponse {
   string token = 1;
   User user = 2;
 }
+
+message UserChangePasswordRequest {
+  string id = 1;
+  string currentPassword = 2;
+  string newPassword = 3;
+}
+
+message UserChangePasswordResponse {}

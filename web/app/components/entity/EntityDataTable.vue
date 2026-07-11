@@ -9,6 +9,7 @@ import LocalizedText from '~/components/display/LocalizedText.vue'
 import StatusBadge from '~/components/display/StatusBadge.vue'
 import DateLabel from '~/components/display/DateLabel.vue'
 import RelationLabel from '~/components/display/RelationLabel.vue'
+import EnumLabel from '~/components/display/EnumLabel.vue'
 import { STATUS_COLOR_MAP } from '~/design/tokens.js'
 
 const props = defineProps({
@@ -37,7 +38,7 @@ const canUpdate = computed(() => can(config.permissions.update))
 const canDelete = computed(() => can(config.permissions.delete))
 const showActions = computed(() => canUpdate.value || canDelete.value)
 
-const COMPONENTS = { LocalizedText, StatusBadge, DateLabel, RelationLabel }
+const COMPONENTS = { LocalizedText, StatusBadge, DateLabel, RelationLabel, EnumLabel }
 
 function columnComponent(col) {
   return COMPONENTS[col.component]
@@ -47,6 +48,7 @@ function columnProps(col, item) {
   if (col.component === 'LocalizedText') return { value: item[col.key] }
   if (col.component === 'DateLabel') return { value: item[col.key] }
   if (col.component === 'RelationLabel') return { value: item[col.key], relation: col.relation }
+  if (col.component === 'EnumLabel') return { value: item[col.key] }
   return {}
 }
 function plainValue(col, item) {

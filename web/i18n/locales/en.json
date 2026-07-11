@@ -31,6 +31,11 @@
       "deactivate": "Deactivate",
       "deactivateConfirmTitle": "Deactivate warehouse",
       "deactivateConfirmBody": "The warehouse will become inactive and unavailable for new operations."
+    },
+    "users": {
+      "label": "Users",
+      "create": "New user",
+      "edit": "Edit user"
     }
   },
   "fields": {
@@ -43,7 +48,12 @@
     "address": "Address",
     "note": "Note",
     "commissionPercentage": "Commission, %",
-    "parentCategory": "Parent category"
+    "parentCategory": "Parent category",
+    "lastName": "Last name",
+    "role": "Role",
+    "password": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -62,7 +72,14 @@
       "CATEGORY_STATUS_UNSPECIFIED": "Unspecified",
       "WAREHOUSE_STATUS_ACTIVE": "Active",
       "WAREHOUSE_STATUS_INACTIVE": "Inactive",
-      "WAREHOUSE_STATUS_UNSPECIFIED": "Unspecified"
+      "WAREHOUSE_STATUS_UNSPECIFIED": "Unspecified",
+      "USER_STATUS_ACTIVE": "Active",
+      "USER_STATUS_INACTIVE": "Inactive",
+      "USER_STATUS_UNSPECIFIED": "Unspecified",
+      "USER_ROLE_ADMIN": "Admin",
+      "USER_ROLE_EMPLOYEE": "Employee",
+      "USER_ROLE_GUEST": "Guest",
+      "USER_ROLE_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {
@@ -89,6 +106,7 @@
   },
   "topbar": {
     "changePassword": "Change password",
+    "changePasswordSuccess": "Password changed",
     "logout": "Log out"
   },
   "errors": {

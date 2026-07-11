@@ -35,6 +35,9 @@ export function useEntityForm(entityKey, id) {
   function applyRecord(rec) {
     const state = {}
     for (const field of config.form.fields) {
+      // createOnly fields (e.g. User.password) don't exist on the fetched
+      // record and aren't editable — never part of the update FieldMask.
+      if (field.createOnly) continue
       state[field.key] = rec[field.key] ?? (field.type === 'localizedString' ? { values: {} } : null)
     }
     form.value = state
@@ -71,7 +74,7 @@ export function useEntityForm(entityKey, id) {
         return record
       }
 
-      const editableKeys = config.form.fields.map((f) => f.key)
+      const editableKeys = config.form.fields.filter((f) => !f.createOnly).map((f) => f.key)
       const mask = buildUpdateMask(original.value, form.value, editableKeys)
       if (mask.length === 0) return original.value
 

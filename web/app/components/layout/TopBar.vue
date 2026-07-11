@@ -1,14 +1,16 @@
 <script setup>
 // Turquoise header (TD §8.1): logo -> dashboard, language switcher, profile
-// menu (change password / logout). Hamburger on < lg opens SideMenu.
+// menu (change password modal / logout). Hamburger on < lg opens SideMenu.
 const { t, locale, locales, setLocale } = useI18n()
 const { user, logout } = useAuth()
 const { menuOpen } = useLayoutState()
 const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 
-// "Change password" lands with the Users entity iteration — not wired yet.
+const changePasswordOpen = ref(false)
+
 const profileItems = computed(() => [
+  [{ label: t('topbar.changePassword'), icon: 'i-lucide-key-round', onSelect: () => (changePasswordOpen.value = true) }],
   [{ label: t('topbar.logout'), icon: 'i-lucide-log-out', onSelect: onLogout }],
 ])
 
@@ -48,5 +50,7 @@ async function onLogout() {
         </UButton>
       </UDropdownMenu>
     </div>
+
+    <ChangePasswordModal v-model:open="changePasswordOpen" />
   </header>
 </template>
