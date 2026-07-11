@@ -44,8 +44,9 @@ func permission(resource, action string) string { return resource + ":" + action
 // wildcard (see Table.Allowed) — fail closed for anything new that lands
 // here without an explicit entry.
 //
-// Login is intentionally absent: the auth interceptor exempts it outright
-// (see auth.New), so it never reaches the RBAC check.
+// Login, ProductsService.List, PricesService.Get and CategoriesService.List
+// are intentionally absent: the auth interceptor exempts them outright (see
+// auth.New), so they never reach the RBAC check.
 var permissions = map[string]string{
 	brandsvcpb.BrandsService_Create_FullMethodName: permission("brands", actionCreate),
 	brandsvcpb.BrandsService_Get_FullMethodName:    permission("brands", actionRead),

@@ -1,0 +1,144 @@
+{
+  "nav": {
+    "katalog": "Catalog",
+    "postaniDiler": "Become a dealer",
+    "zavrseniProjekti": "Completed projects",
+    "kontakt": "Contact",
+    "adminLogin": "Admin login",
+    "langSwitch": "Language",
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "footer": {
+    "about": "About",
+    "aboutPhomi": "About PHOMI",
+    "aboutTomStudio": "About Tom Studio",
+    "ekoPaneli": "Eco panels",
+    "solarniPaneli": "Solar facade panels",
+    "displejPaneli": "Display panels",
+    "usefulLinks": "Useful links",
+    "scrollTop": "Back to top"
+  },
+  "home": {
+    "hero": {
+      "title": "A new generation of PHOMI facade and wall panels",
+      "subtitle": "Eco-friendly, lightweight and durable cladding for every building."
+    },
+    "about": {
+      "title": "A new generation of PHOMI facade and wall panels",
+      "text": "Flexible, eco-friendly panels that combine facade, solar and digital systems.",
+      "text2": "A solution for modern facades, interiors and renovation projects where installation speed, low weight and durability are the key factors.",
+      "text3": "Enables a modern building look with a simpler build process than traditional materials."
+    },
+    "worldPresence": {
+      "title": "PHOMI around the world",
+      "subtitle": "Global development of flexible facade and wall systems since 2008",
+      "intro1": "PHOMI develops innovative flexible facade and wall claddings that combine the natural aesthetics of stone, wood, concrete and other textures with low weight, easy installation and material durability. It's a modern alternative to traditional stone cladding, ventilated facades and classic ceramic systems.",
+      "intro2": "The material is ideal for facades, interiors, building renovations, hotels, commercial spaces and modern residential projects, where speed of execution, sustainability and aesthetics are the key factors.",
+      "projects": "Completed projects",
+      "dealers": "Points of sale worldwide",
+      "countries": "Countries",
+      "patents": "Patents",
+      "growth": {
+        "title": "Continuous international growth",
+        "text": "Since the beginning of PHOMI technology development, the company has continuously expanded its presence on the international market through a distribution network in Europe, Asia and North America. Today PHOMI systems are used in China, India, Canada, Russia, Belarus, the European Union and the Balkans."
+      },
+      "scale": {
+        "title": "Large-scale projects",
+        "text": "PHOMI and its partners deliver projects of every size — from private houses and interiors to large commercial buildings ranging from 10,000 to 200,000 m². Years of development and international presence confirm the system's quality and the trust of investors worldwide."
+      }
+    },
+    "advantages": {
+      "title": "Key advantages",
+      "versatility": { "title": "Versatility of PHOMI", "text": "Wall panels for facades and interiors of every type of building. Facade, solar and display panels in one system." },
+      "practical": { "title": "Light and practical", "text": "MCM materials are stronger than ceramic tiles or facade bricks. Weighing from 3.5 kg/m², lighter than traditional materials." },
+      "designs": { "title": "Wide range of designs", "text": "Over 4,000 texture, format and color variations available. Panels can be customized and made to measure, according to requirements." },
+      "resistance": { "title": "Fire and moisture resistant", "text": "A high degree of resistance to fire, moisture and all weather conditions. Suitable for cladding demanding surfaces such as facades, fireplaces and pools." },
+      "eco": { "title": "Eco-friendly", "text": "No chemicals. 100% modified clay. 15 eco-certificates across Europe, the USA, China and Russia. Over 30 patents." },
+      "install": { "title": "Fast and easy installation", "text": "Installation requires no additional substructure or specialized tools. Panels simply glue onto various surfaces." }
+    },
+    "whyPhomi": {
+      "title": "Why PHOMI?",
+      "cta": "Materials catalog"
+    },
+    "dezenStats": {
+      "title": "We offer over",
+      "stone": "Stone designs",
+      "wood": "Wood designs",
+      "woven": "Woven designs",
+      "brick": "Brick designs",
+      "cta": "See all projects"
+    },
+    "projectsPreview": {
+      "title": "Examples of completed projects",
+      "cta": "See all projects"
+    },
+    "becomePartner": {
+      "title": "Become a PARTNER",
+      "text": "We are actively growing our distributor network in Serbia and the region.",
+      "text2": "Join us and grow the market together with us.",
+      "cta": "Contact us"
+    }
+  },
+  "catalog": {
+    "allCategories": "All categories",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "empty": "No products available right now.",
+    "loadMore": "Load more",
+    "contactCta": "Contact us about this product",
+    "contactPrefill": "I'm interested in: {sku} — {name}"
+  },
+  "dealer": {
+    "intro": "Fill in the form and our team will contact you about partnership.",
+    "thanksTitle": "Thank you for applying!",
+    "thanksText": "Your request has been received. We will contact you soon."
+  },
+  "contact": {
+    "thanks": "Thank you! Your message has been sent."
+  },
+  "forms": {
+    "submit": "Send",
+    "submitError": "Something went wrong. Please try again.",
+    "validationError": "Please check the fields.",
+    "dealer": {
+      "companyName": "Company name",
+      "contactName": "Contact person",
+      "phone": "Phone",
+      "email": "Email",
+      "city": "City / region",
+      "message": "Message"
+    },
+    "contact": {
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Message"
+    }
+  },
+  "about": {
+    "title": "About us",
+    "phomiText": "[Replace this text with the PHOMI company description.]",
+    "tomStudioText": "[Replace this text with the Tom Studio 021 doo description.]"
+  },
+  "common": {
+    "backHome": "Back to home"
+  },
+  "projects": {
+    "items": {
+      "p1": "Family house — [location]",
+      "p2": "Commercial building — [location]",
+      "p3": "Weekend house — [location]",
+      "p4": "Apartment building — [location]"
+    }
+  },
+  "seo": {
+    "home": { "title": "PHOMI Serbia — Facade and wall panels", "description": "A new generation of PHOMI facade and wall panels — eco-friendly, easy to install, fire and moisture resistant." },
+    "katalog": { "title": "Materials catalog — PHOMI Serbia", "description": "Browse the full catalog of PHOMI facade and wall panels." },
+    "dealer": { "title": "Become a dealer — PHOMI Serbia", "description": "Join the PHOMI dealer network." },
+    "dealerThanks": { "title": "Thank you — PHOMI Serbia" },
+    "contact": { "title": "Contact — PHOMI Serbia", "description": "Contact the PHOMI Serbia team." },
+    "projects": { "title": "Completed projects — PHOMI Serbia", "description": "Examples of completed projects with PHOMI panels." },
+    "about": { "title": "About us — PHOMI Serbia", "description": "Information about PHOMI and Tom Studio 021 doo." }
+  }
+}

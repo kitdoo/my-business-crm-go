@@ -21,6 +21,9 @@ import (
 
 	"github.com/altessa-s/go-atlas/transport/grpc/interceptors"
 
+	categorysvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/category/v1"
+	pricesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/price/v1"
+	productsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product/v1"
 	usersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/user/v1"
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
@@ -31,16 +34,29 @@ import (
 type contextKey struct{}
 
 // UserFromContext returns the caller authenticated by this interceptor, or
-// (nil, false) for methods exempted from auth (Login, plus the gRPC
-// reflection/health probes go-atlas exempts by default).
+// (nil, false) for methods exempted from auth (Login, the public-catalog
+// read methods, plus the gRPC reflection/health probes go-atlas exempts by
+// default).
 func UserFromContext(ctx context.Context) (*entities.User, bool) {
 	u, ok := ctx.Value(contextKey{}).(*entities.User)
 	return u, ok
 }
 
 // New builds the gRPC auth interceptor. Login is exempt (it is how a token
-// is obtained in the first place); every other RPC requires a valid bearer
-// token resolving to an active user.
+// is obtained in the first place). ProductsService.List, PricesService.Get
+// and CategoriesService.List are also exempt — they back the public
+// website's catalog (web-public/), which has anonymous visitors and no
+// login of its own; see web-public/README.md. Exempting these is safe only
+// because the gRPC port is never reachable from outside the two Nitro BFFs
+// (web/, web-public/) — it is not exposed to the public internet. An
+// exempted method also skips the RBAC interceptor (see
+// internal/transports/grpc/interceptors/rbac.authorize), so it must not
+// leak anything beyond what an anonymous website visitor should see; the
+// public catalog server route is responsible for always forcing a
+// statuses:[ACTIVE] filter server-side (see
+// web-public/server/utils/catalogClient.js) since nothing here restricts
+// what an anonymous caller passes as filter. Every other RPC requires a
+// valid bearer token resolving to an active user.
 func New(users usersvc.Service) interceptors.ServerInterceptor {
 	return atlasauth.ServerInterceptor(
 		atlasauth.WithAuthFn(atlasauth.AuthFunc(func(ctx context.Context, req atlasauth.Request) (any, error) {
@@ -69,6 +85,11 @@ func New(users usersvc.Service) interceptors.ServerInterceptor {
 			}
 			return context.WithValue(ctx, contextKey{}, u), nil
 		})),
-		atlasauth.WithIgnoreMethods(usersvcpb.UsersService_Login_FullMethodName),
+		atlasauth.WithIgnoreMethods(
+			usersvcpb.UsersService_Login_FullMethodName,
+			productsvcpb.ProductsService_List_FullMethodName,
+			pricesvcpb.PricesService_Get_FullMethodName,
+			categorysvcpb.CategoriesService_List_FullMethodName,
+		),
 	)
 }

@@ -1,0 +1,145 @@
+{
+  "nav": {
+    "katalog": "Katalog",
+    "postaniDiler": "Postani diler",
+    "zavrseniProjekti": "Završeni projekti",
+    "kontakt": "Kontakt",
+    "adminLogin": "Prijava za administratore",
+    "langSwitch": "Jezik",
+    "menu": "Meni",
+    "close": "Zatvori"
+  },
+  "footer": {
+    "about": "O nama",
+    "aboutPhomi": "O PHOMI kompaniji",
+    "aboutTomStudio": "O Tom Studiu",
+    "ekoPaneli": "Eko paneli",
+    "solarniPaneli": "Solarni fasadni paneli",
+    "displejPaneli": "Displej paneli",
+    "usefulLinks": "Korisni linkovi",
+    "scrollTop": "Nazad na vrh"
+  },
+  "home": {
+    "hero": {
+      "title": "Nova generacija fasadnih i zidnih obloga PHOMI",
+      "subtitle": "Ekološki prihvatljive, lake i izdržljive obloge za svaki objekat."
+    },
+    "about": {
+      "title": "Nova generacija fasadnih i zidnih obloga PHOMI",
+      "text": "Fleksibilni i ekološki paneli koji objedinjuju fasadne, solarne i digitalne sisteme.",
+      "text2": "Rešenje za savremene fasade, enterijere i projekte renoviranja gde su brzina ugradnje, mala težina i dugotrajnost ključni faktori.",
+      "text3": "Omogućava moderan izgled objekta uz jednostavniju realizaciju u odnosu na tradicionalne materijale."
+    },
+    "worldPresence": {
+      "title": "PHOMI u svetu",
+      "subtitle": "Globalni razvoj fleksibilnih fasadnih i zidnih sistema od 2008. godine",
+      "intro1": "PHOMI razvija inovativne fleksibilne fasadne i zidne obloge koje kombinuju prirodnu estetiku kamena, drveta, betona i drugih tekstura sa malom težinom, jednostavnom ugradnjom i dugotrajnošću materijala. Predstavlja savremenu alternativu tradicionalnim kamenim oblogama, ventilisanim fasadama i klasičnim keramičkim sistemima.",
+      "intro2": "Materijal je idealan za fasade, enterijere, renovacije objekata, hotele, poslovne prostore i savremene stambene projekte gde su brzina izvođenja, održivost i estetika ključni faktori.",
+      "projects": "Realizovanih projekata",
+      "dealers": "Prodajnih mesta u svetu",
+      "countries": "Zemalja",
+      "patents": "Patenata",
+      "growth": {
+        "title": "Kontinuirani međunarodni rast",
+        "text": "Od početka razvoja PHOMI tehnologije, kompanija kontinuirano širi prisustvo na međunarodnom tržištu kroz distributivnu mrežu u Evropi, Aziji i Severnoj Americi. Danas se PHOMI sistemi koriste u Kini, Indiji, Kanadi, Rusiji, Belorusiji, Evropskoj uniji i regionu Balkana."
+      },
+      "scale": {
+        "title": "Projekti velikih razmera",
+        "text": "PHOMI i njegovi partneri realizuju projekte različitih veličina — od privatnih kuća i enterijera do velikih komercijalnih objekata površine od 10.000 do 200.000 m². Dugogodišnji razvoj i međunarodno prisustvo potvrđuju kvalitet sistema i poverenje investitora širom sveta."
+      }
+    },
+    "advantages": {
+      "title": "Ključne prednosti",
+      "versatility": { "title": "Svestranost PHOMIJA", "text": "Zidni paneli za fasade i enterijere svih vrsta objekata. Fasadni, solarni i displej paneli u jednom sistemu." },
+      "practical": { "title": "Lak i praktičan", "text": "MCM materijali su jači od keramičkih pločica ili fasadnih opeka. Težine od 3,5 kg/m² što je lakše od tradicionalnih materijala." },
+      "designs": { "title": "Veliki izbor dezena", "text": "Dostupno je više od 4000 varijacija tekstura, formata i boja. Paneli se mogu prilagoditi i izraditi po meri, u skladu sa zahtevima." },
+      "resistance": { "title": "Otpornost na vatru i vlagu", "text": "Visok stepen otpornosti na vatru, vlagu i sve atmosferske uticaje. Pogodni za oblaganje zahtevnih površina fasada, kamina i bazena." },
+      "eco": { "title": "Ekološki prihvatljivo", "text": "Bez hemikalija. 100% modifikovana glina. 15 eko-sertifikata u Evropi, SAD-u, Kini i Rusiji. Više od 30 patenata." },
+      "install": { "title": "Brza i laka instalacija", "text": "Ugradnja ne zahteva dodatnu potkonstrukciju niti specijalizovane alate. Paneli se jednostavno lepe na različite podloge." }
+    },
+    "whyPhomi": {
+      "title": "Zašto PHOMI?",
+      "cta": "Katalog materijala"
+    },
+    "dezenStats": {
+      "title": "Posedujemo preko",
+      "stone": "Dezena kamena",
+      "wood": "Dezena drveta",
+      "woven": "Pletenih dezena",
+      "brick": "Dezena opeke",
+      "cta": "Pogledaj sve projekte"
+    },
+    "projectsPreview": {
+      "title": "Primeri izvedenih projekata",
+      "cta": "Pogledaj sve projekte"
+    },
+    "becomePartner": {
+      "title": "Postani PARTNER",
+      "text": "Aktivno razvijamo mrežu distributera u Srbiji i regionu.",
+      "text2": "Pridružite se i razvijajte tržište zajedno sa nama.",
+      "cta": "Kontaktiraj nas"
+    }
+  },
+  "catalog": {
+    "allCategories": "Sve kategorije",
+    "available": "Dostupno",
+    "unavailable": "Nije dostupno",
+    "empty": "Trenutno nema dostupnih proizvoda.",
+    "loadMore": "Učitaj još",
+    "contactCta": "Kontaktirajte nas povodom ovog proizvoda",
+    "contactPrefill": "Interesuje me: {sku} — {name}"
+  },
+  "dealer": {
+    "intro": "Popunite formu i naš tim će vas kontaktirati u vezi saradnje.",
+    "thanksTitle": "Hvala na prijavi!",
+    "thanksText": "Vaš zahtev je primljen. Kontaktiraćemo vas uskoro.",
+    "form": {}
+  },
+  "contact": {
+    "thanks": "Hvala! Vaša poruka je poslata."
+  },
+  "forms": {
+    "submit": "Pošalji",
+    "submitError": "Greška pri slanju. Pokušajte ponovo.",
+    "validationError": "Proverite unesene podatke.",
+    "dealer": {
+      "companyName": "Naziv kompanije",
+      "contactName": "Kontakt osoba",
+      "phone": "Telefon",
+      "email": "Email",
+      "city": "Grad / region",
+      "message": "Poruka"
+    },
+    "contact": {
+      "name": "Ime i prezime",
+      "email": "Email",
+      "phone": "Telefon",
+      "message": "Poruka"
+    }
+  },
+  "about": {
+    "title": "O nama",
+    "phomiText": "[Zamenite ovaj tekst opisom PHOMI kompanije.]",
+    "tomStudioText": "[Zamenite ovaj tekst opisom Tom Studio 021 doo.]"
+  },
+  "common": {
+    "backHome": "Nazad na početnu"
+  },
+  "projects": {
+    "items": {
+      "p1": "Porodična kuća — [lokacija]",
+      "p2": "Poslovni objekat — [lokacija]",
+      "p3": "Vikendica — [lokacija]",
+      "p4": "Stambena zgrada — [lokacija]"
+    }
+  },
+  "seo": {
+    "home": { "title": "PHOMI Srbija — Fasadne i zidne obloge", "description": "Nova generacija fasadnih i zidnih obloga PHOMI — ekološki prihvatljive, lake za ugradnju, otporne na vatru i vlagu." },
+    "katalog": { "title": "Katalog materijala — PHOMI Srbija", "description": "Pregledajte kompletan katalog PHOMI fasadnih i zidnih obloga." },
+    "dealer": { "title": "Postani diler — PHOMI Srbija", "description": "Pridružite se mreži PHOMI dilera." },
+    "dealerThanks": { "title": "Hvala — PHOMI Srbija" },
+    "contact": { "title": "Kontakt — PHOMI Srbija", "description": "Kontaktirajte PHOMI Srbija tim." },
+    "projects": { "title": "Završeni projekti — PHOMI Srbija", "description": "Primeri izvedenih projekata sa PHOMI oblogama." },
+    "about": { "title": "O nama — PHOMI Srbija", "description": "Informacije o PHOMI kompaniji i Tom Studio 021 doo." }
+  }
+}

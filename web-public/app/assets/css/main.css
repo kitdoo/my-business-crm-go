@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/*
+ * Tailwind v4 reads theme colors from CSS, not JS — mirror of
+ * app/design/tokens.js color.brand. Keep in sync with web/assets/css/main.css.
+ */
+@theme static {
+  --color-brand-50: #f4f9fa;
+  --color-brand-100: #e8f3f5;
+  --color-brand-200: #d0e6ea;
+  --color-brand-300: #b7dbe1;
+  --color-brand-400: #9ed0d8;
+  --color-brand-500: #85c5cf;
+  --color-brand-600: #6ba9b2;
+  --color-brand-700: #558790;
+  --color-brand-800: #3f656c;
+  --color-brand-900: #2a4448;
+}
+
+body {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+:root,
+.light {
+  --ui-bg: #ffffff;
+  --ui-text-highlighted: #000000;
+  --ui-border-accented: #000000;
+  --ui-radius: 0.5rem;
+}
+
+/* Hero / section headings — public-site-only, see tokens.typography.hero. */
+.text-hero {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+@media (min-width: 1024px) {
+  .text-hero { font-size: 4rem; }
+}
+@media (min-width: 1280px) {
+  .text-hero { font-size: 5rem; }
+}
