@@ -52,4 +52,9 @@ export const STATUS_COLOR_MAP = {
     BRAND_STATUS_INACTIVE: 'inactive',
     BRAND_STATUS_UNSPECIFIED: 'inactive',
   },
+  partner: {
+    PARTNER_STATUS_ACTIVE: 'active',
+    PARTNER_STATUS_INACTIVE: 'inactive',
+    PARTNER_STATUS_UNSPECIFIED: 'inactive',
+  },
 }

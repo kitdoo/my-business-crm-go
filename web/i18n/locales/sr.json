@@ -13,6 +13,11 @@
       "label": "Klijenti",
       "create": "Novi klijent",
       "edit": "Izmena klijenta"
+    },
+    "partners": {
+      "label": "Partneri",
+      "create": "Novi partner",
+      "edit": "Izmena partnera"
     }
   },
   "fields": {
@@ -23,7 +28,8 @@
     "phone": "Telefon",
     "email": "Email",
     "address": "Adresa",
-    "note": "Napomena"
+    "note": "Napomena",
+    "commissionPercentage": "Provizija, %"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -33,7 +39,10 @@
     "status": {
       "BRAND_STATUS_ACTIVE": "Aktivan",
       "BRAND_STATUS_INACTIVE": "Neaktivan",
-      "BRAND_STATUS_UNSPECIFIED": "Nepoznato"
+      "BRAND_STATUS_UNSPECIFIED": "Nepoznato",
+      "PARTNER_STATUS_ACTIVE": "Aktivan",
+      "PARTNER_STATUS_INACTIVE": "Neaktivan",
+      "PARTNER_STATUS_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {

@@ -6,6 +6,10 @@ export const ENUMS = {
     values: ['BRAND_STATUS_ACTIVE', 'BRAND_STATUS_INACTIVE'],
     labelKey: (value) => `enums.brandStatus.${value}`,
   },
+  PartnerStatus: {
+    values: ['PARTNER_STATUS_ACTIVE', 'PARTNER_STATUS_INACTIVE'],
+    labelKey: (value) => `enums.partnerStatus.${value}`,
+  },
 }
 
 export function getEnumOptions(enumName) {

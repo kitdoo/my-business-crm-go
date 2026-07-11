@@ -13,6 +13,11 @@
       "label": "Клиенты",
       "create": "Новый клиент",
       "edit": "Редактирование клиента"
+    },
+    "partners": {
+      "label": "Партнёры",
+      "create": "Новый партнёр",
+      "edit": "Редактирование партнёра"
     }
   },
   "fields": {
@@ -23,7 +28,8 @@
     "phone": "Телефон",
     "email": "Email",
     "address": "Адрес",
-    "note": "Заметка"
+    "note": "Заметка",
+    "commissionPercentage": "Комиссия, %"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -33,7 +39,10 @@
     "status": {
       "BRAND_STATUS_ACTIVE": "Активен",
       "BRAND_STATUS_INACTIVE": "Неактивен",
-      "BRAND_STATUS_UNSPECIFIED": "Не указано"
+      "BRAND_STATUS_UNSPECIFIED": "Не указано",
+      "PARTNER_STATUS_ACTIVE": "Активен",
+      "PARTNER_STATUS_INACTIVE": "Неактивен",
+      "PARTNER_STATUS_UNSPECIFIED": "Не указано"
     }
   },
   "common": {

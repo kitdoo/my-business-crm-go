@@ -13,6 +13,11 @@
       "label": "Clients",
       "create": "New client",
       "edit": "Edit client"
+    },
+    "partners": {
+      "label": "Partners",
+      "create": "New partner",
+      "edit": "Edit partner"
     }
   },
   "fields": {
@@ -23,7 +28,8 @@
     "phone": "Phone",
     "email": "Email",
     "address": "Address",
-    "note": "Note"
+    "note": "Note",
+    "commissionPercentage": "Commission, %"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -33,7 +39,10 @@
     "status": {
       "BRAND_STATUS_ACTIVE": "Active",
       "BRAND_STATUS_INACTIVE": "Inactive",
-      "BRAND_STATUS_UNSPECIFIED": "Unspecified"
+      "BRAND_STATUS_UNSPECIFIED": "Unspecified",
+      "PARTNER_STATUS_ACTIVE": "Active",
+      "PARTNER_STATUS_INACTIVE": "Inactive",
+      "PARTNER_STATUS_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {

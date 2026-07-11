@@ -105,6 +105,14 @@ function fieldsToRender() {
               :maxlength="field.maxLength"
             />
           </UFormField>
+          <UFormField
+            v-else-if="field.type === 'number'"
+            :label="t(field.label)"
+            :required="field.required"
+            :error="fieldErrors[field.key]"
+          >
+            <UInputNumber v-model="form[field.key]" class="w-full" :min="field.min" :max="field.max" />
+          </UFormField>
         </template>
       </FormGrid>
 
