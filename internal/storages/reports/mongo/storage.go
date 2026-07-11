@@ -200,14 +200,25 @@ func (s *Storage) GetPopularProducts(ctx context.Context, period *entities.Perio
 		{{Key: "$group", Value: bson.M{
 			"_id":          "$" + fieldItemProductID,
 			"quantitySold": bson.M{"$sum": "$" + fieldItemQuantity},
-			"totalAmount": bson.M{"$sum": bson.M{"$divide": bson.A{
+			// $divide always returns a double in MongoDB's aggregation
+			// pipeline, even when both operands are integers — decoding
+			// that into the int64 TotalAmount field below fails outright
+			// whenever the division isn't exact (driver refuses the
+			// lossy float64->int64 truncation). $trunc dividing before
+			// summing matches the truncating integer division the sale
+			// service itself uses to compute a line total
+			// (internal/services/sale/sale/service.go), then $toLong
+			// converts the now-integral double into a real BSON Long so
+			// $sum accumulates as Long throughout instead of drifting
+			// back to double.
+			"totalAmount": bson.M{"$sum": bson.M{"$toLong": bson.M{"$trunc": bson.M{"$divide": bson.A{
 				bson.M{"$multiply": bson.A{
 					"$" + fieldItemPriceAmount,
 					"$" + fieldItemQuantity,
 					bson.M{"$subtract": bson.A{100, "$" + fieldItemDiscountPercent}},
 				}},
 				100,
-			}}},
+			}}}}},
 		}}},
 		{{Key: "$sort", Value: bson.M{"quantitySold": -1}}},
 		{{Key: "$limit", Value: int64(limit)}},
