@@ -48,6 +48,20 @@
     "inventoryMovements": {
       "label": "Kretanja zaliha",
       "create": "Novo kretanje"
+    },
+    "sales": {
+      "label": "Prodaje",
+      "create": "Nova prodaja",
+      "newClient": "Kreiraj novog klijenta",
+      "addItem": "Dodaj stavku",
+      "lineTotal": "Iznos stavke",
+      "detailTitle": "Prodaja",
+      "items": "Stavke",
+      "changeStatus": "Promeni status",
+      "cancel": "Otkaži prodaju",
+      "cancelConfirmTitle": "Otkazivanje prodaje",
+      "cancelConfirmBody": "Zaliha će automatski biti vraćena u magacin.",
+      "cancelReason": "Razlog"
     }
   },
   "fields": {
@@ -82,7 +96,11 @@
     "minQuantity": "Min. količina",
     "maxQuantity": "Maks. količina",
     "movementType": "Tip kretanja",
-    "comment": "Komentar"
+    "comment": "Komentar",
+    "client": "Klijent",
+    "partner": "Partner",
+    "totalAmount": "Ukupno",
+    "discountPercentage": "Popust, %"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -118,7 +136,14 @@
       "MOVEMENT_TYPE_WRITE_OFF": "Otpis",
       "MOVEMENT_TYPE_ADJUSTMENT": "Korekcija",
       "MOVEMENT_TYPE_TRANSFER": "Transfer",
-      "MOVEMENT_TYPE_UNSPECIFIED": "Nepoznato"
+      "MOVEMENT_TYPE_UNSPECIFIED": "Nepoznato",
+      "SALE_STATUS_DRAFT": "Nacrt",
+      "SALE_STATUS_PAID": "Plaćeno",
+      "SALE_STATUS_SHIPPED": "Poslato",
+      "SALE_STATUS_COMPLETED": "Završeno",
+      "SALE_STATUS_CANCELLED": "Otkazano",
+      "SALE_STATUS_REFUNDED": "Refundirano",
+      "SALE_STATUS_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {
@@ -136,7 +161,9 @@
     "loadMore": "Učitaj još",
     "none": "Nijedna",
     "add": "Dodaj",
-    "openFullPage": "Otvori celu stranicu"
+    "openFullPage": "Otvori celu stranicu",
+    "next": "Dalje",
+    "back": "Nazad"
   },
   "products": {
     "mainImage": "Glavna",

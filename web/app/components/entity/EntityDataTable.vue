@@ -4,17 +4,22 @@
 // a column here means editing one entity config file, not this component.
 // Row click / the edit icon both emit 'edit' so the host (EntityListPage)
 // can open the left-side edit drawer; delete is handled locally with a
-// confirm dialog and reloads the table in place.
+// confirm dialog and reloads the table in place. For entities with no
+// generic edit at all (Sale, TD §12.3 — items immutable, status moves
+// only through UpdateStatus/Cancel), pass `rowTo` instead: row click
+// navigates to a full page rather than emitting 'edit'.
 import LocalizedText from '~/components/display/LocalizedText.vue'
 import StatusBadge from '~/components/display/StatusBadge.vue'
 import DateLabel from '~/components/display/DateLabel.vue'
 import RelationLabel from '~/components/display/RelationLabel.vue'
 import EnumLabel from '~/components/display/EnumLabel.vue'
+import MoneyAmountLabel from '~/components/display/MoneyAmountLabel.vue'
 import { STATUS_COLOR_MAP } from '~/design/tokens.js'
 
 const props = defineProps({
   entity: { type: String, required: true },
   fixedFilter: { type: Object, default: () => ({}) },
+  rowTo: { type: Function, default: null }, // (item) => route path
 })
 const emit = defineEmits(['edit'])
 
@@ -34,11 +39,15 @@ const deleting = ref(false)
 const confirmDeleteOpen = ref(false)
 const pendingDelete = ref(null)
 
-const canUpdate = computed(() => can(config.permissions.update))
+// canUpdate gates the pencil icon / drawer-edit click; when `rowTo` is
+// set (Sale) there's no drawer to open regardless of the update
+// permission, so the pencil never renders — the row click already does
+// full-page navigation instead.
+const canUpdate = computed(() => !props.rowTo && can(config.permissions.update))
 const canDelete = computed(() => can(config.permissions.delete))
 const showActions = computed(() => canUpdate.value || canDelete.value)
 
-const COMPONENTS = { LocalizedText, StatusBadge, DateLabel, RelationLabel, EnumLabel }
+const COMPONENTS = { LocalizedText, StatusBadge, DateLabel, RelationLabel, EnumLabel, MoneyAmountLabel }
 
 function columnComponent(col) {
   return COMPONENTS[col.component]
@@ -49,6 +58,7 @@ function columnProps(col, item) {
   if (col.component === 'DateLabel') return { value: item[col.key] }
   if (col.component === 'RelationLabel') return { value: item[col.key], relation: col.relation }
   if (col.component === 'EnumLabel') return { value: item[col.key] }
+  if (col.component === 'MoneyAmountLabel') return { value: item[col.key] }
   return {}
 }
 function plainValue(col, item) {
@@ -73,8 +83,17 @@ async function load(reset = true) {
   }
 }
 
-function onEdit(item) {
-  if (!canUpdate.value) return
+const clickable = computed(() => !!props.rowTo || canUpdate.value)
+
+function onRowClick(item) {
+  if (props.rowTo) {
+    navigateTo(props.rowTo(item))
+    return
+  }
+  if (canUpdate.value) emit('edit', item)
+}
+
+function onEditClick(item) {
   emit('edit', item)
 }
 
@@ -125,8 +144,8 @@ onMounted(() => load(true))
             v-for="item in items"
             :key="item.id"
             class="border-b border-neutral-100"
-            :class="canUpdate ? 'hover:bg-neutral-50 cursor-pointer' : ''"
-            @click="onEdit(item)"
+            :class="clickable ? 'hover:bg-neutral-50 cursor-pointer' : ''"
+            @click="onRowClick(item)"
           >
             <td v-for="col in config.list.columns" :key="col.key" class="py-2 px-3">
               <component :is="columnComponent(col)" v-if="columnComponent(col)" v-bind="columnProps(col, item)" />
@@ -141,7 +160,7 @@ onMounted(() => load(true))
                   variant="ghost"
                   size="xs"
                   :aria-label="t('common.edit')"
-                  @click="onEdit(item)"
+                  @click="onEditClick(item)"
                 />
                 <UButton
                   v-if="canDelete"
@@ -164,8 +183,8 @@ onMounted(() => load(true))
           v-for="item in items"
           :key="item.id"
           class="rounded-lg border border-neutral-200 p-3 space-y-1"
-          :class="canUpdate ? 'cursor-pointer' : ''"
-          @click="onEdit(item)"
+          :class="clickable ? 'cursor-pointer' : ''"
+          @click="onRowClick(item)"
         >
           <div v-for="col in config.list.columns" :key="col.key" class="flex justify-between text-sm">
             <span class="text-neutral-500">{{ t(col.label) }}</span>

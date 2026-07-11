@@ -1,0 +1,130 @@
+syntax = "proto3";
+package crm.grpc.sale.v1;
+
+import "common.proto";
+
+// Mirrors proto/services/grpc/sale/v1/sale_service.proto and
+// proto/types/sale/sale.proto on the backend. No generic Update/Delete —
+// items are immutable once created, status moves only through
+// UpdateStatus/Cancel (TD §12.3), so this is not a generic
+// EntityRegistry entity: no drawer, custom wizard + detail pages.
+
+message SaleItem {
+  string productId = 1;
+  int64 quantity = 2;
+  int64 priceAmount = 3;
+  // Always 0-100, never a fixed amount.
+  int32 discountPercentage = 4;
+}
+
+enum SaleStatus {
+  SALE_STATUS_UNSPECIFIED = 0;
+  SALE_STATUS_DRAFT = 1;
+  SALE_STATUS_PAID = 2;
+  SALE_STATUS_SHIPPED = 3;
+  SALE_STATUS_COMPLETED = 4;
+  SALE_STATUS_CANCELLED = 5;
+  SALE_STATUS_REFUNDED = 6;
+}
+
+message Sale {
+  string id = 1;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
+  optional int64 deletedAt = 4;
+  string clientId = 5;
+  // Fulfilled from exactly one warehouse.
+  string warehouseId = 6;
+  optional string partnerId = 7;
+  repeated SaleItem items = 8;
+  // Basis points, sum of item lines after discount.
+  int64 totalAmount = 9;
+  SaleStatus status = 10;
+  string createdBy = 11;
+  string etag = 101;
+}
+
+service SalesService {
+  rpc Create (SaleCreateRequest) returns (SaleCreateResponse) {}
+  rpc Get (SaleGetRequest) returns (SaleGetResponse) {}
+  rpc List (SalesListRequest) returns (SalesListResponse) {}
+  rpc UpdateStatus (SaleUpdateStatusRequest) returns (SaleUpdateStatusResponse) {}
+  rpc Cancel (SaleCancelRequest) returns (SaleCancelResponse) {}
+}
+
+message SaleGetRequest {
+  string id = 1;
+}
+
+message SaleGetResponse {
+  Sale sale = 1;
+}
+
+message SalesListRequest {
+  optional string clientId = 1;
+  optional string warehouseId = 2;
+  optional string partnerId = 3;
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+    }
+    Field field = 1;
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 4;
+  optional crm.types.common.Pagination pagination = 5;
+  message Filter {
+    repeated SaleStatus statuses = 1;
+    optional crm.types.common.PeriodFilter createdAt = 2;
+    repeated string createdBy = 3;
+    repeated string productIds = 4;
+  }
+  optional Filter filter = 6;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message SalesListResponse {
+  repeated Sale items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message SaleCreateRequest {
+  message Item {
+    string productId = 1;
+    int64 quantity = 2;
+    int32 discountPercentage = 3;
+  }
+  string clientId = 1;
+  string warehouseId = 2;
+  optional string partnerId = 3;
+  repeated Item items = 4;
+}
+
+message SaleCreateResponse {
+  Sale sale = 1;
+}
+
+message SaleUpdateStatusRequest {
+  string id = 1;
+  SaleStatus status = 2;
+  optional string etag = 3;
+}
+
+message SaleUpdateStatusResponse {
+  Sale sale = 1;
+}
+
+message SaleCancelRequest {
+  string id = 1;
+  optional string reason = 2;
+  optional string etag = 3;
+}
+
+message SaleCancelResponse {
+  Sale sale = 1;
+}

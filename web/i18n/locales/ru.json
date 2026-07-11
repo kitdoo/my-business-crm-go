@@ -48,6 +48,20 @@
     "inventoryMovements": {
       "label": "Движения склада",
       "create": "Новое движение"
+    },
+    "sales": {
+      "label": "Продажи",
+      "create": "Новая продажа",
+      "newClient": "Создать нового клиента",
+      "addItem": "Добавить позицию",
+      "lineTotal": "Сумма позиции",
+      "detailTitle": "Продажа",
+      "items": "Позиции",
+      "changeStatus": "Изменить статус",
+      "cancel": "Отменить продажу",
+      "cancelConfirmTitle": "Отмена продажи",
+      "cancelConfirmBody": "Остаток будет возвращён на склад автоматически.",
+      "cancelReason": "Причина"
     }
   },
   "fields": {
@@ -82,7 +96,11 @@
     "minQuantity": "Мин. количество",
     "maxQuantity": "Макс. количество",
     "movementType": "Тип движения",
-    "comment": "Комментарий"
+    "comment": "Комментарий",
+    "client": "Клиент",
+    "partner": "Партнёр",
+    "totalAmount": "Итого",
+    "discountPercentage": "Скидка, %"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -118,7 +136,14 @@
       "MOVEMENT_TYPE_WRITE_OFF": "Списание",
       "MOVEMENT_TYPE_ADJUSTMENT": "Корректировка",
       "MOVEMENT_TYPE_TRANSFER": "Перемещение",
-      "MOVEMENT_TYPE_UNSPECIFIED": "Не указано"
+      "MOVEMENT_TYPE_UNSPECIFIED": "Не указано",
+      "SALE_STATUS_DRAFT": "Черновик",
+      "SALE_STATUS_PAID": "Оплачен",
+      "SALE_STATUS_SHIPPED": "Отправлен",
+      "SALE_STATUS_COMPLETED": "Завершён",
+      "SALE_STATUS_CANCELLED": "Отменён",
+      "SALE_STATUS_REFUNDED": "Возврат",
+      "SALE_STATUS_UNSPECIFIED": "Не указано"
     }
   },
   "common": {
@@ -136,7 +161,9 @@
     "loadMore": "Загрузить ещё",
     "none": "Нет",
     "add": "Добавить",
-    "openFullPage": "Открыть на отдельной странице"
+    "openFullPage": "Открыть на отдельной странице",
+    "next": "Далее",
+    "back": "Назад"
   },
   "products": {
     "mainImage": "Главное",

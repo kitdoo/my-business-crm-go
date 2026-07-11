@@ -48,6 +48,20 @@
     "inventoryMovements": {
       "label": "Inventory movements",
       "create": "New movement"
+    },
+    "sales": {
+      "label": "Sales",
+      "create": "New sale",
+      "newClient": "Create new client",
+      "addItem": "Add item",
+      "lineTotal": "Line total",
+      "detailTitle": "Sale",
+      "items": "Items",
+      "changeStatus": "Change status",
+      "cancel": "Cancel sale",
+      "cancelConfirmTitle": "Cancel sale",
+      "cancelConfirmBody": "Stock will be returned to the warehouse automatically.",
+      "cancelReason": "Reason"
     }
   },
   "fields": {
@@ -82,7 +96,11 @@
     "minQuantity": "Min quantity",
     "maxQuantity": "Max quantity",
     "movementType": "Movement type",
-    "comment": "Comment"
+    "comment": "Comment",
+    "client": "Client",
+    "partner": "Partner",
+    "totalAmount": "Total",
+    "discountPercentage": "Discount, %"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -118,7 +136,14 @@
       "MOVEMENT_TYPE_WRITE_OFF": "Write-off",
       "MOVEMENT_TYPE_ADJUSTMENT": "Adjustment",
       "MOVEMENT_TYPE_TRANSFER": "Transfer",
-      "MOVEMENT_TYPE_UNSPECIFIED": "Unspecified"
+      "MOVEMENT_TYPE_UNSPECIFIED": "Unspecified",
+      "SALE_STATUS_DRAFT": "Draft",
+      "SALE_STATUS_PAID": "Paid",
+      "SALE_STATUS_SHIPPED": "Shipped",
+      "SALE_STATUS_COMPLETED": "Completed",
+      "SALE_STATUS_CANCELLED": "Cancelled",
+      "SALE_STATUS_REFUNDED": "Refunded",
+      "SALE_STATUS_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {
@@ -136,7 +161,9 @@
     "loadMore": "Load more",
     "none": "None",
     "add": "Add",
-    "openFullPage": "Open full page"
+    "openFullPage": "Open full page",
+    "next": "Next",
+    "back": "Back"
   },
   "products": {
     "mainImage": "Main",

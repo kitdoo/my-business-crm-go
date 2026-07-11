@@ -32,6 +32,17 @@ export const ENUMS = {
     values: ['MOVEMENT_TYPE_RECEIPT', 'MOVEMENT_TYPE_WRITE_OFF', 'MOVEMENT_TYPE_ADJUSTMENT', 'MOVEMENT_TYPE_TRANSFER'],
     labelKey: (value) => `enums.movementType.${value}`,
   },
+  SaleStatus: {
+    values: [
+      'SALE_STATUS_DRAFT',
+      'SALE_STATUS_PAID',
+      'SALE_STATUS_SHIPPED',
+      'SALE_STATUS_COMPLETED',
+      'SALE_STATUS_CANCELLED',
+      'SALE_STATUS_REFUNDED',
+    ],
+    labelKey: (value) => `enums.saleStatus.${value}`,
+  },
 }
 
 export function getEnumOptions(enumName) {
