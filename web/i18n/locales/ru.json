@@ -44,6 +44,10 @@
     },
     "inventory": {
       "label": "Остатки"
+    },
+    "inventoryMovements": {
+      "label": "Движения склада",
+      "create": "Новое движение"
     }
   },
   "fields": {
@@ -76,7 +80,9 @@
     "quantity": "Количество",
     "updatedAt": "Обновлён",
     "minQuantity": "Мин. количество",
-    "maxQuantity": "Макс. количество"
+    "maxQuantity": "Макс. количество",
+    "movementType": "Тип движения",
+    "comment": "Комментарий"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -106,7 +112,13 @@
       "PRODUCT_STATUS_DRAFT": "Черновик",
       "PRODUCT_STATUS_ACTIVE": "Активен",
       "PRODUCT_STATUS_INACTIVE": "Неактивен",
-      "PRODUCT_STATUS_UNSPECIFIED": "Не указано"
+      "PRODUCT_STATUS_UNSPECIFIED": "Не указано",
+      "MOVEMENT_TYPE_RECEIPT": "Приход",
+      "MOVEMENT_TYPE_SALE": "Продажа",
+      "MOVEMENT_TYPE_WRITE_OFF": "Списание",
+      "MOVEMENT_TYPE_ADJUSTMENT": "Корректировка",
+      "MOVEMENT_TYPE_TRANSFER": "Перемещение",
+      "MOVEMENT_TYPE_UNSPECIFIED": "Не указано"
     }
   },
   "common": {

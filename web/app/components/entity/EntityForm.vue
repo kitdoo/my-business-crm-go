@@ -11,6 +11,10 @@ const props = defineProps({
   // 'drawer': emits events instead, so the host (EntityListPage's
   // left-side edit drawer, TD §8.3) decides what happens next.
   mode: { type: String, default: 'page' },
+  // Pre-filled field values for create mode only (e.g. a "New movement"
+  // button on Product's Movements tab pre-filling productId). Ignored
+  // once editing an existing record.
+  initialValues: { type: Object, default: () => ({}) },
 })
 const emit = defineEmits(['saved', 'cancel', 'deleted'])
 
@@ -28,7 +32,7 @@ const api = useEntityApi(props.entity)
 const { handle } = useApiErrorHandler()
 
 const { form, record, etag, loading, saving, fieldErrors, etagConflict, isCreate, load, save, reloadAfterConflict } =
-  useEntityForm(props.entity, props.id)
+  useEntityForm(props.entity, props.id, props.initialValues)
 
 const confirmDeleteOpen = ref(false)
 const canDelete = computed(() => !isCreate && can(config.permissions.delete))

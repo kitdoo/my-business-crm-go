@@ -1,0 +1,82 @@
+syntax = "proto3";
+package crm.grpc.inventory_movement.v1;
+
+import "common.proto";
+
+// Mirrors proto/services/grpc/inventory_movement/v1/inventory_movement_service.proto
+// and proto/types/inventory_movement/inventory_movement.proto on the
+// backend. Append-only ledger — no Get/Update/Delete at all, not just no
+// permission for them (TD §10/§12.4).
+
+message InventoryMovement {
+  string id = 1;
+  int64 createdAt = 2;
+  string productId = 3;
+  string warehouseId = 4;
+  MovementType type = 5;
+  int64 quantity = 6;
+  string comment = 7;
+  string createdBy = 8;
+}
+
+enum MovementType {
+  MOVEMENT_TYPE_UNSPECIFIED = 0;
+  MOVEMENT_TYPE_RECEIPT = 1;
+  MOVEMENT_TYPE_SALE = 2;
+  MOVEMENT_TYPE_WRITE_OFF = 3;
+  MOVEMENT_TYPE_ADJUSTMENT = 4;
+  // Warehouse-to-warehouse; recorded as a paired debit/credit movement.
+  MOVEMENT_TYPE_TRANSFER = 5;
+}
+
+service InventoryMovementsService {
+  rpc Create (InventoryMovementCreateRequest) returns (InventoryMovementCreateResponse) {}
+  rpc List (InventoryMovementsListRequest) returns (InventoryMovementsListResponse) {}
+  rpc GetHistory (InventoryMovementGetHistoryRequest) returns (InventoryMovementGetHistoryResponse) {}
+}
+
+message InventoryMovementCreateRequest {
+  string productId = 1;
+  string warehouseId = 2;
+  MovementType type = 3;
+  // Signed — positive for Receipt, negative for Sale/WriteOff.
+  int64 quantity = 4;
+  optional string comment = 5;
+}
+
+message InventoryMovementCreateResponse {
+  InventoryMovement movement = 1;
+}
+
+message InventoryMovementsListRequest {
+  optional string warehouseId = 1;
+  message Filter {
+    repeated MovementType types = 1;
+    repeated string productIds = 2;
+    repeated string createdBy = 3;
+    optional crm.types.common.PeriodFilter createdAt = 4;
+  }
+  optional Filter filter = 2;
+  optional crm.types.common.Pagination pagination = 3;
+}
+
+message InventoryMovementsListResponse {
+  repeated InventoryMovement items = 1;
+  optional string nextCursor = 2;
+}
+
+message InventoryMovementGetHistoryRequest {
+  string productId = 1;
+  string warehouseId = 2;
+  message Filter {
+    repeated MovementType types = 1;
+    optional crm.types.common.PeriodFilter createdAt = 2;
+  }
+  optional Filter filter = 3;
+  optional crm.types.common.Pagination pagination = 4;
+}
+
+message InventoryMovementGetHistoryResponse {
+  repeated InventoryMovement items = 1;
+  optional string nextCursor = 2;
+}

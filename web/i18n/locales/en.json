@@ -44,6 +44,10 @@
     },
     "inventory": {
       "label": "Inventory"
+    },
+    "inventoryMovements": {
+      "label": "Inventory movements",
+      "create": "New movement"
     }
   },
   "fields": {
@@ -76,7 +80,9 @@
     "quantity": "Quantity",
     "updatedAt": "Updated",
     "minQuantity": "Min quantity",
-    "maxQuantity": "Max quantity"
+    "maxQuantity": "Max quantity",
+    "movementType": "Movement type",
+    "comment": "Comment"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -106,7 +112,13 @@
       "PRODUCT_STATUS_DRAFT": "Draft",
       "PRODUCT_STATUS_ACTIVE": "Active",
       "PRODUCT_STATUS_INACTIVE": "Inactive",
-      "PRODUCT_STATUS_UNSPECIFIED": "Unspecified"
+      "PRODUCT_STATUS_UNSPECIFIED": "Unspecified",
+      "MOVEMENT_TYPE_RECEIPT": "Receipt",
+      "MOVEMENT_TYPE_SALE": "Sale",
+      "MOVEMENT_TYPE_WRITE_OFF": "Write-off",
+      "MOVEMENT_TYPE_ADJUSTMENT": "Adjustment",
+      "MOVEMENT_TYPE_TRANSFER": "Transfer",
+      "MOVEMENT_TYPE_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {

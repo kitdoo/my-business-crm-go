@@ -44,6 +44,10 @@
     },
     "inventory": {
       "label": "Zalihe"
+    },
+    "inventoryMovements": {
+      "label": "Kretanja zaliha",
+      "create": "Novo kretanje"
     }
   },
   "fields": {
@@ -76,7 +80,9 @@
     "quantity": "Količina",
     "updatedAt": "Ažurirano",
     "minQuantity": "Min. količina",
-    "maxQuantity": "Maks. količina"
+    "maxQuantity": "Maks. količina",
+    "movementType": "Tip kretanja",
+    "comment": "Komentar"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -106,7 +112,13 @@
       "PRODUCT_STATUS_DRAFT": "Nacrt",
       "PRODUCT_STATUS_ACTIVE": "Aktivan",
       "PRODUCT_STATUS_INACTIVE": "Neaktivan",
-      "PRODUCT_STATUS_UNSPECIFIED": "Nepoznato"
+      "PRODUCT_STATUS_UNSPECIFIED": "Nepoznato",
+      "MOVEMENT_TYPE_RECEIPT": "Prijem",
+      "MOVEMENT_TYPE_SALE": "Prodaja",
+      "MOVEMENT_TYPE_WRITE_OFF": "Otpis",
+      "MOVEMENT_TYPE_ADJUSTMENT": "Korekcija",
+      "MOVEMENT_TYPE_TRANSFER": "Transfer",
+      "MOVEMENT_TYPE_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {

@@ -26,6 +26,12 @@ export const ENUMS = {
     values: ['PRODUCT_STATUS_DRAFT', 'PRODUCT_STATUS_ACTIVE', 'PRODUCT_STATUS_INACTIVE'],
     labelKey: (value) => `enums.productStatus.${value}`,
   },
+  // MOVEMENT_TYPE_SALE is deliberately excluded — it's an internal type
+  // created only by SalesService.Create, never picked by hand (TD §12.4).
+  MovementType: {
+    values: ['MOVEMENT_TYPE_RECEIPT', 'MOVEMENT_TYPE_WRITE_OFF', 'MOVEMENT_TYPE_ADJUSTMENT', 'MOVEMENT_TYPE_TRANSFER'],
+    labelKey: (value) => `enums.movementType.${value}`,
+  },
 }
 
 export function getEnumOptions(enumName) {

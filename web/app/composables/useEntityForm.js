@@ -4,13 +4,13 @@ import { getEntityConfig } from '~/config/entities'
 // blank (create mode), tracks the original snapshot to diff into a
 // FieldMask on save, and always carries the etag through update/delete so
 // individual forms never have to remember to do it themselves.
-export function useEntityForm(entityKey, id) {
+export function useEntityForm(entityKey, id, initialValues = {}) {
   const config = getEntityConfig(entityKey)
   const api = useEntityApi(entityKey)
   const { handle } = useApiErrorHandler()
 
   const isCreate = !id
-  const form = ref(blankForm(config))
+  const form = ref({ ...blankForm(config), ...(isCreate ? initialValues : {}) })
   const original = ref(null)
   const etag = ref(null)
   const loading = ref(false)
