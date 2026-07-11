@@ -12,6 +12,8 @@ const PRESETS = [
   { key: 'today', label: 'periodFilter.today', days: 0 },
   { key: '7d', label: 'periodFilter.7d', days: 7 },
   { key: '30d', label: 'periodFilter.30d', days: 30 },
+  { key: '3m', label: 'periodFilter.3m', days: 90 },
+  { key: '1y', label: 'periodFilter.1y', days: 365 },
 ]
 const active = ref('7d')
 

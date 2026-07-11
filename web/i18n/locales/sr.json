@@ -181,7 +181,9 @@
   "periodFilter": {
     "today": "Danas",
     "7d": "7 dana",
-    "30d": "30 dana"
+    "30d": "30 dana",
+    "3m": "3 meseca",
+    "1y": "1 godina"
   },
   "products": {
     "mainImage": "Glavna",
