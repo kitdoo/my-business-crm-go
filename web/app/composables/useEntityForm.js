@@ -17,6 +17,11 @@ export function useEntityForm(entityKey, id) {
   const saving = ref(false)
   const fieldErrors = ref({})
   const etagConflict = ref(false)
+  // Full record as last loaded from the server, unlike `form` which only
+  // tracks config.form.fields — needed by things like a Warehouse
+  // Deactivate action button whose visibility depends on `status`, a
+  // field intentionally absent from the editable form (TD §12.2).
+  const record = ref(null)
 
   function blankForm(cfg) {
     const state = {}
@@ -27,14 +32,15 @@ export function useEntityForm(entityKey, id) {
     return state
   }
 
-  function applyRecord(record) {
+  function applyRecord(rec) {
     const state = {}
     for (const field of config.form.fields) {
-      state[field.key] = record[field.key] ?? (field.type === 'localizedString' ? { values: {} } : null)
+      state[field.key] = rec[field.key] ?? (field.type === 'localizedString' ? { values: {} } : null)
     }
     form.value = state
     original.value = state
-    etag.value = record.etag
+    etag.value = rec.etag
+    record.value = rec
   }
 
   async function load() {
@@ -97,6 +103,8 @@ export function useEntityForm(entityKey, id) {
 
   return {
     form,
+    record,
+    etag,
     loading,
     saving,
     fieldErrors,

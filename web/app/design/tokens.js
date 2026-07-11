@@ -62,4 +62,9 @@ export const STATUS_COLOR_MAP = {
     CATEGORY_STATUS_INACTIVE: 'inactive',
     CATEGORY_STATUS_UNSPECIFIED: 'inactive',
   },
+  warehouse: {
+    WAREHOUSE_STATUS_ACTIVE: 'active',
+    WAREHOUSE_STATUS_INACTIVE: 'inactive',
+    WAREHOUSE_STATUS_UNSPECIFIED: 'inactive',
+  },
 }

@@ -19,13 +19,58 @@ const router = useRouter()
 const config = getEntityConfig(props.entity)
 const runtimeConfig = useRuntimeConfig()
 const { can } = usePermission()
+const api = useEntityApi(props.entity)
+// Composables that rely on Vue's inject (useI18n/useRoute underneath) must
+// be called synchronously at setup top-level — calling them lazily inside
+// an async handler reached through a teleported <ConfirmDialog> loses the
+// active component instance and throws "Must be called at the top of a
+// setup function". Every handler below reuses this one instance.
+const { handle } = useApiErrorHandler()
 
-const { form, loading, saving, fieldErrors, etagConflict, isCreate, load, save, reloadAfterConflict } =
+const { form, record, etag, loading, saving, fieldErrors, etagConflict, isCreate, load, save, reloadAfterConflict } =
   useEntityForm(props.entity, props.id)
 
 const confirmDeleteOpen = ref(false)
 const canDelete = computed(() => !isCreate && can(config.permissions.delete))
 const isDrawer = computed(() => props.mode === 'drawer')
+
+// Declarative non-CRUD actions (TD §12.2, e.g. Warehouse.Deactivate) — an
+// RPC that isn't part of the standard 5 and isn't a form field edit, so it
+// can't go through useEntityForm.save(). Config-driven like everything
+// else here: config.form.actions, not a bespoke Vue file per entity.
+// visibleWhen reads `record` (the full loaded entity), not `form` — a
+// gating field like Warehouse.status is deliberately absent from `form`.
+const visibleActions = computed(() => {
+  if (isCreate || !config.form.actions || !record.value) return []
+  return config.form.actions.filter(
+    (action) =>
+      can(config.permissions[action.permission] ?? config.permissions.update) && action.visibleWhen(record.value),
+  )
+})
+const pendingAction = ref(null)
+const runningAction = ref(false)
+
+async function onActionConfirm() {
+  const action = pendingAction.value
+  if (!action) return
+  runningAction.value = true
+  try {
+    const updated = await $fetch(action.endpoint, {
+      method: action.method || 'POST',
+      body: { id: props.id, etag: etag.value },
+    })
+    if (isDrawer.value) {
+      emit('saved', updated)
+    } else {
+      await load()
+    }
+  } catch (err) {
+    handle(err)
+  } finally {
+    runningAction.value = false
+    pendingAction.value = null
+  }
+}
 
 onMounted(() => {
   if (!isCreate) load()
@@ -51,10 +96,8 @@ function onCancel() {
 }
 
 async function onDelete() {
-  const api = useEntityApi(props.entity)
-  const { handle } = useApiErrorHandler()
   try {
-    await api.remove(props.id, form.value.etag)
+    await api.remove(props.id, etag.value)
     if (isDrawer.value) {
       emit('deleted')
     } else {
@@ -127,9 +170,20 @@ function fieldsToRender() {
       </FormGrid>
 
       <div class="flex items-center justify-between">
-        <UButton v-if="canDelete" color="error" variant="soft" @click="confirmDeleteOpen = true">
-          {{ t('common.delete') }}
-        </UButton>
+        <div class="flex gap-2">
+          <UButton v-if="canDelete" color="error" variant="soft" @click="confirmDeleteOpen = true">
+            {{ t('common.delete') }}
+          </UButton>
+          <UButton
+            v-for="action in visibleActions"
+            :key="action.key"
+            color="warning"
+            variant="soft"
+            @click="pendingAction = action"
+          >
+            {{ t(action.label) }}
+          </UButton>
+        </div>
         <div class="ml-auto flex gap-2">
           <UButton v-if="isDrawer" color="neutral" variant="soft" @click="onCancel">{{ t('common.cancel') }}</UButton>
           <UButton v-else color="neutral" variant="soft" :to="config.route">{{ t('common.cancel') }}</UButton>
@@ -143,6 +197,14 @@ function fieldsToRender() {
       :title="t('common.deleteConfirmTitle')"
       :description="t('common.deleteConfirmBody')"
       @confirm="onDelete"
+    />
+    <ConfirmDialog
+      :open="!!pendingAction"
+      :title="pendingAction ? t(pendingAction.confirmTitle) : ''"
+      :description="pendingAction ? t(pendingAction.confirmBody) : ''"
+      :danger="false"
+      @update:open="(v) => !v && (pendingAction = null)"
+      @confirm="onActionConfirm"
     />
     <EtagConflictDialog v-model:open="etagConflict" @reload="reloadAfterConflict" />
   </div>

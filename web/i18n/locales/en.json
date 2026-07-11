@@ -23,6 +23,14 @@
       "label": "Categories",
       "create": "New category",
       "edit": "Edit category"
+    },
+    "warehouses": {
+      "label": "Warehouses",
+      "create": "New warehouse",
+      "edit": "Edit warehouse",
+      "deactivate": "Deactivate",
+      "deactivateConfirmTitle": "Deactivate warehouse",
+      "deactivateConfirmBody": "The warehouse will become inactive and unavailable for new operations."
     }
   },
   "fields": {
@@ -51,7 +59,10 @@
       "PARTNER_STATUS_UNSPECIFIED": "Unspecified",
       "CATEGORY_STATUS_ACTIVE": "Active",
       "CATEGORY_STATUS_INACTIVE": "Inactive",
-      "CATEGORY_STATUS_UNSPECIFIED": "Unspecified"
+      "CATEGORY_STATUS_UNSPECIFIED": "Unspecified",
+      "WAREHOUSE_STATUS_ACTIVE": "Active",
+      "WAREHOUSE_STATUS_INACTIVE": "Inactive",
+      "WAREHOUSE_STATUS_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {

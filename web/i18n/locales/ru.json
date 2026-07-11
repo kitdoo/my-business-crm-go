@@ -23,6 +23,14 @@
       "label": "Категории",
       "create": "Новая категория",
       "edit": "Редактирование категории"
+    },
+    "warehouses": {
+      "label": "Склады",
+      "create": "Новый склад",
+      "edit": "Редактирование склада",
+      "deactivate": "Деактивировать",
+      "deactivateConfirmTitle": "Деактивация склада",
+      "deactivateConfirmBody": "Склад станет неактивным и будет недоступен для новых операций."
     }
   },
   "fields": {
@@ -51,7 +59,10 @@
       "PARTNER_STATUS_UNSPECIFIED": "Не указано",
       "CATEGORY_STATUS_ACTIVE": "Активна",
       "CATEGORY_STATUS_INACTIVE": "Неактивна",
-      "CATEGORY_STATUS_UNSPECIFIED": "Не указано"
+      "CATEGORY_STATUS_UNSPECIFIED": "Не указано",
+      "WAREHOUSE_STATUS_ACTIVE": "Активен",
+      "WAREHOUSE_STATUS_INACTIVE": "Неактивен",
+      "WAREHOUSE_STATUS_UNSPECIFIED": "Не указано"
     }
   },
   "common": {

@@ -23,6 +23,14 @@
       "label": "Kategorije",
       "create": "Nova kategorija",
       "edit": "Izmena kategorije"
+    },
+    "warehouses": {
+      "label": "Magacini",
+      "create": "Novi magacin",
+      "edit": "Izmena magacina",
+      "deactivate": "Deaktiviraj",
+      "deactivateConfirmTitle": "Deaktivacija magacina",
+      "deactivateConfirmBody": "Magacin će postati neaktivan i nedostupan za nove operacije."
     }
   },
   "fields": {
@@ -51,7 +59,10 @@
       "PARTNER_STATUS_UNSPECIFIED": "Nepoznato",
       "CATEGORY_STATUS_ACTIVE": "Aktivna",
       "CATEGORY_STATUS_INACTIVE": "Neaktivna",
-      "CATEGORY_STATUS_UNSPECIFIED": "Nepoznato"
+      "CATEGORY_STATUS_UNSPECIFIED": "Nepoznato",
+      "WAREHOUSE_STATUS_ACTIVE": "Aktivan",
+      "WAREHOUSE_STATUS_INACTIVE": "Neaktivan",
+      "WAREHOUSE_STATUS_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {

@@ -2,6 +2,7 @@ import brands from './brands.js'
 import categories from './categories.js'
 import clients from './clients.js'
 import partners from './partners.js'
+import warehouses from './warehouses.js'
 
 // Registry of all entities (TD §9.1). Add a new file + one import line
 // here when a new entity ships — nothing else should need to know the
@@ -11,6 +12,7 @@ const ENTITIES = {
   categories,
   clients,
   partners,
+  warehouses,
 }
 
 export function getEntityConfig(entityKey) {
