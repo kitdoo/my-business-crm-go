@@ -1,6 +1,7 @@
 syntax = "proto3";
 package crm.grpc.sale.v1;
 
+import "google/protobuf/field_mask.proto";
 import "common.proto";
 
 // Mirrors proto/services/grpc/sale/v1/sale_service.proto and
