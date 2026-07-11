@@ -15,7 +15,6 @@ export default {
   },
 
   list: {
-    idsFilterKey: 'ids', // not implemented server-side yet; falls back to per-id Get in useReferenceCache
     columns: [
       { key: 'name', label: 'fields.name', component: 'LocalizedText' },
       { key: 'description', label: 'fields.description', component: 'LocalizedText' },

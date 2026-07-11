@@ -50,13 +50,20 @@ export const useReferenceCacheStore = defineStore('referenceCache', {
       const filterKey = config?.list?.idsFilterKey
 
       try {
+        const { list, get } = useEntityApi(entityKey)
+        let missing = ids
         if (filterKey) {
-          const { list } = useEntityApi(entityKey)
           const { items } = await list({ filter: { [filterKey]: ids }, pagination: { limit: ids.length } })
           for (const item of items) this.setCached(entityKey, item)
-        } else {
-          const { get } = useEntityApi(entityKey)
-          const items = await Promise.all(ids.map((id) => get(id)))
+          missing = ids.filter((id) => !this.getCached(entityKey, id))
+        }
+        // Falls back to per-id Get for anything the batch didn't resolve —
+        // covers both the no-filterKey case and a filterKey the backend
+        // doesn't actually honor (silently returning an unrelated page
+        // instead of filtering), so a config mistake degrades to slightly
+        // more requests instead of blank labels.
+        if (missing.length > 0) {
+          const items = await Promise.all(missing.map((id) => get(id)))
           for (const item of items) if (item) this.setCached(entityKey, item)
         }
       } finally {
