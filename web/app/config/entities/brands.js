@@ -1,5 +1,5 @@
 // Single source of truth for the Brand entity (TD §9.1): how to list it,
-// edit it, and which permissions gate each action. RightDrawer, routing,
+// edit it, and which permissions gate each action. SideMenu, routing,
 // EntityListPage/EntityForm all read only this file for Brand-specific
 // behavior — adding a field here is the whole change.
 export default {

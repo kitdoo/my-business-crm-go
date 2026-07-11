@@ -1,14 +1,14 @@
 <script setup>
 // Flat side menu (TD §8.2): Dashboard + every permission-visible entity,
-// one level, no intermediate section click. Permanent panel on >= lg,
-// overlay slideover below that (TD §6).
+// one level, no intermediate section click. Sits on the left; permanent
+// panel on >= lg, overlay slideover below that (TD §6).
 import { NAV_ITEMS } from '~/config/navigation.js'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { can } = usePermission()
-const { rightDrawerOpen } = useLayoutState()
+const { menuOpen } = useLayoutState()
 
 const navItems = computed(() => [
   ...NAV_ITEMS,
@@ -23,7 +23,7 @@ function isActive(item) {
 
 function onSelect(item) {
   router.push(item.to)
-  rightDrawerOpen.value = false
+  menuOpen.value = false
 }
 </script>
 

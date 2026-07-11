@@ -27,7 +27,7 @@ export const tokens = {
       base: '#ffffff',
       subtle: '#f9fafb',
       border: '#000000',
-      // Menu / side navigation background (TopBar/RightDrawer, TD §8).
+      // Menu / side navigation background (TopBar/SideMenu, TD §8).
       menu: '#333333',
     },
     status: {

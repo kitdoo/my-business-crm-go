@@ -1,7 +1,7 @@
 <script setup>
 // Fully generic list page: table + "Create" button gated on
 // entity.permissions.create (TD §9.3). Create and row-edit both open the
-// same left-side drawer with <EntityForm mode="drawer"> (TD §8.3) instead
+// same right-side drawer with <EntityForm mode="drawer"> (TD §8.3) instead
 // of navigating to a separate page.
 const props = defineProps({
   entity: { type: String, required: true },
@@ -48,13 +48,21 @@ function onDeleted() {
     </div>
     <EntityDataTable ref="tableRef" :entity="entity" @edit="openEdit" />
 
-    <USlideover v-model:open="drawerOpen" side="left">
+    <USlideover v-model:open="drawerOpen" side="right">
       <template #content>
         <div class="p-6 space-y-4 w-full max-w-md">
           <h2 class="text-lg font-semibold">
             {{ editingId ? t(`entities.${entity}.edit`) : t(`entities.${entity}.create`) }}
           </h2>
-          <EntityForm :entity="entity" :id="editingId" mode="drawer" @saved="onSaved" @cancel="drawerOpen = false" @deleted="onDeleted" />
+          <EntityForm
+            :key="editingId ?? 'create'"
+            :entity="entity"
+            :id="editingId"
+            mode="drawer"
+            @saved="onSaved"
+            @cancel="drawerOpen = false"
+            @deleted="onDeleted"
+          />
         </div>
       </template>
     </USlideover>

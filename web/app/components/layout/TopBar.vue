@@ -1,9 +1,9 @@
 <script setup>
 // Turquoise header (TD §8.1): logo -> dashboard, language switcher, profile
-// menu (change password / logout). Hamburger on < lg opens RightDrawer.
+// menu (change password / logout). Hamburger on < lg opens SideMenu.
 const { t, locale, locales, setLocale } = useI18n()
 const { user, logout } = useAuth()
-const { rightDrawerOpen } = useLayoutState()
+const { menuOpen } = useLayoutState()
 const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 
@@ -30,7 +30,7 @@ async function onLogout() {
         color="neutral"
         variant="ghost"
         class="lg:hidden text-white"
-        @click="rightDrawerOpen = !rightDrawerOpen"
+        @click="menuOpen = !menuOpen"
       />
       <NuxtLink to="/" class="font-semibold text-white">{{ runtimeConfig.public.appName }}</NuxtLink>
     </div>
