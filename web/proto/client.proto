@@ -1,0 +1,116 @@
+syntax = "proto3";
+package crm.grpc.client.v1;
+
+import "google/protobuf/field_mask.proto";
+import "common.proto";
+
+// Mirrors proto/services/grpc/client/v1/client_service.proto and
+// proto/types/client/client.proto on the backend. See proto/common.proto
+// for the note on why buf.validate annotations were dropped here.
+// name/address/note are factual data, not localized.
+
+message Client {
+  string id = 1;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
+  optional int64 deletedAt = 4;
+  string name = 5;
+  string phone = 6;
+  string email = 7;
+  string address = 8;
+  string note = 9;
+  string etag = 101;
+}
+
+service ClientsService {
+  rpc Create (ClientCreateRequest) returns (ClientCreateResponse) {}
+  rpc Get (ClientGetRequest) returns (ClientGetResponse) {}
+  rpc List (ClientsListRequest) returns (ClientsListResponse) {}
+  rpc Update (ClientUpdateRequest) returns (ClientUpdateResponse) {}
+  rpc Delete (ClientDeleteRequest) returns (ClientDeleteResponse) {}
+}
+
+message ClientGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1;
+  optional Options options = 99;
+}
+
+message ClientGetResponse {
+  Client client = 1;
+}
+
+message ClientsListRequest {
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_NAME = 1;
+    }
+    Field field = 1;
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 1;
+  optional crm.types.common.Pagination pagination = 2;
+  message Filter {
+    optional string searchQuery = 1;
+    optional crm.types.common.PeriodFilter createdAt = 2;
+  }
+  optional Filter filter = 3;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message ClientsListResponse {
+  repeated Client items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message ClientCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string name = 1;
+  string phone = 2;
+  string email = 3;
+  string address = 4;
+  string note = 5;
+  optional Options options = 99;
+}
+
+message ClientCreateResponse {
+  Client client = 1;
+}
+
+message ClientUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1;
+  optional string name = 2;
+  optional string phone = 3;
+  optional string email = 4;
+  optional string address = 5;
+  optional string note = 6;
+  optional Options options = 99;
+}
+
+message ClientUpdateResponse {
+  Client client = 1;
+}
+
+message ClientDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1;
+  optional Options options = 99;
+}
+
+message ClientDeleteResponse {}

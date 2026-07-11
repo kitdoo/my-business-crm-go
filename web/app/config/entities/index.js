@@ -1,10 +1,12 @@
 import brands from './brands.js'
+import clients from './clients.js'
 
 // Registry of all entities (TD §9.1). Add a new file + one import line
 // here when a new entity ships — nothing else should need to know the
 // full entity list.
 const ENTITIES = {
   brands,
+  clients,
 }
 
 export function getEntityConfig(entityKey) {

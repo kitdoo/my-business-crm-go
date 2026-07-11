@@ -8,13 +8,22 @@
       "label": "Бренды",
       "create": "Новый бренд",
       "edit": "Редактирование бренда"
+    },
+    "clients": {
+      "label": "Клиенты",
+      "create": "Новый клиент",
+      "edit": "Редактирование клиента"
     }
   },
   "fields": {
     "name": "Название",
     "description": "Описание",
     "status": "Статус",
-    "createdAt": "Создан"
+    "createdAt": "Создан",
+    "phone": "Телефон",
+    "email": "Email",
+    "address": "Адрес",
+    "note": "Заметка"
   },
   "sort": {
     "createdAt": "По дате создания",

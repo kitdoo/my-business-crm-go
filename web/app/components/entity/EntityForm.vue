@@ -91,6 +91,20 @@ function fieldsToRender() {
               class="w-full"
             />
           </UFormField>
+          <UFormField
+            v-else-if="field.type === 'text'"
+            :label="t(field.label)"
+            :required="field.required"
+            :error="fieldErrors[field.key]"
+          >
+            <UInput
+              v-model="form[field.key]"
+              class="w-full"
+              :type="field.inputType || 'text'"
+              :required="field.required"
+              :maxlength="field.maxLength"
+            />
+          </UFormField>
         </template>
       </FormGrid>
 

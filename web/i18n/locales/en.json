@@ -8,13 +8,22 @@
       "label": "Brands",
       "create": "New brand",
       "edit": "Edit brand"
+    },
+    "clients": {
+      "label": "Clients",
+      "create": "New client",
+      "edit": "Edit client"
     }
   },
   "fields": {
     "name": "Name",
     "description": "Description",
     "status": "Status",
-    "createdAt": "Created"
+    "createdAt": "Created",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "note": "Note"
   },
   "sort": {
     "createdAt": "By creation date",

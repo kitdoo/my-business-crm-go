@@ -8,13 +8,22 @@
       "label": "Brendovi",
       "create": "Novi brend",
       "edit": "Izmena brenda"
+    },
+    "clients": {
+      "label": "Klijenti",
+      "create": "Novi klijent",
+      "edit": "Izmena klijenta"
     }
   },
   "fields": {
     "name": "Naziv",
     "description": "Opis",
     "status": "Status",
-    "createdAt": "Kreirano"
+    "createdAt": "Kreirano",
+    "phone": "Telefon",
+    "email": "Email",
+    "address": "Adresa",
+    "note": "Napomena"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
