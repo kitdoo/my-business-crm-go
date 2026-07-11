@@ -1,4 +1,5 @@
 import brands from './brands.js'
+import categories from './categories.js'
 import clients from './clients.js'
 import partners from './partners.js'
 
@@ -7,6 +8,7 @@ import partners from './partners.js'
 // full entity list.
 const ENTITIES = {
   brands,
+  categories,
   clients,
   partners,
 }

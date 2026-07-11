@@ -113,6 +113,16 @@ function fieldsToRender() {
           >
             <UInputNumber v-model="form[field.key]" class="w-full" :min="field.min" :max="field.max" />
           </UFormField>
+          <RelationSelect
+            v-else-if="field.type === 'relation'"
+            v-model="form[field.key]"
+            :relation="field.relation"
+            :label="t(field.label)"
+            :error="fieldErrors[field.key]"
+            :required="field.required"
+            :tree="field.tree"
+            :exclude-id="field.tree && !isCreate ? props.id : null"
+          />
         </template>
       </FormGrid>
 

@@ -1,0 +1,45 @@
+// Single source of truth for the Category entity (TD §9.1, §10). First
+// entity with a self-relation (parentId — categories are peers, not a
+// strict hierarchy, but the UI still offers a depth-indented flat tree
+// for picking a parent, per TD §10). SideMenu, routing,
+// EntityListPage/EntityForm all read only this file for Category-specific
+// behavior.
+export default {
+  key: 'categories',
+  label: 'entities.categories.label',
+  icon: 'i-lucide-shapes',
+  route: '/categories',
+  permissions: {
+    read: 'categories:read',
+    create: 'categories:create',
+    update: 'categories:update',
+    delete: 'categories:delete',
+  },
+
+  list: {
+    columns: [
+      { key: 'name', label: 'fields.name', component: 'LocalizedText' },
+      { key: 'parentId', label: 'fields.parentCategory', component: 'RelationLabel', relation: 'categories' },
+      { key: 'status', label: 'fields.status', component: 'StatusBadge', statusMap: 'category' },
+      { key: 'createdAt', label: 'fields.createdAt', component: 'DateLabel' },
+    ],
+    filters: [
+      { key: 'statuses', type: 'multiselect', label: 'fields.status', optionsFrom: 'enum:CategoryStatus' },
+      { key: 'createdAt', type: 'periodFilter', label: 'fields.createdAt' },
+    ],
+    sort: [
+      { field: 'FIELD_CREATED_AT', label: 'sort.createdAt' },
+      { field: 'FIELD_NAME', label: 'sort.name' },
+    ],
+    defaultSort: { field: 'FIELD_CREATED_AT', direction: 'SORT_DIRECTION_DESC' },
+  },
+
+  form: {
+    fields: [
+      { key: 'name', type: 'localizedString', label: 'fields.name', required: true },
+      { key: 'description', type: 'localizedString', label: 'fields.description' },
+      { key: 'parentId', type: 'relation', relation: 'categories', tree: true, label: 'fields.parentCategory' },
+      { key: 'status', type: 'enum', enum: 'CategoryStatus', label: 'fields.status', editOnly: true },
+    ],
+  },
+}

@@ -18,6 +18,11 @@
       "label": "Partneri",
       "create": "Novi partner",
       "edit": "Izmena partnera"
+    },
+    "categories": {
+      "label": "Kategorije",
+      "create": "Nova kategorija",
+      "edit": "Izmena kategorije"
     }
   },
   "fields": {
@@ -29,7 +34,8 @@
     "email": "Email",
     "address": "Adresa",
     "note": "Napomena",
-    "commissionPercentage": "Provizija, %"
+    "commissionPercentage": "Provizija, %",
+    "parentCategory": "Nadređena kategorija"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -42,7 +48,10 @@
       "BRAND_STATUS_UNSPECIFIED": "Nepoznato",
       "PARTNER_STATUS_ACTIVE": "Aktivan",
       "PARTNER_STATUS_INACTIVE": "Neaktivan",
-      "PARTNER_STATUS_UNSPECIFIED": "Nepoznato"
+      "PARTNER_STATUS_UNSPECIFIED": "Nepoznato",
+      "CATEGORY_STATUS_ACTIVE": "Aktivna",
+      "CATEGORY_STATUS_INACTIVE": "Neaktivna",
+      "CATEGORY_STATUS_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {
@@ -57,7 +66,8 @@
     "deleteConfirmBody": "Ova radnja je nepovratna. Da li ste sigurni da želite da obrišete ovaj zapis?",
     "loading": "Učitavanje...",
     "empty": "Nema podataka",
-    "loadMore": "Učitaj još"
+    "loadMore": "Učitaj još",
+    "none": "Nijedna"
   },
   "login": {
     "title": "Prijava",

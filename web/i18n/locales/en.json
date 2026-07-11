@@ -18,6 +18,11 @@
       "label": "Partners",
       "create": "New partner",
       "edit": "Edit partner"
+    },
+    "categories": {
+      "label": "Categories",
+      "create": "New category",
+      "edit": "Edit category"
     }
   },
   "fields": {
@@ -29,7 +34,8 @@
     "email": "Email",
     "address": "Address",
     "note": "Note",
-    "commissionPercentage": "Commission, %"
+    "commissionPercentage": "Commission, %",
+    "parentCategory": "Parent category"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -42,7 +48,10 @@
       "BRAND_STATUS_UNSPECIFIED": "Unspecified",
       "PARTNER_STATUS_ACTIVE": "Active",
       "PARTNER_STATUS_INACTIVE": "Inactive",
-      "PARTNER_STATUS_UNSPECIFIED": "Unspecified"
+      "PARTNER_STATUS_UNSPECIFIED": "Unspecified",
+      "CATEGORY_STATUS_ACTIVE": "Active",
+      "CATEGORY_STATUS_INACTIVE": "Inactive",
+      "CATEGORY_STATUS_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {
@@ -57,7 +66,8 @@
     "deleteConfirmBody": "This action cannot be undone. Are you sure you want to delete this record?",
     "loading": "Loading...",
     "empty": "No data",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "none": "None"
   },
   "login": {
     "title": "Sign in",

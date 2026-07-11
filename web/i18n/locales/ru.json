@@ -18,6 +18,11 @@
       "label": "Партнёры",
       "create": "Новый партнёр",
       "edit": "Редактирование партнёра"
+    },
+    "categories": {
+      "label": "Категории",
+      "create": "Новая категория",
+      "edit": "Редактирование категории"
     }
   },
   "fields": {
@@ -29,7 +34,8 @@
     "email": "Email",
     "address": "Адрес",
     "note": "Заметка",
-    "commissionPercentage": "Комиссия, %"
+    "commissionPercentage": "Комиссия, %",
+    "parentCategory": "Родительская категория"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -42,7 +48,10 @@
       "BRAND_STATUS_UNSPECIFIED": "Не указано",
       "PARTNER_STATUS_ACTIVE": "Активен",
       "PARTNER_STATUS_INACTIVE": "Неактивен",
-      "PARTNER_STATUS_UNSPECIFIED": "Не указано"
+      "PARTNER_STATUS_UNSPECIFIED": "Не указано",
+      "CATEGORY_STATUS_ACTIVE": "Активна",
+      "CATEGORY_STATUS_INACTIVE": "Неактивна",
+      "CATEGORY_STATUS_UNSPECIFIED": "Не указано"
     }
   },
   "common": {
@@ -57,7 +66,8 @@
     "deleteConfirmBody": "Это действие необратимо. Вы уверены, что хотите удалить эту запись?",
     "loading": "Загрузка...",
     "empty": "Нет данных",
-    "loadMore": "Загрузить ещё"
+    "loadMore": "Загрузить ещё",
+    "none": "Нет"
   },
   "login": {
     "title": "Вход",

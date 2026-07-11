@@ -57,4 +57,9 @@ export const STATUS_COLOR_MAP = {
     PARTNER_STATUS_INACTIVE: 'inactive',
     PARTNER_STATUS_UNSPECIFIED: 'inactive',
   },
+  category: {
+    CATEGORY_STATUS_ACTIVE: 'active',
+    CATEGORY_STATUS_INACTIVE: 'inactive',
+    CATEGORY_STATUS_UNSPECIFIED: 'inactive',
+  },
 }

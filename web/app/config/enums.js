@@ -10,6 +10,10 @@ export const ENUMS = {
     values: ['PARTNER_STATUS_ACTIVE', 'PARTNER_STATUS_INACTIVE'],
     labelKey: (value) => `enums.partnerStatus.${value}`,
   },
+  CategoryStatus: {
+    values: ['CATEGORY_STATUS_ACTIVE', 'CATEGORY_STATUS_INACTIVE'],
+    labelKey: (value) => `enums.categoryStatus.${value}`,
+  },
 }
 
 export function getEnumOptions(enumName) {
