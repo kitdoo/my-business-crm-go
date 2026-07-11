@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "dashboard": "Kontrolna tabla",
+    "catalog": "Katalog"
+  },
+  "entities": {
+    "brands": {
+      "label": "Brendovi",
+      "create": "Novi brend",
+      "edit": "Izmena brenda"
+    }
+  },
+  "fields": {
+    "name": "Naziv",
+    "description": "Opis",
+    "status": "Status",
+    "createdAt": "Kreirano"
+  },
+  "sort": {
+    "createdAt": "Po datumu kreiranja",
+    "name": "Po nazivu"
+  },
+  "enums": {
+    "status": {
+      "BRAND_STATUS_ACTIVE": "Aktivan",
+      "BRAND_STATUS_INACTIVE": "Neaktivan",
+      "BRAND_STATUS_UNSPECIFIED": "Nepoznato"
+    }
+  },
+  "common": {
+    "create": "Kreiraj",
+    "save": "Sačuvaj",
+    "cancel": "Otkaži",
+    "confirm": "Potvrdi",
+    "edit": "Izmeni",
+    "delete": "Obriši",
+    "actions": "Radnje",
+    "deleteConfirmTitle": "Brisanje zapisa",
+    "deleteConfirmBody": "Ova radnja je nepovratna. Da li ste sigurni da želite da obrišete ovaj zapis?",
+    "loading": "Učitavanje...",
+    "empty": "Nema podataka",
+    "loadMore": "Učitaj još"
+  },
+  "login": {
+    "title": "Prijava",
+    "login": "Telefon ili email",
+    "password": "Lozinka",
+    "submit": "Prijavi se",
+    "error": "Neuspešna prijava"
+  },
+  "topbar": {
+    "changePassword": "Promeni lozinku",
+    "logout": "Odjava"
+  },
+  "errors": {
+    "generic": "Došlo je do neočekivane greške",
+    "notFound": "Zapis nije pronađen",
+    "alreadyExists": "Vrednost već postoji",
+    "staleEntity": "Zapis je izmenjen od strane drugog korisnika",
+    "permissionDenied": "Nemate dovoljno prava",
+    "unimplemented": "Funkcija trenutno nije dostupna",
+    "etagConflictTitle": "Zapis izmenjen od strane drugog korisnika",
+    "etagConflictBody": "Neko je izmenio ovaj zapis dok ste ga vi uređivali. Osvežite podatke i pokušajte ponovo.",
+    "etagConflictReload": "Osveži"
+  }
+}

@@ -1,0 +1,25 @@
+syntax = "proto3";
+package crm.types.common;
+
+// Mirrors proto/types/common/*.proto on the backend, without buf.validate
+// annotations (server-side enforcement stays authoritative; the frontend
+// mirrors constraints separately via Zod — see docs TD §11).
+
+message LocalizedString {
+  map<string, string> values = 1;
+}
+
+message Pagination {
+  int64 limit = 1;
+  optional string cursor = 2;
+}
+
+message PeriodFilter {
+  optional int64 from = 1;
+  optional int64 to = 2;
+}
+
+enum SortDirection {
+  SORT_DIRECTION_ASC = 0;
+  SORT_DIRECTION_DESC = 1;
+}

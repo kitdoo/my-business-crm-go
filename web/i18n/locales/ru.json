@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "dashboard": "Дашборд",
+    "catalog": "Каталог"
+  },
+  "entities": {
+    "brands": {
+      "label": "Бренды",
+      "create": "Новый бренд",
+      "edit": "Редактирование бренда"
+    }
+  },
+  "fields": {
+    "name": "Название",
+    "description": "Описание",
+    "status": "Статус",
+    "createdAt": "Создан"
+  },
+  "sort": {
+    "createdAt": "По дате создания",
+    "name": "По названию"
+  },
+  "enums": {
+    "status": {
+      "BRAND_STATUS_ACTIVE": "Активен",
+      "BRAND_STATUS_INACTIVE": "Неактивен",
+      "BRAND_STATUS_UNSPECIFIED": "Не указано"
+    }
+  },
+  "common": {
+    "create": "Создать",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "edit": "Изменить",
+    "delete": "Удалить",
+    "actions": "Действия",
+    "deleteConfirmTitle": "Удаление записи",
+    "deleteConfirmBody": "Это действие необратимо. Вы уверены, что хотите удалить эту запись?",
+    "loading": "Загрузка...",
+    "empty": "Нет данных",
+    "loadMore": "Загрузить ещё"
+  },
+  "login": {
+    "title": "Вход",
+    "login": "Телефон или email",
+    "password": "Пароль",
+    "submit": "Войти",
+    "error": "Не удалось войти"
+  },
+  "topbar": {
+    "changePassword": "Сменить пароль",
+    "logout": "Выйти"
+  },
+  "errors": {
+    "generic": "Произошла непредвиденная ошибка",
+    "notFound": "Запись не найдена",
+    "alreadyExists": "Такое значение уже существует",
+    "staleEntity": "Запись изменена другим пользователем",
+    "permissionDenied": "Недостаточно прав",
+    "unimplemented": "Функция временно недоступна",
+    "etagConflictTitle": "Запись изменена другим пользователем",
+    "etagConflictBody": "Кто-то изменил эту запись, пока вы её редактировали. Обновите данные и повторите попытку.",
+    "etagConflictReload": "Обновить"
+  }
+}

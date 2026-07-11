@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/*
+ * Tailwind v4 reads theme colors from CSS, not JS, so these custom
+ * properties are the CSS mirror of app/design/tokens.js color.brand /
+ * color.status. If you change the brand color, update BOTH tokens.js
+ * (JS/component consumers) and the --color-brand-* block below.
+ */
+@theme static {
+  --color-brand-50: #f4f9fa;
+  --color-brand-100: #e8f3f5;
+  --color-brand-200: #d0e6ea;
+  --color-brand-300: #b7dbe1;
+  --color-brand-400: #9ed0d8;
+  --color-brand-500: #85c5cf;
+  --color-brand-600: #6ba9b2;
+  --color-brand-700: #558790;
+  --color-brand-800: #3f656c;
+  --color-brand-900: #2a4448;
+}
+
+body {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/*
+ * Field styling per stakeholder note: white background, black slightly
+ * rounded border, black text — applied via Nuxt UI's semantic tokens so
+ * every UInput/USelect/UTextarea/etc. picks it up without per-component
+ * overrides.
+ */
+:root,
+.light {
+  --ui-bg: #ffffff;
+  --ui-text-highlighted: #000000;
+  --ui-border-accented: #000000;
+  --ui-radius: 0.5rem;
+}
