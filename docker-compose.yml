@@ -1,20 +1,23 @@
 # Bounded JSON-file logging for every service — restart: unless-stopped
 # plus JSON logs to stdout with no rotation will otherwise fill the disk
-# on a long-running VM.
+# on a long-running VM. Not an "environment:" entry, so bare passthrough
+# doesn't apply here — needs an actual value, hence ${VAR:-default}.
 x-logging: &default-logging
   driver: json-file
   options:
-    max-size: "10m"
-    max-file: "5"
+    max-size: "${LOG_MAX_SIZE:-10m}"
+    max-file: "${LOG_MAX_FILE:-5}"
 
 services:
   mongo:
     image: mongo:7
     restart: unless-stopped
     logging: *default-logging
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD must be set}
+    # Loads every KEY=VALUE line straight from .env into the container's
+    # environment — no need to list each name here, and no compose-level
+    # validation (see .env.docker-compose.example for what mongo expects).
+    env_file:
+      - .env
     volumes:
       - mongo_data:/data/db
     # No published port: only the backend needs to reach mongo, over the
@@ -89,69 +92,14 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    # List form (not the map form the other services use): the SMTP/
-    # notification-client entries at the bottom must be passed through
-    # bare (no `:-` default) so they're entirely absent from the
-    # container when unset in the shell/.env — see the comment there.
-    environment:
-      - GRPC__LISTEN_ADDRESS=0.0.0.0:7779
-      - GRPC__REFLECTION=true
-      - GRPC__LOG_REQUESTS=true
-
-      - HTTP__LISTEN_ADDRESS=0.0.0.0:9080
-      - HTTP__LOG_REQUESTS=true
-
-      - LOGGER__LEVEL=${LOGGER_LEVEL:-info}
-      - LOGGER__OUTPUT_FORMAT=json
-      - LOGGER__COLORIZED=false
-
-      - MONGODB__HOSTS=[mongo:27017]
-      - MONGODB__DATABASE=${MONGODB_DATABASE:-my-business-crm}
-      - MONGODB__CREDENTIALS__AUTH_MECHANISM=SCRAM-SHA-256
-      - MONGODB__CREDENTIALS__SCRAM__AUTH_SOURCE=admin
-      - MONGODB__CREDENTIALS__SCRAM__USERNAME=${MONGO_ROOT_USER:-admin}
-      - MONGODB__CREDENTIALS__SCRAM__PASSWORD=${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD must be set}
-      - MONGODB__DIRECT_CONNECTION=true
-
-      - REDIS__HOSTS=[redis:6379]
-      - REDIS__DATABASE=${REDIS_DATABASE:-0}
-
-      - NODE__ID=${NODE_ID:-1}
-
-      - OBSERVABILITY__METRICS__ENABLED=true
-      - OBSERVABILITY__METRICS__TYPE=prometheus
-      - OBSERVABILITY__METRICS__SERVICE_NAME=my-business-crm
-
-      - CRM__AUTH__SIGNING_KEY=${CRM_SIGNING_KEY:?CRM_SIGNING_KEY must be set}
-      - CRM__AUTH__TOKEN_TTL=72h
-
-      - CRM__BOOTSTRAP_ADMIN__NAME=${CRM_BOOTSTRAP_ADMIN_NAME:-Admin}
-      - CRM__BOOTSTRAP_ADMIN__PHONE=${CRM_BOOTSTRAP_ADMIN_PHONE:-+000000000000}
-      - CRM__BOOTSTRAP_ADMIN__EMAIL=${CRM_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
-      - CRM__BOOTSTRAP_ADMIN__PASSWORD=${CRM_BOOTSTRAP_ADMIN_PASSWORD:?CRM_BOOTSTRAP_ADMIN_PASSWORD must be set}
-
-      - CRM__RBAC__admin=*
-      - CRM__RBAC__employee=products:read,products:create,categories:read,categories:create,brands:read,brands:create,sales:create
-
-      # Explicit rather than relying on the "<var-dir>/images" implicit
-      # default (internal/fx/images.go) — matches the backend_images
-      # volume mount above regardless of how VAR_DIR ends up configured.
-      - CRM__IMAGES__DIR=/var/images
-
-      # Outbound SMTP for NotificationsService.Send (web-public/'s contact/
-      # dealer forms) and the client key it must present — both optional,
-      # but CRMConfig.Smtp requires every field once that section exists
-      # at all, so these are passed through bare (no `=value`, no `:-`
-      # default): unset in the shell/.env, the key is entirely absent from
-      # the container and Smtp stays nil (form delivery disabled); set it
-      # (see .env.docker-compose.example) and it's forwarded as-is.
-      - CRM__SMTP__HOST
-      - CRM__SMTP__PORT
-      - CRM__SMTP__USERNAME
-      - CRM__SMTP__PASSWORD
-      - CRM__SMTP__FROM
-      - CRM__SMTP__TO
-      - CRM__NOTIFICATION_CLIENTS__web_public
+    # Loads every KEY=VALUE line straight from .env into the container's
+    # environment — no need to list each name here. Names in .env match
+    # the app's own CRM__/GRPC__/... config keys directly (double
+    # underscore = nested config); the backend validates its own config
+    # at startup and fails fast on missing required fields (see
+    # internal/pkg/appconfig), so there's no compose-level `:?` here.
+    env_file:
+      - .env
 
   web:
     # See the comment on backend's image/build above.
@@ -165,14 +113,18 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "${WEB_PORT:-3000}:3000"
+    # Unlike backend (which validates its own config and fails fast on
+    # missing required fields), the Nuxt apps do no such validation
+    # themselves — so required-ness is enforced here with `:?` instead of
+    # bare passthrough.
     environment:
-      NUXT_GRPC_BASE_URL: backend:7779
-      NUXT_GRPC_TIMEOUT_MS: 15000
-      NUXT_IMAGES_BASE_URL: http://backend:9080
-      NUXT_IMAGES_MAX_SIZE_BYTES: 10485760
+      NUXT_GRPC_BASE_URL: ${NUXT_GRPC_BASE_URL:-backend:7779}
+      NUXT_GRPC_TIMEOUT_MS: ${NUXT_GRPC_TIMEOUT_MS:-15000}
+      NUXT_IMAGES_BASE_URL: ${NUXT_IMAGES_BASE_URL:-http://backend:9080}
+      NUXT_IMAGES_MAX_SIZE_BYTES: ${NUXT_IMAGES_MAX_SIZE_BYTES:-10485760}
       NUXT_SESSION_SECRET: ${NUXT_SESSION_SECRET:?NUXT_SESSION_SECRET must be set}
-      NUXT_SESSION_TTL_SECONDS: 43200
+      NUXT_SESSION_TTL_SECONDS: ${NUXT_SESSION_TTL_SECONDS:-43200}
 
   web-public:
     # See the comment on backend's image/build above.
@@ -186,16 +138,21 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "3001:3000"
+      - "${WEB_PUBLIC_PORT:-3001}:3000"
+    # Unlike backend (which validates its own config and fails fast on
+    # missing required fields), the Nuxt apps do no such validation
+    # themselves — so required-ness is enforced here with `:?` instead of
+    # bare passthrough. NUXT_GRPC_CLIENT_KEY is the one intentional
+    # exception: it must match one of the values under
+    # CRM__NOTIFICATION_CLIENTS__* on the backend (see
+    # .env.docker-compose.example), but left unset, the contact/dealer
+    # forms just fail at submit time with a clear error instead of
+    # blocking startup — so it defaults to empty rather than `:?`.
     environment:
-      NUXT_GRPC_BASE_URL: backend:7779
-      NUXT_GRPC_TIMEOUT_MS: 15000
-      # Must match one of the values under CRM__NOTIFICATION_CLIENTS__* on
-      # the backend (see .env.docker-compose.example). Optional like that
-      # section — left empty, the contact/dealer forms fail at submit time
-      # with a clear error instead of blocking the container from starting.
+      NUXT_GRPC_BASE_URL: ${NUXT_GRPC_BASE_URL:-backend:7779}
+      NUXT_GRPC_TIMEOUT_MS: ${NUXT_GRPC_TIMEOUT_MS:-15000}
       NUXT_GRPC_CLIENT_KEY: ${NUXT_GRPC_CLIENT_KEY:-}
-      NUXT_IMAGES_BASE_URL: http://backend:9080
+      NUXT_IMAGES_BASE_URL: ${NUXT_IMAGES_BASE_URL:-http://backend:9080}
       NUXT_PUBLIC_ADMIN_URL: ${NUXT_PUBLIC_ADMIN_URL:-http://localhost:3000/login}
       NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL:-http://localhost:3001}
 
