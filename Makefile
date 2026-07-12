@@ -4,7 +4,7 @@ UNAME := $(shell uname)
 PROJECT_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 APP_NAME = my-business-crm
 APP_PROJECT = my-business-crm
-APP_ENV_PREFIX ?= CRM_
+APP_ENV_PREFIX ?=
 APP_VERSION ?= v$(shell git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
 APP_VERSION_COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
