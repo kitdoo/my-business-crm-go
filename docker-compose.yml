@@ -1,14 +1,27 @@
+# Bounded JSON-file logging for every service — restart: unless-stopped
+# plus JSON logs to stdout with no rotation will otherwise fill the disk
+# on a long-running VM.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   mongo:
     image: mongo:7
     restart: unless-stopped
+    logging: *default-logging
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD must be set}
     volumes:
       - mongo_data:/data/db
-    ports:
-      - "27017:27017"
+    # No published port: only the backend needs to reach mongo, over the
+    # compose-internal network (service name "mongo"). Publishing 27017
+    # to the host exposes it to the internet on a cloud VM unless a
+    # firewall blocks it — a well-known mass-scan target. Use
+    # `docker compose exec mongo mongosh` for ad-hoc access instead.
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -18,10 +31,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    logging: *default-logging
     volumes:
       - redis_data:/data
-    ports:
-      - "6379:6379"
+    # No published port — same rationale as mongo above.
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -37,17 +50,37 @@ services:
         APP_VERSION: ${APP_VERSION:-dev}
         APP_VERSION_COMMIT: ${APP_VERSION_COMMIT:-local}
     restart: unless-stopped
+    logging: *default-logging
     command: ["server", "run", "-c", "/app/configs"]
     volumes:
       - ./configs:/app/configs:ro
+      # Product images (internal/transports/http/handlers/image) are
+      # written under CRM__IMAGES__DIR below. Without a volume here they
+      # live only in the container's writable layer and are lost on
+      # `docker compose down`, a rebuild, or any container recreate.
+      - backend_images:/var/images
     depends_on:
       mongo:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "7779:7779"
-      - "9080:9080"
+    # No published ports: gRPC (7779) and the image-upload/serve HTTP
+    # port (9080) are reached by web/web-public over the compose-internal
+    # network only. Several RPCs are intentionally anonymous (see
+    # internal/transports/grpc/interceptors/auth.New) on the assumption
+    # that the gRPC port is never reachable from outside the two Nitro
+    # BFFs — publishing it to the host on a cloud VM would break that
+    # assumption (doubly so with GRPC__REFLECTION enabled below, which
+    # makes the whole API trivially enumerable).
+    healthcheck:
+      # readyz (not healthz): web/web-public's depends_on below waits on
+      # this, so it needs to reflect "can actually serve requests"
+      # (mongo/redis reachable), not just "process is alive".
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9080/internal/readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     # List form (not the map form the other services use): the SMTP/
     # notification-client entries at the bottom must be passed through
     # bare (no `:-` default) so they're entirely absent from the
@@ -69,7 +102,7 @@ services:
       - MONGODB__CREDENTIALS__AUTH_MECHANISM=SCRAM-SHA-256
       - MONGODB__CREDENTIALS__SCRAM__AUTH_SOURCE=admin
       - MONGODB__CREDENTIALS__SCRAM__USERNAME=${MONGO_ROOT_USER:-admin}
-      - MONGODB__CREDENTIALS__SCRAM__PASSWORD=${MONGO_ROOT_PASSWORD:-changeme}
+      - MONGODB__CREDENTIALS__SCRAM__PASSWORD=${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD must be set}
       - MONGODB__DIRECT_CONNECTION=true
 
       - REDIS__HOSTS=[redis:6379]
@@ -92,6 +125,11 @@ services:
       - CRM__RBAC__admin=*
       - CRM__RBAC__employee=products:read,products:create,categories:read,categories:create,brands:read,brands:create,sales:create
 
+      # Explicit rather than relying on the "<var-dir>/images" implicit
+      # default (internal/fx/images.go) — matches the backend_images
+      # volume mount above regardless of how VAR_DIR ends up configured.
+      - CRM__IMAGES__DIR=/var/images
+
       # Outbound SMTP for NotificationsService.Send (web-public/'s contact/
       # dealer forms) and the client key it must present — both optional,
       # but CRMConfig.Smtp requires every field once that section exists
@@ -112,8 +150,10 @@ services:
       context: ./web
       dockerfile: Dockerfile
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
@@ -129,8 +169,10 @@ services:
       context: ./web-public
       dockerfile: Dockerfile
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "3001:3000"
     environment:
@@ -148,3 +190,4 @@ services:
 volumes:
   mongo_data:
   redis_data:
+  backend_images:
