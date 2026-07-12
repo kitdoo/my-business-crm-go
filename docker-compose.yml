@@ -42,6 +42,14 @@ services:
       retries: 5
 
   backend:
+    # image is used by `docker compose pull`/`up` as-is (this is what the
+    # VM does — it never builds); `build:` is only consulted by `docker
+    # compose build` / `up --build`, e.g. on a dev machine with the repo
+    # checked out. Images are published by .github/workflows/
+    # docker-publish.yml on every vX.Y.Z git tag. IMAGE_TAG defaults to
+    # "latest" — pin it to a specific version to control what a `pull`
+    # picks up instead of always tracking the newest tagged release.
+    image: ghcr.io/kitdoo/my-business-crm-go:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
@@ -146,6 +154,8 @@ services:
       - CRM__NOTIFICATION_CLIENTS__web_public
 
   web:
+    # See the comment on backend's image/build above.
+    image: ghcr.io/kitdoo/my-business-crm-go-web:${IMAGE_TAG:-latest}
     build:
       context: ./web
       dockerfile: Dockerfile
@@ -165,6 +175,8 @@ services:
       NUXT_SESSION_TTL_SECONDS: 43200
 
   web-public:
+    # See the comment on backend's image/build above.
+    image: ghcr.io/kitdoo/my-business-crm-go-web-public:${IMAGE_TAG:-latest}
     build:
       context: ./web-public
       dockerfile: Dockerfile

@@ -35,7 +35,10 @@ configs/dev*
 .DS_Store
 var
 
-# Local environment
-.env
+# Local environment — ignore every .env variant (.env, .env2, web/.env,
+# etc.) except the committed *.example templates.
+.env*
+!.env.docker-compose.example
+!.env.example
 
 vendor/

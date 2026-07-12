@@ -23,6 +23,8 @@ LDFLAGS := $(LDFLAGS) -extldflags=-Wl,-ld_classic
 endif
 
 DOCKER_IMAGE ?= "ghcr.io/kitdoo/my-business-crm-go"
+DOCKER_IMAGE_WEB ?= "ghcr.io/kitdoo/my-business-crm-go-web"
+DOCKER_IMAGE_WEB_PUBLIC ?= "ghcr.io/kitdoo/my-business-crm-go-web-public"
 DOCKER_IMAGE_LATEST_TAG = "latest"
 
 ifeq ($(findstring alpha,$(APP_VERSION)), alpha)
@@ -161,8 +163,10 @@ proto-go: ## Generate Go protobuf bindings into proto/gen/go/
 proto-js: ## Generate JavaScript protobuf bindings into proto/gen/js/ (requires protoc-gen-es on PATH: npm i -g @bufbuild/protoc-gen-es)
 	@cd proto && NODE_OPTIONS="--no-experimental-webstorage" buf generate --template buf.gen.js.yaml
 
+##@ Docker
+
 .PHONY: build-docker-image
-build-docker-image: ## Build and push the docker image
+build-docker-image: ## Build and push the backend docker image (ghcr.io/.../my-business-crm-go)
 ifndef DOCKER_IMAGE
 	$(error DOCKER_IMAGE is not set)
 endif
@@ -186,3 +190,40 @@ endif
 		--label=org.opencontainers.image.version="${APP_VERSION}" \
 		--label=org.opencontainers.image.created=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		-f ./Dockerfile .
+
+.PHONY: build-docker-image-web
+build-docker-image-web: ## Build and push the admin web docker image (ghcr.io/.../my-business-crm-go-web)
+ifndef DOCKER_IMAGE_WEB
+	$(error DOCKER_IMAGE_WEB is not set)
+endif
+
+	@docker buildx build --push \
+		--platform=linux/amd64 \
+		--output=type=image,push=true \
+		--tag "${DOCKER_IMAGE_WEB}:${APP_VERSION}" \
+		--tag "${DOCKER_IMAGE_WEB}:${DOCKER_IMAGE_LATEST_TAG}" \
+		--label=org.opencontainers.image.title="${APP_NAME}-web" \
+		--label=org.opencontainers.image.revision="${APP_VERSION_COMMIT}" \
+		--label=org.opencontainers.image.version="${APP_VERSION}" \
+		--label=org.opencontainers.image.created=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		-f ./web/Dockerfile ./web
+
+.PHONY: build-docker-image-web-public
+build-docker-image-web-public: ## Build and push the public site docker image (ghcr.io/.../my-business-crm-go-web-public)
+ifndef DOCKER_IMAGE_WEB_PUBLIC
+	$(error DOCKER_IMAGE_WEB_PUBLIC is not set)
+endif
+
+	@docker buildx build --push \
+		--platform=linux/amd64 \
+		--output=type=image,push=true \
+		--tag "${DOCKER_IMAGE_WEB_PUBLIC}:${APP_VERSION}" \
+		--tag "${DOCKER_IMAGE_WEB_PUBLIC}:${DOCKER_IMAGE_LATEST_TAG}" \
+		--label=org.opencontainers.image.title="${APP_NAME}-web-public" \
+		--label=org.opencontainers.image.revision="${APP_VERSION_COMMIT}" \
+		--label=org.opencontainers.image.version="${APP_VERSION}" \
+		--label=org.opencontainers.image.created=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		-f ./web-public/Dockerfile ./web-public
+
+.PHONY: build-docker-images
+build-docker-images: build-docker-image build-docker-image-web build-docker-image-web-public ## Build and push all three docker images

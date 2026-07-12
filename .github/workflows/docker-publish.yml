@@ -1,0 +1,34 @@
+name: Docker Publish
+
+# Builds and pushes all three images (backend, web, web-public) to GHCR
+# on every version tag (v1.2.3, v1.2.3-beta.1, ...). The VM only ever
+# pulls these — it never builds from source. See docker-compose.yml
+# (image: + build: both set) and .env.docker-compose.example.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push all images
+        env:
+          APP_VERSION: ${{ github.ref_name }}
+        run: make build-docker-images
