@@ -4,6 +4,7 @@ const localeHead = useLocaleHead()
 const route = useRoute()
 const localePath = useLocalePath()
 const { getProduct } = useCatalogApi()
+const { addItem } = useCart()
 
 const { data: product, error } = await useAsyncData(`product-${route.params.sku}`, () => getProduct(route.params.sku))
 if (error.value) {
@@ -67,9 +68,14 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
           </div>
         </dl>
 
-        <UButton :to="contactHref" variant="cta-outline" size="xl" class="py-4 text-base" block>
-          {{ t('catalog.contactCta') }}
-        </UButton>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <UButton variant="cta-outline" size="xl" class="py-4 text-base flex-1" @click="addItem(product)">
+            {{ t('cart.addToCart') }}
+          </UButton>
+          <UButton :to="contactHref" variant="cta-outline" size="xl" class="py-4 text-base flex-1">
+            {{ t('catalog.contactCta') }}
+          </UButton>
+        </div>
       </div>
     </div>
   </div>

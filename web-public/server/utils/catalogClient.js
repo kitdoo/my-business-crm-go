@@ -16,7 +16,7 @@ async function call(protoFile, servicePath, methodName, request) {
   return grpcCall(client, methodName, request)
 }
 
-/** @param {{ categoryId?: string, cursor?: string, limit?: number }} opts */
+/** @param {{ categoryId?: string, cursor?: string, limit?: number, sortField?: string, sortDirection?: string }} opts */
 export async function listActiveProducts(opts = {}) {
   const request = {
     filter: {
@@ -24,7 +24,11 @@ export async function listActiveProducts(opts = {}) {
       categoryIds: opts.categoryId ? [opts.categoryId] : [],
     },
     pagination: { limit: opts.limit || 24, cursor: opts.cursor },
-    sort: { field: 'FIELD_CREATED_AT', direction: 'SORT_DIRECTION_DESC' },
+    sort: {
+      field: opts.sortField || 'FIELD_CREATED_AT',
+      direction: opts.sortDirection || 'SORT_DIRECTION_DESC',
+    },
+    options: { includeTotalCount: true },
   }
   return call('product.proto', 'crm.grpc.product.v1.ProductsService', 'List', request)
 }

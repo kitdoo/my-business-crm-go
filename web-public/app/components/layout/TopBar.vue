@@ -1,8 +1,8 @@
 <script setup>
 const { t, locale, locales, setLocale } = useI18n()
 const localePath = useLocalePath()
-const route = useRoute()
-const { scrolled } = useScrollHeader()
+const { isHome, isCompact, scrolled } = useHeaderCompact()
+const { count: cartCount, open: openCart } = useCart()
 const mobileOpen = ref(false)
 
 const navItems = computed(() => [
@@ -18,7 +18,6 @@ const availableLocales = computed(() => locales.value)
 // only there is a transparent-then-brand-on-scroll header appropriate —
 // every other page gets a plain solid black header (item 13), since a
 // transparent one over plain white content was unreadable.
-const isHome = computed(() => route.path === localePath('/'))
 
 const langMenuItems = computed(() => [
   availableLocales.value.map((l) => ({
@@ -38,10 +37,18 @@ function closeMobile() {
     class="fixed inset-x-0 top-0 z-50 text-white transition-colors duration-300"
     :class="!isHome ? 'bg-black' : (scrolled ? 'bg-brand-500 shadow-sm' : 'bg-transparent')"
   >
-    <div class="mx-auto max-w-7xl px-4 lg:px-8 h-28 lg:h-32 flex items-center justify-between">
-      <NuxtLink :to="localePath('/')" class="flex flex-col items-center gap-1">
-        <img src="/images/main_logo.png" alt="PHOMI SRBIJA" class="h-[72px] lg:h-[88px] w-auto object-contain" />
-        <span class="text-[11px] lg:text-xs tracking-[0.2em] text-white">
+    <div
+      class="mx-auto max-w-7xl 2xl:max-w-[1800px] px-4 lg:px-8 flex items-center justify-between transition-[height] duration-300"
+      :class="isCompact ? 'h-16 lg:h-20' : 'h-28 lg:h-32'"
+    >
+      <NuxtLink :to="localePath('/')" class="flex flex-col items-center transition-all duration-300" :class="isCompact ? 'gap-0 pt-0' : 'gap-1 pt-3'">
+        <img
+          src="/images/main_logo.png"
+          alt="PHOMI SRBIJA"
+          class="w-auto object-contain transition-[height] duration-300"
+          :class="isCompact ? 'h-8 lg:h-10' : 'h-[72px] lg:h-[88px]'"
+        />
+        <span class="tracking-[0.2em] text-white transition-[font-size] duration-300" :class="isCompact ? 'text-[10px] lg:text-xs' : 'text-sm lg:text-base'">
           <span class="font-bold">PHOMI</span> <span class="font-light">SRBIJA</span>
         </span>
       </NuxtLink>
@@ -52,8 +59,8 @@ function closeMobile() {
             v-for="item in navItems"
             :key="item.to"
             :to="item.to"
-            class="hover:text-[#333333] transition-colors"
-            active-class="text-[#333333]"
+            class="hover:text-brand-500 transition-colors"
+            active-class="text-brand-500"
           >
             {{ item.label }}
           </NuxtLink>
@@ -66,15 +73,41 @@ function closeMobile() {
             {{ locale }}
           </button>
         </UDropdownMenu>
+
+        <button class="relative" :aria-label="t('cart.title')" @click="openCart">
+          <UIcon name="i-lucide-shopping-cart" class="w-6 h-6" />
+          <span
+            v-if="cartCount"
+            class="absolute -top-2 -right-2 min-w-4 h-4 px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center"
+          >
+            {{ cartCount }}
+          </span>
+        </button>
       </div>
 
-      <button class="lg:hidden" :aria-label="t('nav.menu')" @click="mobileOpen = true">
-        <UIcon name="i-lucide-menu" class="w-7 h-7" />
-      </button>
+      <div class="flex items-center gap-4 lg:hidden">
+        <button class="relative" :aria-label="t('cart.title')" @click="openCart">
+          <UIcon name="i-lucide-shopping-cart" class="w-6 h-6" />
+          <span
+            v-if="cartCount"
+            class="absolute -top-2 -right-2 min-w-4 h-4 px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center"
+          >
+            {{ cartCount }}
+          </span>
+        </button>
+        <button :aria-label="t('nav.menu')" @click="mobileOpen = true">
+          <UIcon name="i-lucide-menu" class="w-7 h-7" />
+        </button>
+      </div>
     </div>
 
-    <!-- Mobile overlay menu — TZ §4.1 -->
-    <div v-if="mobileOpen" class="fixed inset-0 z-[60] bg-[#333333] text-white flex flex-col">
+    <!-- Mobile overlay menu — TZ §4.1. Full-screen only on real phone
+         widths; from `sm:` up it's a right-anchored drawer so it doesn't
+         look like an empty full-screen blank on tablets. -->
+    <div
+      v-if="mobileOpen"
+      class="fixed inset-0 sm:inset-y-0 sm:left-auto sm:right-0 sm:w-96 sm:max-w-[85vw] z-[60] bg-[#333333] text-white flex flex-col shadow-2xl"
+    >
       <div class="flex items-center justify-between px-4 h-16">
         <span class="font-bold">PHOMI SRBIJA</span>
         <button :aria-label="t('nav.close')" @click="closeMobile">
@@ -98,5 +131,7 @@ function closeMobile() {
         </button>
       </div>
     </div>
+
+    <CartDrawer />
   </header>
 </template>

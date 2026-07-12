@@ -15,6 +15,7 @@ message Partner {
   int32 commissionPercentage = 8;
   string note = 9;
   PartnerStatus status = 10;
+  string address = 11;
   string etag = 101;
 }
 

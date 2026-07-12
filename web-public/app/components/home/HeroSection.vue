@@ -15,13 +15,13 @@ const { t } = useI18n()
       fetchpriority="high"
     />
     <div class="absolute inset-0 bg-black/30" />
-    <div class="relative z-10 mx-auto max-w-7xl w-full px-4 lg:px-8 -mt-16 lg:-mt-24 text-white text-right">
+    <div class="relative z-10 mx-auto max-w-7xl 2xl:max-w-[1800px] w-full px-4 lg:px-8 -mt-28 lg:-mt-40 text-white text-right">
       <h1 class="text-hero max-w-3xl ml-auto">{{ t('home.hero.title') }}</h1>
       <p class="mt-4 max-w-xl ml-auto text-lg text-white/90">{{ t('home.hero.subtitle') }}</p>
     </div>
     <UIcon
       name="i-lucide-chevron-down"
-      class="absolute z-10 bottom-8 right-8 w-6 h-6 text-white/80 animate-bounce"
+      class="absolute z-10 bottom-8 right-1/4 w-6 h-6 text-white/80 animate-bounce"
     />
   </section>
 </template>

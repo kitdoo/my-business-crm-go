@@ -21,7 +21,7 @@
   },
   "home": {
     "hero": {
-      "title": "A new generation of PHOMI facade and wall panels",
+      "title": "A new generation of facade and wall panels",
       "subtitle": "Eco-friendly, lightweight and durable cladding for every building."
     },
     "about": {
@@ -87,15 +87,45 @@
     "empty": "No products available right now.",
     "loadMore": "Load more",
     "contactCta": "Contact us about this product",
-    "contactPrefill": "I'm interested in: {sku} — {name}"
+    "contactPrefill": "I'm interested in: {sku} — {name}",
+    "intro": "PHOMI offers a wide range of materials — stone, wood, brick and concrete looks, as well as solar and display panels — all in one lightweight, flexible system. Equally suited to facades and interiors, delivering a modern look with fast, easy installation.",
+    "sort": {
+      "label": "Sort by",
+      "newest": "Newest",
+      "nameAsc": "Name A-Z",
+      "nameDesc": "Name Z-A"
+    },
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "pageOf": "Page {page} of {total}"
   },
   "dealer": {
     "intro": "Fill in the form and our team will contact you about partnership.",
     "thanksTitle": "Thank you for applying!",
-    "thanksText": "Your request has been received. We will contact you soon."
+    "thanksText": "Your request has been received. We will contact you soon.",
+    "whyTitle": "Why become a PHOMI partner?",
+    "whyText1": "We are actively growing our distributor network in Serbia and the region, offering a product with over 4,000 designs, fast installation and proven demand in the facade and interior market.",
+    "whyText2": "Partners get retail and wholesale support, marketing materials and access to the full PHOMI catalog — join a network that is already growing worldwide.",
+    "partnersTitle": "Our current partners",
+    "partnersEmpty": "The partner list is currently unavailable."
   },
   "contact": {
-    "thanks": "Thank you! Your message has been sent."
+    "thanks": "Thank you! Your message has been sent.",
+    "address": "Veselina Masleše 56, Novi Sad, Serbia",
+    "showroomLabel": "Main showroom"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty.",
+    "addToCart": "Add to cart",
+    "remove": "Remove",
+    "checkout": "Send inquiry",
+    "checkoutTitle": "Send an inquiry about these products",
+    "messageLabel": "Selected products",
+    "back": "Back",
+    "send": "Send",
+    "thanks": "Thank you! Your inquiry has been sent, we'll contact you soon.",
+    "total": "Total"
   },
   "forms": {
     "submit": "Send",
@@ -122,9 +152,13 @@
     "tomStudioText": "[Replace this text with the Tom Studio 021 doo description.]"
   },
   "common": {
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "prev": "Previous",
+    "next": "Next"
   },
   "projects": {
+    "usedMaterials": "Materials used",
+    "recommendedMaterials": "Recommended / similar",
     "items": {
       "p1": "Family house — [location]",
       "p2": "Commercial building — [location]",

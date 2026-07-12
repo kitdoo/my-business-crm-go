@@ -27,6 +27,11 @@ body {
 .light {
   --ui-bg: #ffffff;
   --ui-text-highlighted: #000000;
+  /* Form field labels use text-default (--ui-text), which defaults to a
+     pale neutral-700 that read as near-invisible on white form backgrounds
+     — force it dark like --ui-text-highlighted. */
+  --ui-text: #1a1a1a;
+  --ui-text-toned: #1a1a1a;
   --ui-border-accented: #000000;
   --ui-radius: 0.5rem;
 }

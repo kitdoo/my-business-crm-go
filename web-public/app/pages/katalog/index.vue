@@ -1,40 +1,89 @@
 <script setup>
-const { t } = useI18n()
+import { localizedText } from '~/utils/localizedText.js'
+
+const { t, locale } = useI18n()
 const localeHead = useLocaleHead()
 const { listProducts, listCategories } = useCatalogApi()
 const route = useRoute()
 const router = useRouter()
 
-const activeCategoryId = ref(route.query.category?.toString() || '')
+const PAGE_SIZE = 12
+
+// Reka UI's SelectItem rejects an empty-string value outright (it's the
+// sentinel Radix/Reka reserves for "no selection"), which was silently
+// breaking the whole category <USelect> — and apparently left its portal
+// stuck open, eating clicks on the nav links behind it. ALL_CATEGORIES is
+// a non-empty sentinel, translated back to "no filter" wherever it's used.
+const ALL_CATEGORIES = '__all__'
+
+const activeCategoryId = ref(route.query.category?.toString() || ALL_CATEGORIES)
+const activeSort = ref(route.query.sort?.toString() || 'newest')
 
 const { data: categoriesData } = await useAsyncData('catalog-categories', () => listCategories())
 const categories = computed(() => categoriesData.value?.items || [])
+const categoryOptions = computed(() => [
+  { label: t('catalog.allCategories'), value: ALL_CATEGORIES },
+  ...categories.value.map((c) => ({ label: localizedText(c.name, locale.value), value: c.id })),
+])
+
+const sortOptions = computed(() => [
+  { label: t('catalog.sort.newest'), value: 'newest' },
+  { label: t('catalog.sort.nameAsc'), value: 'name_asc' },
+  { label: t('catalog.sort.nameDesc'), value: 'name_desc' },
+])
 
 const items = ref([])
-const nextCursor = ref(null)
+const total = ref(0)
 const loading = ref(false)
 const initialLoading = ref(true)
+// Backend pagination is cursor-based (no offset), so arbitrary page jumps
+// aren't possible — we keep the cursor of every page we've visited so
+// Prev/Next can move one page at a time.
+const cursorHistory = ref([undefined])
+const currentPage = ref(1)
+const nextCursor = ref(null)
 
-async function loadPage(reset = false) {
+const totalPages = computed(() => (total.value ? Math.max(1, Math.ceil(total.value / PAGE_SIZE)) : 1))
+// Only pages whose start cursor we've already resolved (by having visited
+// the page before it) can be jumped to directly — see loadPage.
+const knownPages = computed(() => Array.from({ length: cursorHistory.value.length }, (_, i) => i + 1))
+
+async function loadPage(page) {
   loading.value = true
   try {
     const response = await listProducts({
-      categoryId: activeCategoryId.value || undefined,
-      cursor: reset ? undefined : nextCursor.value || undefined,
+      categoryId: activeCategoryId.value === ALL_CATEGORIES ? undefined : activeCategoryId.value,
+      sort: activeSort.value,
+      cursor: cursorHistory.value[page - 1],
+      limit: PAGE_SIZE,
     })
-    items.value = reset ? response.items : [...items.value, ...response.items]
-    nextCursor.value = response.nextCursor
+    items.value = response.items
+    total.value = response.total ?? 0
+    nextCursor.value = response.nextCursor || null
+    currentPage.value = page
+    if (nextCursor.value) cursorHistory.value[page] = nextCursor.value
   } finally {
     loading.value = false
     initialLoading.value = false
   }
 }
 
-await loadPage(true)
+function resetAndLoad() {
+  cursorHistory.value = [undefined]
+  loadPage(1)
+}
 
-watch(activeCategoryId, (val) => {
-  router.replace({ query: { ...route.query, category: val || undefined } })
-  loadPage(true)
+await loadPage(1)
+
+watch([activeCategoryId, activeSort], () => {
+  router.replace({
+    query: {
+      ...route.query,
+      category: activeCategoryId.value === ALL_CATEGORIES ? undefined : activeCategoryId.value,
+      sort: activeSort.value !== 'newest' ? activeSort.value : undefined,
+    },
+  })
+  resetAndLoad()
 })
 
 useSeoMeta({
@@ -46,25 +95,18 @@ useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 
 <template>
   <div class="mx-auto max-w-7xl px-4 lg:px-8 py-12 lg:py-16">
-    <h1 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide mb-8">{{ t('nav.katalog') }}</h1>
+    <h1 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide mb-4">{{ t('nav.katalog') }}</h1>
+    <p class="text-black/70 leading-relaxed max-w-3xl mb-8">{{ t('catalog.intro') }}</p>
 
-    <div v-if="categories.length" class="flex flex-wrap gap-2 mb-8">
-      <button
-        class="px-4 py-1.5 rounded-full text-sm border"
-        :class="!activeCategoryId ? 'bg-brand-500 text-white border-brand-500' : 'border-black/20 hover:border-brand-500'"
-        @click="activeCategoryId = ''"
-      >
-        {{ t('catalog.allCategories') }}
-      </button>
-      <button
-        v-for="c in categories"
-        :key="c.id"
-        class="px-4 py-1.5 rounded-full text-sm border"
-        :class="activeCategoryId === c.id ? 'bg-brand-500 text-white border-brand-500' : 'border-black/20 hover:border-brand-500'"
-        @click="activeCategoryId = c.id"
-      >
-        <LocalizedText :value="c.name" />
-      </button>
+    <div class="flex flex-wrap items-end gap-4 mb-8">
+      <div class="w-full sm:w-64">
+        <label class="block text-xs uppercase tracking-wide text-black/50 mb-1">{{ t('catalog.allCategories') }}</label>
+        <USelect v-model="activeCategoryId" :items="categoryOptions" value-key="value" class="w-full" />
+      </div>
+      <div class="w-full sm:w-56">
+        <label class="block text-xs uppercase tracking-wide text-black/50 mb-1">{{ t('catalog.sort.label') }}</label>
+        <USelect v-model="activeSort" :items="sortOptions" value-key="value" class="w-full" />
+      </div>
     </div>
 
     <p v-if="!initialLoading && !items.length" class="text-black/50 py-16 text-center">
@@ -75,11 +117,37 @@ useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
       <ProductCard v-for="p in items" :key="p.id" :product="p" />
     </div>
 
-    <div v-if="nextCursor" class="text-center mt-10">
-      <UButton variant="cta-outline" size="xl" class="px-10 py-4 text-base" :loading="loading" @click="loadPage(false)">
-        {{ t('catalog.loadMore') }}
-      </UButton>
-    </div>
+    <nav v-if="totalPages > 1" class="flex items-center justify-center gap-1.5 mt-10">
+      <button
+        class="w-9 h-9 flex items-center justify-center rounded-full border border-black/20 disabled:opacity-30 hover:border-brand-500"
+        :disabled="currentPage <= 1 || loading"
+        :aria-label="t('catalog.prevPage')"
+        @click="loadPage(currentPage - 1)"
+      >
+        <UIcon name="i-lucide-chevron-left" class="w-4 h-4" />
+      </button>
+
+      <button
+        v-for="p in knownPages"
+        :key="p"
+        class="w-9 h-9 rounded-full text-sm border"
+        :class="p === currentPage ? 'bg-brand-500 text-white border-brand-500' : 'border-black/20 hover:border-brand-500'"
+        :disabled="loading"
+        @click="loadPage(p)"
+      >
+        {{ p }}
+      </button>
+      <span v-if="totalPages > knownPages.length" class="px-1 text-black/40">…</span>
+
+      <button
+        class="w-9 h-9 flex items-center justify-center rounded-full border border-black/20 disabled:opacity-30 hover:border-brand-500"
+        :disabled="!nextCursor || loading"
+        :aria-label="t('catalog.nextPage')"
+        @click="loadPage(currentPage + 1)"
+      >
+        <UIcon name="i-lucide-chevron-right" class="w-4 h-4" />
+      </button>
+    </nav>
   </div>
 </template>
 
@@ -90,6 +158,5 @@ useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 @media (min-width: 640px) { .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1024px) { .catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1280px) { .catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 </style>

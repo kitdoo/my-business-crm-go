@@ -43,6 +43,7 @@ type model struct {
 	CommissionPercentage int32                  `bson:"commission_percentage"`
 	Note                 string                 `bson:"note"`
 	Status               entities.PartnerStatus `bson:"status"`
+	Address              string                 `bson:"address"`
 	CreatedAt            time.Time              `bson:"created_at,omitonupdate"`
 	UpdatedAt            time.Time              `bson:"updated_at"`
 	DeletedAt            *time.Time             `bson:"deleted_at,omitonupdate"`

@@ -16,6 +16,12 @@ service PartnersService {
   rpc List (PartnersListRequest) returns (PartnersListResponse) {}
   rpc Update (PartnerUpdateRequest) returns (PartnerUpdateResponse) {}
   rpc Delete (PartnerDeleteRequest) returns (PartnerDeleteResponse) {}
+  // ListPublic is the only method exempt from auth (see
+  // internal/transports/grpc/interceptors/auth.New) — it backs the public
+  // website's dealer-network listing (web-public/). It always forces
+  // status=ACTIVE and returns PartnerPublic, never the full Partner, so
+  // commissionPercentage/note can never leak to an anonymous caller.
+  rpc ListPublic (PartnersListPublicRequest) returns (PartnersListPublicResponse) {}
 }
 
 message PartnerGetRequest {
@@ -69,6 +75,7 @@ message PartnerCreateRequest {
   string email = 3 [(buf.validate.field).required = true, (buf.validate.field).string.email = true];
   int32 commissionPercentage = 4 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   string note = 5 [(buf.validate.field).string.max_len = 1024];
+  string address = 6 [(buf.validate.field).string.max_len = 500];
   optional Options options = 99;
 }
 
@@ -88,6 +95,7 @@ message PartnerUpdateRequest {
   optional int32 commissionPercentage = 5 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   optional string note = 6 [(buf.validate.field).string.max_len = 1024];
   optional crm.types.partner.PartnerStatus status = 7 [(buf.validate.field).enum.defined_only = true];
+  optional string address = 8 [(buf.validate.field).string.max_len = 500];
   optional Options options = 99;
 }
 
@@ -104,3 +112,18 @@ message PartnerDeleteRequest {
 }
 
 message PartnerDeleteResponse {}
+
+// PartnerPublic is the anonymous-safe projection of Partner — name/phone/
+// email/address only, never commissionPercentage or note.
+message PartnerPublic {
+  string name = 1;
+  string phone = 2;
+  string email = 3;
+  string address = 4;
+}
+
+message PartnersListPublicRequest {}
+
+message PartnersListPublicResponse {
+  repeated PartnerPublic items = 1;
+}

@@ -10,12 +10,12 @@ const preview = projects.slice(0, 2)
     <h2 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide text-center mb-5">
       {{ t('home.projectsPreview.title') }}
     </h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[880px] mx-auto">
       <NuxtLink
         v-for="p in preview"
         :key="p.id"
         :to="localePath('/projekti')"
-        class="block rounded-lg overflow-hidden group"
+        class="block rounded-sm overflow-hidden group"
       >
         <NuxtImg
           :src="p.image"

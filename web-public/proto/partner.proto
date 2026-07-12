@@ -1,0 +1,26 @@
+syntax = "proto3";
+package crm.grpc.partner.v1;
+
+// Mirrors proto/services/grpc/partner/v1/partner_service.proto on the
+// backend — trimmed to the one anonymous-safe RPC (ListPublic) that backs
+// the public site's dealer-network list (postani-diler page). It is the
+// only PartnersService method exempt from auth (see
+// internal/transports/grpc/interceptors/auth.New) and it never returns
+// commissionPercentage/note, only name/phone/email/address.
+
+service PartnersService {
+  rpc ListPublic (PartnersListPublicRequest) returns (PartnersListPublicResponse) {}
+}
+
+message PartnerPublic {
+  string name = 1;
+  string phone = 2;
+  string email = 3;
+  string address = 4;
+}
+
+message PartnersListPublicRequest {}
+
+message PartnersListPublicResponse {
+  repeated PartnerPublic items = 1;
+}

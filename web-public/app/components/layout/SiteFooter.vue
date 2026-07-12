@@ -15,17 +15,16 @@ const year = new Date().getFullYear()
           <img src="/images/logo_footer.jpg" alt="PHOMI SRBIJA" class="h-8 w-auto object-contain" />
         </div>
         <div class="flex items-center gap-4">
-          <a href="#" target="_blank" rel="noopener" aria-label="Facebook"><UIcon name="i-lucide-facebook" class="w-5 h-5 text-white/70 hover:text-white" /></a>
-          <a href="#" target="_blank" rel="noopener" aria-label="Instagram"><UIcon name="i-lucide-instagram" class="w-5 h-5 text-white/70 hover:text-white" /></a>
-          <a href="mailto:info@phomi.rs" aria-label="Email"><UIcon name="i-lucide-mail" class="w-5 h-5 text-white/70 hover:text-white" /></a>
+          <a href="https://www.instagram.com/phomi_serbia/" target="_blank" rel="noopener" aria-label="Instagram"><UIcon name="i-lucide-instagram" class="w-5 h-5 text-white/70 hover:text-white" /></a>
+          <a href="mailto:serbia@phomi.info" aria-label="Email"><UIcon name="i-lucide-mail" class="w-5 h-5 text-white/70 hover:text-white" /></a>
         </div>
       </div>
 
       <div>
         <h3 class="text-base font-semibold uppercase text-brand-300 mb-3">{{ t('footer.about') }}</h3>
         <ul class="space-y-2 text-base text-white/80">
-          <li><NuxtLink :to="localePath('/o-nama')">{{ t('footer.aboutPhomi') }}</NuxtLink></li>
-          <li><NuxtLink :to="localePath('/o-nama')">{{ t('footer.aboutTomStudio') }}</NuxtLink></li>
+          <li><a href="https://phomi.com/" target="_blank" rel="noopener">{{ t('footer.aboutPhomi') }}</a></li>
+          <li><a href="https://tom.archi/" target="_blank" rel="noopener">{{ t('footer.aboutTomStudio') }}</a></li>
         </ul>
       </div>
 

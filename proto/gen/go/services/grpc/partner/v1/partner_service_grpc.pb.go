@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PartnersService_Create_FullMethodName = "/crm.grpc.partner.v1.PartnersService/Create"
-	PartnersService_Get_FullMethodName    = "/crm.grpc.partner.v1.PartnersService/Get"
-	PartnersService_List_FullMethodName   = "/crm.grpc.partner.v1.PartnersService/List"
-	PartnersService_Update_FullMethodName = "/crm.grpc.partner.v1.PartnersService/Update"
-	PartnersService_Delete_FullMethodName = "/crm.grpc.partner.v1.PartnersService/Delete"
+	PartnersService_Create_FullMethodName     = "/crm.grpc.partner.v1.PartnersService/Create"
+	PartnersService_Get_FullMethodName        = "/crm.grpc.partner.v1.PartnersService/Get"
+	PartnersService_List_FullMethodName       = "/crm.grpc.partner.v1.PartnersService/List"
+	PartnersService_Update_FullMethodName     = "/crm.grpc.partner.v1.PartnersService/Update"
+	PartnersService_Delete_FullMethodName     = "/crm.grpc.partner.v1.PartnersService/Delete"
+	PartnersService_ListPublic_FullMethodName = "/crm.grpc.partner.v1.PartnersService/ListPublic"
 )
 
 // PartnersServiceClient is the client API for PartnersService service.
@@ -35,6 +36,12 @@ type PartnersServiceClient interface {
 	List(ctx context.Context, in *PartnersListRequest, opts ...grpc.CallOption) (*PartnersListResponse, error)
 	Update(ctx context.Context, in *PartnerUpdateRequest, opts ...grpc.CallOption) (*PartnerUpdateResponse, error)
 	Delete(ctx context.Context, in *PartnerDeleteRequest, opts ...grpc.CallOption) (*PartnerDeleteResponse, error)
+	// ListPublic is the only method exempt from auth (see
+	// internal/transports/grpc/interceptors/auth.New) — it backs the public
+	// website's dealer-network listing (web-public/). It always forces
+	// status=ACTIVE and returns PartnerPublic, never the full Partner, so
+	// commissionPercentage/note can never leak to an anonymous caller.
+	ListPublic(ctx context.Context, in *PartnersListPublicRequest, opts ...grpc.CallOption) (*PartnersListPublicResponse, error)
 }
 
 type partnersServiceClient struct {
@@ -95,6 +102,16 @@ func (c *partnersServiceClient) Delete(ctx context.Context, in *PartnerDeleteReq
 	return out, nil
 }
 
+func (c *partnersServiceClient) ListPublic(ctx context.Context, in *PartnersListPublicRequest, opts ...grpc.CallOption) (*PartnersListPublicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PartnersListPublicResponse)
+	err := c.cc.Invoke(ctx, PartnersService_ListPublic_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PartnersServiceServer is the server API for PartnersService service.
 // All implementations must embed UnimplementedPartnersServiceServer
 // for forward compatibility.
@@ -104,6 +121,12 @@ type PartnersServiceServer interface {
 	List(context.Context, *PartnersListRequest) (*PartnersListResponse, error)
 	Update(context.Context, *PartnerUpdateRequest) (*PartnerUpdateResponse, error)
 	Delete(context.Context, *PartnerDeleteRequest) (*PartnerDeleteResponse, error)
+	// ListPublic is the only method exempt from auth (see
+	// internal/transports/grpc/interceptors/auth.New) — it backs the public
+	// website's dealer-network listing (web-public/). It always forces
+	// status=ACTIVE and returns PartnerPublic, never the full Partner, so
+	// commissionPercentage/note can never leak to an anonymous caller.
+	ListPublic(context.Context, *PartnersListPublicRequest) (*PartnersListPublicResponse, error)
 	mustEmbedUnimplementedPartnersServiceServer()
 }
 
@@ -128,6 +151,9 @@ func (UnimplementedPartnersServiceServer) Update(context.Context, *PartnerUpdate
 }
 func (UnimplementedPartnersServiceServer) Delete(context.Context, *PartnerDeleteRequest) (*PartnerDeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedPartnersServiceServer) ListPublic(context.Context, *PartnersListPublicRequest) (*PartnersListPublicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPublic not implemented")
 }
 func (UnimplementedPartnersServiceServer) mustEmbedUnimplementedPartnersServiceServer() {}
 func (UnimplementedPartnersServiceServer) testEmbeddedByValue()                         {}
@@ -240,6 +266,24 @@ func _PartnersService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PartnersService_ListPublic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PartnersListPublicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PartnersServiceServer).ListPublic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PartnersService_ListPublic_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PartnersServiceServer).ListPublic(ctx, req.(*PartnersListPublicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PartnersService_ServiceDesc is the grpc.ServiceDesc for PartnersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +310,10 @@ var PartnersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _PartnersService_Delete_Handler,
+		},
+		{
+			MethodName: "ListPublic",
+			Handler:    _PartnersService_ListPublic_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -22,6 +22,7 @@ import (
 	"github.com/altessa-s/go-atlas/transport/grpc/interceptors"
 
 	categorysvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/category/v1"
+	partnersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/partner/v1"
 	pricesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/price/v1"
 	productsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product/v1"
 	usersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/user/v1"
@@ -90,6 +91,7 @@ func New(users usersvc.Service) interceptors.ServerInterceptor {
 			productsvcpb.ProductsService_List_FullMethodName,
 			pricesvcpb.PricesService_Get_FullMethodName,
 			categorysvcpb.CategoriesService_List_FullMethodName,
+			partnersvcpb.PartnersService_ListPublic_FullMethodName,
 		),
 	)
 }

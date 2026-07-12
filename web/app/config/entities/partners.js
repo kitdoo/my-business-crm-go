@@ -39,6 +39,7 @@ export default {
       { key: 'name', type: 'text', label: 'fields.name', required: true, maxLength: 255 },
       { key: 'phone', type: 'text', label: 'fields.phone', required: true, maxLength: 32 },
       { key: 'email', type: 'text', label: 'fields.email', required: true, inputType: 'email' },
+      { key: 'address', type: 'text', label: 'fields.address', maxLength: 500 },
       { key: 'commissionPercentage', type: 'number', label: 'fields.commissionPercentage', required: true, min: 0, max: 100 },
       { key: 'note', type: 'text', label: 'fields.note', maxLength: 1024 },
       { key: 'status', type: 'enum', enum: 'PartnerStatus', label: 'fields.status', editOnly: true },

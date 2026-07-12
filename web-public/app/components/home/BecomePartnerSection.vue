@@ -5,8 +5,8 @@ const localePath = useLocalePath()
 
 <template>
   <section class="relative h-screen min-h-[560px] flex items-center justify-start overflow-hidden">
-    <NuxtImg src="/images/map.jpg" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover object-[65%_center] scale-[2]" />
-    <div class="relative z-10 ml-6 md:ml-16 lg:ml-24 max-w-xl rounded-lg bg-[#333333]/30 px-8 py-10 lg:px-12 lg:py-14 text-white backdrop-blur-sm">
+    <NuxtImg src="/images/map.jpg" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover object-[92%_center] scale-[2.2]" />
+    <div class="relative z-10 ml-6 md:ml-16 lg:ml-24 max-w-xl rounded-sm bg-[#333333]/30 px-8 py-10 lg:px-12 lg:py-14 text-white backdrop-blur-sm">
       <h2 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide mb-6">{{ t('home.becomePartner.title') }}</h2>
       <p class="text-white/90 mb-2">{{ t('home.becomePartner.text') }}</p>
       <p class="text-white/90 mb-8">{{ t('home.becomePartner.text2') }}</p>

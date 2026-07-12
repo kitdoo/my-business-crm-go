@@ -123,6 +123,31 @@ func (h *Handler) List(ctx context.Context, in *partnersvcpb.PartnersListRequest
 	return out, nil
 }
 
+// ListPublic backs the public website's dealer-network listing (see the
+// comment on PartnersService.ListPublic in partner_service.proto) — it
+// always forces status=ACTIVE and hand-builds PartnerPublic so
+// commissionPercentage/note can never reach an anonymous caller, even if
+// this method is later exempted from RBAC.
+func (h *Handler) ListPublic(ctx context.Context, _ *partnersvcpb.PartnersListPublicRequest) (*partnersvcpb.PartnersListPublicResponse, error) {
+	result, err := h.svc.List(ctx, &entities.PartnersList{
+		Statuses:   []entities.PartnerStatus{entities.PartnerStatusActive},
+		Pagination: entities.ListPagination{Limit: 200},
+	})
+	if err != nil {
+		return nil, MapError(err)
+	}
+	return &partnersvcpb.PartnersListPublicResponse{
+		Items: coreslices.To(result.Items, func(p *entities.Partner) *partnersvcpb.PartnerPublic {
+			return &partnersvcpb.PartnerPublic{
+				Name:    p.Name,
+				Phone:   p.Phone,
+				Email:   p.Email,
+				Address: p.Address,
+			}
+		}),
+	}, nil
+}
+
 func (h *Handler) Update(ctx context.Context, in *partnersvcpb.PartnerUpdateRequest) (*partnersvcpb.PartnerUpdateResponse, error) {
 	update := &entities.PartnerUpdate{Etag: optionalString(in.GetOptions().GetEtag())}
 

@@ -21,7 +21,7 @@
   },
   "home": {
     "hero": {
-      "title": "Nova generacija fasadnih i zidnih obloga PHOMI",
+      "title": "Nova generacija fasadnih i zidnih obloga",
       "subtitle": "Ekološki prihvatljive, lake i izdržljive obloge za svaki objekat."
     },
     "about": {
@@ -87,16 +87,46 @@
     "empty": "Trenutno nema dostupnih proizvoda.",
     "loadMore": "Učitaj još",
     "contactCta": "Kontaktirajte nas povodom ovog proizvoda",
-    "contactPrefill": "Interesuje me: {sku} — {name}"
+    "contactPrefill": "Interesuje me: {sku} — {name}",
+    "intro": "PHOMI nudi širok izbor materijala — dezene kamena, drveta, opeke i betona, kao i solarne i displej panele — objedinjene u jednom lakom i fleksibilnom sistemu. Podjednako su pogodni za fasade i enterijere, uz moderan izgled i brzu, jednostavnu ugradnju.",
+    "sort": {
+      "label": "Sortiranje",
+      "newest": "Najnovije",
+      "nameAsc": "Naziv A-Š",
+      "nameDesc": "Naziv Š-A"
+    },
+    "prevPage": "Prethodna",
+    "nextPage": "Sledeća",
+    "pageOf": "Strana {page} od {total}"
   },
   "dealer": {
     "intro": "Popunite formu i naš tim će vas kontaktirati u vezi saradnje.",
     "thanksTitle": "Hvala na prijavi!",
     "thanksText": "Vaš zahtev je primljen. Kontaktiraćemo vas uskoro.",
-    "form": {}
+    "form": {},
+    "whyTitle": "Zašto postati PHOMI partner?",
+    "whyText1": "Aktivno razvijamo mrežu distributera u Srbiji i regionu i nudimo proizvod sa preko 4000 dezena, brzom ugradnjom i dokazanom potražnjom na tržištu fasada i enterijera.",
+    "whyText2": "Partneri dobijaju maloprodajnu i veleprodajnu podršku, marketinške materijale i pristup kompletnom PHOMI katalogu — pridružite se mreži koja već raste širom sveta.",
+    "partnersTitle": "Naši trenutni partneri",
+    "partnersEmpty": "Lista partnera trenutno nije dostupna."
   },
   "contact": {
-    "thanks": "Hvala! Vaša poruka je poslata."
+    "thanks": "Hvala! Vaša poruka je poslata.",
+    "address": "Veselina Masleše 56, Novi Sad, Srbija",
+    "showroomLabel": "Glavni izložbeni salon"
+  },
+  "cart": {
+    "title": "Korpa",
+    "empty": "Vaša korpa je prazna.",
+    "addToCart": "Dodaj u korpu",
+    "remove": "Ukloni",
+    "checkout": "Pošalji upit",
+    "checkoutTitle": "Pošalji upit za odabrane proizvode",
+    "messageLabel": "Odabrani proizvodi",
+    "back": "Nazad",
+    "send": "Pošalji",
+    "thanks": "Hvala! Vaš upit je poslat, kontaktiraćemo vas uskoro.",
+    "total": "Ukupno"
   },
   "forms": {
     "submit": "Pošalji",
@@ -123,9 +153,13 @@
     "tomStudioText": "[Zamenite ovaj tekst opisom Tom Studio 021 doo.]"
   },
   "common": {
-    "backHome": "Nazad na početnu"
+    "backHome": "Nazad na početnu",
+    "prev": "Prethodna",
+    "next": "Sledeća"
   },
   "projects": {
+    "usedMaterials": "Korišćeni materijali",
+    "recommendedMaterials": "Preporučeno / slično",
     "items": {
       "p1": "Porodična kuća — [lokacija]",
       "p2": "Poslovni objekat — [lokacija]",
