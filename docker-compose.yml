@@ -1,0 +1,150 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: my-business-crm
+        APP_VERSION: ${APP_VERSION:-dev}
+        APP_VERSION_COMMIT: ${APP_VERSION_COMMIT:-local}
+    restart: unless-stopped
+    command: ["server", "run", "-c", "/app/configs"]
+    volumes:
+      - ./configs:/app/configs:ro
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "7779:7779"
+      - "9080:9080"
+    # List form (not the map form the other services use): the SMTP/
+    # notification-client entries at the bottom must be passed through
+    # bare (no `:-` default) so they're entirely absent from the
+    # container when unset in the shell/.env — see the comment there.
+    environment:
+      - GRPC__LISTEN_ADDRESS=0.0.0.0:7779
+      - GRPC__REFLECTION=true
+      - GRPC__LOG_REQUESTS=true
+
+      - HTTP__LISTEN_ADDRESS=0.0.0.0:9080
+      - HTTP__LOG_REQUESTS=true
+
+      - LOGGER__LEVEL=${LOGGER_LEVEL:-info}
+      - LOGGER__OUTPUT_FORMAT=json
+      - LOGGER__COLORIZED=false
+
+      - MONGODB__HOSTS=[mongo:27017]
+      - MONGODB__DATABASE=${MONGODB_DATABASE:-my-business-crm}
+      - MONGODB__CREDENTIALS__AUTH_MECHANISM=SCRAM-SHA-256
+      - MONGODB__CREDENTIALS__SCRAM__AUTH_SOURCE=admin
+      - MONGODB__CREDENTIALS__SCRAM__USERNAME=${MONGO_ROOT_USER:-admin}
+      - MONGODB__CREDENTIALS__SCRAM__PASSWORD=${MONGO_ROOT_PASSWORD:-changeme}
+      - MONGODB__DIRECT_CONNECTION=true
+
+      - REDIS__HOSTS=[redis:6379]
+      - REDIS__DATABASE=${REDIS_DATABASE:-0}
+
+      - NODE__ID=${NODE_ID:-1}
+
+      - OBSERVABILITY__METRICS__ENABLED=true
+      - OBSERVABILITY__METRICS__TYPE=prometheus
+      - OBSERVABILITY__METRICS__SERVICE_NAME=my-business-crm
+
+      - CRM__AUTH__SIGNING_KEY=${CRM_SIGNING_KEY:?CRM_SIGNING_KEY must be set}
+      - CRM__AUTH__TOKEN_TTL=72h
+
+      - CRM__BOOTSTRAP_ADMIN__NAME=${CRM_BOOTSTRAP_ADMIN_NAME:-Admin}
+      - CRM__BOOTSTRAP_ADMIN__PHONE=${CRM_BOOTSTRAP_ADMIN_PHONE:-+000000000000}
+      - CRM__BOOTSTRAP_ADMIN__EMAIL=${CRM_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
+      - CRM__BOOTSTRAP_ADMIN__PASSWORD=${CRM_BOOTSTRAP_ADMIN_PASSWORD:?CRM_BOOTSTRAP_ADMIN_PASSWORD must be set}
+
+      - CRM__RBAC__admin=*
+      - CRM__RBAC__employee=products:read,products:create,categories:read,categories:create,brands:read,brands:create,sales:create
+
+      # Outbound SMTP for NotificationsService.Send (web-public/'s contact/
+      # dealer forms) and the client key it must present — both optional,
+      # but CRMConfig.Smtp requires every field once that section exists
+      # at all, so these are passed through bare (no `=value`, no `:-`
+      # default): unset in the shell/.env, the key is entirely absent from
+      # the container and Smtp stays nil (form delivery disabled); set it
+      # (see .env.docker-compose.example) and it's forwarded as-is.
+      - CRM__SMTP__HOST
+      - CRM__SMTP__PORT
+      - CRM__SMTP__USERNAME
+      - CRM__SMTP__PASSWORD
+      - CRM__SMTP__FROM
+      - CRM__SMTP__TO
+      - CRM__NOTIFICATION_CLIENTS__web_public
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      NUXT_GRPC_BASE_URL: backend:7779
+      NUXT_GRPC_TIMEOUT_MS: 15000
+      NUXT_IMAGES_BASE_URL: http://backend:9080
+      NUXT_IMAGES_MAX_SIZE_BYTES: 10485760
+      NUXT_SESSION_SECRET: ${NUXT_SESSION_SECRET:?NUXT_SESSION_SECRET must be set}
+      NUXT_SESSION_TTL_SECONDS: 43200
+
+  web-public:
+    build:
+      context: ./web-public
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3001:3000"
+    environment:
+      NUXT_GRPC_BASE_URL: backend:7779
+      NUXT_GRPC_TIMEOUT_MS: 15000
+      # Must match one of the values under CRM__NOTIFICATION_CLIENTS__* on
+      # the backend (see .env.docker-compose.example). Optional like that
+      # section — left empty, the contact/dealer forms fail at submit time
+      # with a clear error instead of blocking the container from starting.
+      NUXT_GRPC_CLIENT_KEY: ${NUXT_GRPC_CLIENT_KEY:-}
+      NUXT_IMAGES_BASE_URL: http://backend:9080
+      NUXT_PUBLIC_ADMIN_URL: ${NUXT_PUBLIC_ADMIN_URL:-http://localhost:3000/login}
+      NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL:-http://localhost:3001}
+
+volumes:
+  mongo_data:
+  redis_data:

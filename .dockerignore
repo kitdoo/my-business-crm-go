@@ -1,0 +1,12 @@
+.git
+.idea
+.github
+build
+dist
+var
+web
+web-public
+docs
+*.md
+coverage.out
+coverage.html
