@@ -51,10 +51,11 @@ auth-интерсепторе (`internal/transports/grpc/interceptors/auth/auth.
 - `/postani-diler` (+ `/postani-diler/hvala`), `/kontakt`, `/projekti`,
   `/o-nama` — отдельные страницы (вариант A из ТЗ §4.1a).
 - Формы "Стать дилером" / "Контакт" — с Zod-валидацией, honeypot-полем и
-  rate-limit на сервере, но **отправка — заглушка**
-  (`server/utils/submitForm.js` просто логирует). Решение (A) email / (B)
-  CRM-лид ещё не принято — поменять реализацию этих двух функций, когда
-  решится.
+  rate-limit на сервере; отправка идёт через бэкенд
+  (`server/utils/notificationClient.js` → `NotificationsService.Send` по
+  gRPC, авторизация статичным ключом клиента — `NUXT_GRPC_CLIENT_KEY`,
+  см. `internal/transports/grpc/interceptors/clientkey`), бэкенд шлёт
+  письмо на `crm.smtp.to`.
 - i18n `sr/en/ru`, `sr` без префикса в URL, `en`/`ru` с префиксом,
   `hreflang` через `useLocaleHead()`.
 - `robots.txt`, `sitemap.xml` (включает реальные товары каталога).

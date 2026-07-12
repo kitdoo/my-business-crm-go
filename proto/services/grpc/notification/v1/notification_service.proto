@@ -1,0 +1,38 @@
+syntax = "proto3";
+package crm.grpc.notification.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = ".;notificationpb";
+
+// NotificationsService is a generic outbound-message sender: any approved
+// caller (see CRMConfig.NotificationClients / internal/transports/grpc/
+// interceptors/clientkey) hands it an already-composed message and an
+// email to reply to, and it delivers that message to the address
+// configured in CRMConfig.Smtp.To. It has no notion of "forms" or any
+// other specific caller — the message body is opaque, composed entirely
+// by the caller.
+//
+// Send is exempt from the usual user bearer-token auth (see
+// internal/transports/grpc/interceptors/auth.New) and instead requires a
+// valid "x-client-key" header, checked by the clientkey interceptor. This
+// is what lets anonymous website visitors (via web-public/, which holds
+// one of the approved keys) reach it without a login of their own, while
+// still restricting the RPC to approved frontends rather than any caller
+// that can reach the gRPC port.
+service NotificationsService {
+  rpc Send (SendMessageRequest) returns (SendMessageResponse) {}
+}
+
+message SendMessageRequest {
+  // Subject is the email subject line. Optional — the backend falls back
+  // to a generic subject when empty.
+  string subject = 1 [(buf.validate.field).string.max_len = 255];
+  // Message is the full message body, already composed by the caller.
+  string message = 2 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 10000];
+  // Email is set as the Reply-To address, so the recipient can respond
+  // directly to whoever the caller says this message is from.
+  string email = 3 [(buf.validate.field).required = true, (buf.validate.field).string.email = true];
+}
+
+message SendMessageResponse {}

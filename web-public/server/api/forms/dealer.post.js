@@ -1,5 +1,5 @@
 import { dealerFormSchema } from '~~/server/utils/formSchemas.js'
-import { submitDealerForm } from '~~/server/utils/submitForm.js'
+import { sendNotification } from '~~/server/utils/notificationClient.js'
 import { checkRateLimit } from '~~/server/utils/rateLimiter.js'
 
 export default defineEventHandler(async (event) => {
@@ -18,6 +18,16 @@ export default defineEventHandler(async (event) => {
     return { ok: true }
   }
 
-  const { website, ...payload } = parsed.data
-  return submitDealerForm(payload)
+  const { companyName, contactName, phone, email, city, message } = parsed.data
+  const lines = [`Company: ${companyName}`, `Contact: ${contactName}`]
+  if (phone) lines.push(`Phone: ${phone}`)
+  lines.push(`Email: ${email}`, `City: ${city}`)
+  if (message) lines.push('', message)
+
+  await sendNotification({
+    subject: 'Website dealer application',
+    message: lines.join('\n'),
+    email,
+  })
+  return { ok: true }
 })

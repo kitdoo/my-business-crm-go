@@ -53,18 +53,21 @@ export function getServiceClient(protoFile, packagePath) {
 }
 
 /**
- * Promisified unary call with optional bearer token metadata and a
- * deadline from runtimeConfig.grpc.timeoutMs.
+ * Promisified unary call with optional bearer token / extra metadata
+ * headers and a deadline from runtimeConfig.grpc.timeoutMs.
  * @param {import('@grpc/grpc-js').Client} client
  * @param {string} methodName
  * @param {object} request
- * @param {{ token?: string }} [opts]
+ * @param {{ token?: string, headers?: Record<string, string> }} [opts]
  */
 export function grpcCall(client, methodName, request, opts = {}) {
   const config = useRuntimeConfig()
   const metadata = new grpc.Metadata()
   if (opts.token) {
     metadata.set('authorization', `Bearer ${opts.token}`)
+  }
+  for (const [key, value] of Object.entries(opts.headers || {})) {
+    metadata.set(key, value)
   }
   const deadline = new Date(Date.now() + (config.grpc.timeoutMs || 15000))
 

@@ -1,5 +1,5 @@
 import { contactFormSchema } from '~~/server/utils/formSchemas.js'
-import { submitContactForm } from '~~/server/utils/submitForm.js'
+import { sendNotification } from '~~/server/utils/notificationClient.js'
 import { checkRateLimit } from '~~/server/utils/rateLimiter.js'
 
 export default defineEventHandler(async (event) => {
@@ -14,9 +14,19 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, data: { error: parsed.error.flatten() } })
   }
   if (parsed.data.website) {
+    // Honeypot tripped — pretend success, do nothing.
     return { ok: true }
   }
 
-  const { website, ...payload } = parsed.data
-  return submitContactForm(payload)
+  const { name, email, phone, message } = parsed.data
+  const lines = [`Name: ${name}`, `Email: ${email}`]
+  if (phone) lines.push(`Phone: ${phone}`)
+  lines.push('', message)
+
+  await sendNotification({
+    subject: 'Website contact form submission',
+    message: lines.join('\n'),
+    email,
+  })
+  return { ok: true }
 })

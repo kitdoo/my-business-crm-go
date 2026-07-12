@@ -50,3 +50,38 @@
 #    # <int> Max accepted upload size in bytes.
 #    # Default value: 10485760 (10 MiB)
 #    maxSizeBytes: 10485760
+#
+#  # <object> Outbound SMTP for NotificationsService.Send (generic
+#  # message sender used by web-public/'s contact/dealer forms, and any
+#  # other approved caller — see notificationClients below). Optional —
+#  # when absent, Send fails with an explicit error instead of silently
+#  # doing nothing.
+#  smtp:
+#    # <string> SMTP server hostname.
+#    host: "smtp.gmail.com"
+#
+#    # <int> SMTP server port. 587 (STARTTLS) and 465 (implicit TLS) are
+#    # both supported.
+#    # Default value: 587
+#    port: 587
+#
+#    # <string> SMTP auth username. Leave unset to disable auth.
+#    username: "you@example.com"
+#
+#    # <string> SMTP auth password (app password for Gmail/etc).
+#    password: "change-me-before-boot"
+#
+#    # <string> From address emails are sent as.
+#    from: "no-reply@example.com"
+#
+#    # <string> Recipient every message is delivered to.
+#    to: "sales@example.com"
+#
+#  # <map<string, string>> Client name (for audit logging) -> static API
+#  # key. A caller of NotificationsService.Send must present one of these
+#  # keys via the "x-client-key" gRPC metadata header; an absent/empty map
+#  # denies every caller (fail closed). Each approved frontend (web-public/,
+#  # future others) gets its own entry so a leaked key can be identified
+#  # and rotated without affecting the others.
+#  notificationClients:
+#    web-public: "change-me-before-boot"

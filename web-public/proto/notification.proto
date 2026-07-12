@@ -1,0 +1,23 @@
+syntax = "proto3";
+package crm.grpc.notification.v1;
+
+// Mirrors proto/services/grpc/notification/v1/notification_service.proto
+// on the backend. NotificationsService is a generic outbound-message
+// sender — the message body is opaque, composed entirely by the caller
+// (see server/utils/notificationClient.js) — used for the contact/dealer
+// forms and any future "send this to the admin inbox" need. Send requires
+// a valid "x-client-key" metadata header (see notificationClient.js); it
+// is the only NotificationsService method and does not need auth.New's
+// bearer-token auth (see internal/transports/grpc/interceptors/auth).
+
+service NotificationsService {
+  rpc Send (SendMessageRequest) returns (SendMessageResponse) {}
+}
+
+message SendMessageRequest {
+  string subject = 1;
+  string message = 2;
+  string email = 3;
+}
+
+message SendMessageResponse {}

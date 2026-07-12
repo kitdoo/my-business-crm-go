@@ -18,7 +18,10 @@ import (
 	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
 	"github.com/kitdoo/my-business-crm-go/internal/rbac"
 	grpcauth "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/interceptors/auth"
+	grpcclientkey "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/interceptors/clientkey"
 	grpcrbac "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/interceptors/rbac"
+
+	notificationsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/notification/v1"
 
 	coreerrs "github.com/altessa-s/go-atlas/core/errors"
 	obshealth "github.com/altessa-s/go-atlas/observability/health"
@@ -50,6 +53,7 @@ func TransportsModule() fx.Option {
 		fx.Provide(AsGRPCInterceptor(grpcauth.New)),
 		fx.Provide(newRBACTable),
 		fx.Provide(AsGRPCInterceptor(grpcrbac.New)),
+		fx.Provide(AsGRPCInterceptor(newClientKeyInterceptor)),
 
 		fx.Invoke(fx.Annotate(registerGRPCHandlers, fx.ParamTags(`group:"grpc-interceptors"`, `group:"grpc-handlers"`))),
 
@@ -184,4 +188,21 @@ func newRBACTable(cfg *appconfig.Config) rbac.Table {
 		return nil
 	}
 	return rbac.Table(cfg.CRM.RBAC)
+}
+
+// newClientKeyInterceptor resolves the approved API keys from
+// cfg.CRM.NotificationClients (inverted: key -> client name) and scopes
+// the interceptor to NotificationsService.Send, the one RPC that is
+// exempt from user auth (see grpcauth.New) but still must be restricted
+// to approved frontends. An absent/empty section denies every caller —
+// fail closed, same as an absent/empty RBAC table.
+func newClientKeyInterceptor(cfg *appconfig.Config) interceptors.ServerInterceptor {
+	var keys map[string]string
+	if cfg.CRM != nil {
+		keys = make(map[string]string, len(cfg.CRM.NotificationClients))
+		for name, key := range cfg.CRM.NotificationClients {
+			keys[key.Expose()] = name
+		}
+	}
+	return grpcclientkey.New(keys, notificationsvcpb.NotificationsService_Send_FullMethodName)
 }

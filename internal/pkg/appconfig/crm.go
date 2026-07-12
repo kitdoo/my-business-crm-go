@@ -81,6 +81,21 @@ type CRMConfig struct {
 	// Auth configures session-token signing (internal/services/user).
 	// Required for the service to boot — see AuthConfig.SigningKey.
 	Auth *AuthConfig `yaml:"auth" default:"-"`
+
+	// Smtp configures the outbound mail server NotificationsService.Send
+	// delivers messages through (internal/services/mailer). Optional: when
+	// absent, Send returns a "not configured" error instead of failing app
+	// boot.
+	Smtp *SMTPConfig `yaml:"smtp" default:"-"`
+
+	// NotificationClients maps a client name (for audit logging — which
+	// frontend sent this) to the static API key it must present via the
+	// "x-client-key" gRPC metadata header to call
+	// NotificationsService.Send — see internal/transports/grpc/
+	// interceptors/clientkey. A caller whose key matches no entry here is
+	// rejected; an absent/empty map denies every caller (fail closed),
+	// same as an absent/empty RBAC table.
+	NotificationClients map[string]redacted.RedactedString `yaml:"notificationClients"`
 }
 
 // Validate enforces that, when the crm section is present, auth is too
@@ -93,6 +108,58 @@ func (c *CRMConfig) Validate() error {
 		validation.Field(&c.Images, validation.NilOrNotEmpty),
 		validation.Field(&c.Auth, validation.Required),
 		validation.Field(&c.RBAC, validation.By(validateRBAC)),
+		validation.Field(&c.Smtp, validation.NilOrNotEmpty),
+		validation.Field(&c.NotificationClients, validation.By(validateNotificationClients)),
+	)
+}
+
+// validateNotificationClients rejects a client entry with a blank name or
+// key — either would silently make that entry unreachable/unmatchable
+// rather than failing config load.
+func validateNotificationClients(value any) error {
+	table, ok := value.(map[string]redacted.RedactedString)
+	if !ok {
+		return nil
+	}
+	for name, key := range table {
+		if name == "" {
+			return fmt.Errorf("notificationClients has an entry with an empty client name")
+		}
+		if key.Expose() == "" {
+			return fmt.Errorf("notificationClients entry %q has an empty key", name)
+		}
+	}
+	return nil
+}
+
+// SMTPConfig configures the outbound mail server NotificationsService.Send
+// delivers messages through (internal/services/mailer) to To.
+type SMTPConfig struct {
+	// Host is the SMTP server hostname (e.g. "smtp.gmail.com").
+	Host string `yaml:"host"`
+	// Port is the SMTP server port. 587 (STARTTLS) and 465 (implicit TLS)
+	// are both supported — see mailer.Service.
+	Port int `yaml:"port" default:"587"`
+	// Username authenticates to the SMTP server. Empty disables auth
+	// (some internal relays accept unauthenticated mail).
+	Username string `yaml:"username"`
+	// Password authenticates to the SMTP server alongside Username.
+	Password redacted.RedactedString `yaml:"password"`
+	// From is the envelope/header From address emails are sent as.
+	From string `yaml:"from"`
+	// To is the single recipient address every message is delivered to.
+	To string `yaml:"to"`
+}
+
+// Validate requires Host, Port, From, and To — a partially configured
+// SMTP section would otherwise reach mailer.Service with a blank field
+// instead of failing config load.
+func (s *SMTPConfig) Validate() error {
+	return config.ValidateStruct(s,
+		validation.Field(&s.Host, validation.Required),
+		validation.Field(&s.Port, validation.Required, validation.Min(1), validation.Max(65535)),
+		validation.Field(&s.From, validation.Required),
+		validation.Field(&s.To, validation.Required),
 	)
 }
 

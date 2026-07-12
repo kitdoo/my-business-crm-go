@@ -22,6 +22,7 @@ import (
 	"github.com/altessa-s/go-atlas/transport/grpc/interceptors"
 
 	categorysvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/category/v1"
+	notificationsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/notification/v1"
 	partnersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/partner/v1"
 	pricesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/price/v1"
 	productsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product/v1"
@@ -47,7 +48,13 @@ func UserFromContext(ctx context.Context) (*entities.User, bool) {
 // is obtained in the first place). ProductsService.List, PricesService.Get
 // and CategoriesService.List are also exempt — they back the public
 // website's catalog (web-public/), which has anonymous visitors and no
-// login of its own; see web-public/README.md. Exempting these is safe only
+// login of its own; see web-public/README.md. NotificationsService.Send is
+// exempt for the same reason (anonymous visitors submit web-public/'s
+// contact/dealer forms through it) but is not left open to anyone who can
+// reach the gRPC port: internal/transports/grpc/interceptors/clientkey
+// runs independently of this interceptor and requires a valid
+// "x-client-key" header on that one method — see CRMConfig.NotificationClients.
+// Exempting the others is safe only
 // because the gRPC port is never reachable from outside the two Nitro BFFs
 // (web/, web-public/) — it is not exposed to the public internet. An
 // exempted method also skips the RBAC interceptor (see
@@ -92,6 +99,7 @@ func New(users usersvc.Service) interceptors.ServerInterceptor {
 			pricesvcpb.PricesService_Get_FullMethodName,
 			categorysvcpb.CategoriesService_List_FullMethodName,
 			partnersvcpb.PartnersService_ListPublic_FullMethodName,
+			notificationsvcpb.NotificationsService_Send_FullMethodName,
 		),
 	)
 }

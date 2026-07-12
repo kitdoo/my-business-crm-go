@@ -145,4 +145,9 @@ var (
 	// ErrNotImplemented marks a method whose body is a skeleton per the
 	// service development standard.
 	ErrNotImplemented = errors.New("not implemented")
+
+	// ErrSMTPNotConfigured is returned by mailer.Service.Send when
+	// CRMConfig.Smtp is absent — form submissions cannot be delivered
+	// anywhere until an operator configures it.
+	ErrSMTPNotConfigured = errors.New("smtp not configured")
 )

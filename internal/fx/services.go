@@ -16,6 +16,10 @@ import (
 	invservice "github.com/kitdoo/my-business-crm-go/internal/services/inventory/inventory"
 	invmovementsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
 	invmovementservice "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement/inventorymovement"
+	"github.com/kitdoo/my-business-crm-go/internal/services/mailer"
+	mailerservice "github.com/kitdoo/my-business-crm-go/internal/services/mailer/mailer"
+	"github.com/kitdoo/my-business-crm-go/internal/services/notification"
+	notificationservice "github.com/kitdoo/my-business-crm-go/internal/services/notification/notification"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	partnerservice "github.com/kitdoo/my-business-crm-go/internal/services/partner/partner"
 	"github.com/kitdoo/my-business-crm-go/internal/services/price"
@@ -59,6 +63,7 @@ import (
 	clienthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/client"
 	invhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/inventory"
 	invmovementhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/inventorymovement"
+	notificationhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/notification"
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
 	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
@@ -121,6 +126,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(reportsmongo.New, fx.As(new(reports.Storage)))),
 		fx.Provide(fx.Annotate(reportservice.New, fx.As(new(reportsvc.Service)))),
 		fx.Provide(AsGRPCHandler(reporthandler.New)),
+
+		fx.Provide(fx.Annotate(newMailerService, fx.As(new(mailer.Service)))),
+		fx.Provide(fx.Annotate(newNotificationService, fx.As(new(notification.Service)))),
+		fx.Provide(AsGRPCHandler(notificationhandler.New)),
 	)
 }
 
@@ -195,4 +204,32 @@ func newWarehouseService(storage warehouses.Storage, inventorySvc invsvc.Service
 // required LocalizedString locale from cfg.CRM.DefaultLocale.
 func newProductService(storage products.Storage, brandSvc brand.Service, categorySvc category.Service, cfg *appconfig.Config) *productservice.Service {
 	return productservice.New(storage, brandSvc, categorySvc, resolveDefaultLocale(cfg))
+}
+
+// newMailerService resolves the SMTP connection/auth data from
+// cfg.CRM.Smtp. A nil section (optional — see CRMConfig.Smtp) yields a
+// Service whose Send always fails with errs.ErrSMTPNotConfigured, rather
+// than failing app boot.
+func newMailerService(cfg *appconfig.Config) *mailerservice.Service {
+	if cfg.CRM == nil || cfg.CRM.Smtp == nil {
+		return mailerservice.New(nil)
+	}
+	smtp := cfg.CRM.Smtp
+	return mailerservice.New(&mailerservice.Config{
+		Host:     smtp.Host,
+		Port:     smtp.Port,
+		Username: smtp.Username,
+		Password: smtp.Password.Expose(),
+		From:     smtp.From,
+	})
+}
+
+// newNotificationService resolves the message recipient from
+// cfg.CRM.Smtp.To.
+func newNotificationService(mailerSvc mailer.Service, cfg *appconfig.Config) *notificationservice.Service {
+	var recipient string
+	if cfg.CRM != nil && cfg.CRM.Smtp != nil {
+		recipient = cfg.CRM.Smtp.To
+	}
+	return notificationservice.New(mailerSvc, recipient)
 }

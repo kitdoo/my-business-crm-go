@@ -53,13 +53,14 @@ export default defineNuxtConfig({
     grpc: {
       baseUrl: '',
       timeoutMs: 15000,
+      // Static API key this frontend is registered under on the backend
+      // (CRMConfig.NotificationClients) — required by
+      // NotificationsService.Send (contact/dealer forms). env:
+      // NUXT_GRPC_CLIENT_KEY.
+      clientKey: '',
     },
     images: {
       baseUrl: '',
-    },
-    mail: {
-      smtpUrl: '',
-      contactRecipient: '',
     },
     public: {
       appName: 'PHOMI Srbija',
