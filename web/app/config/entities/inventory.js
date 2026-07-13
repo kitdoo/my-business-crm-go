@@ -9,6 +9,7 @@ export default {
   label: 'entities.inventory.label',
   icon: 'i-lucide-package-search',
   route: '/inventory',
+  group: 'warehouse',
   permissions: {
     read: 'inventory:read',
   },

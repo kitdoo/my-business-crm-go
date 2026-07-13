@@ -7,6 +7,7 @@ export default {
   label: 'entities.partners.label',
   icon: 'i-lucide-handshake',
   route: '/partners',
+  group: 'sales',
   permissions: {
     read: 'partners:read',
     create: 'partners:create',

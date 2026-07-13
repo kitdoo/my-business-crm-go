@@ -11,6 +11,7 @@ export default {
   label: 'entities.sales.label',
   icon: 'i-lucide-shopping-cart',
   route: '/sales',
+  group: 'sales',
   permissions: {
     read: 'sales:read',
     create: 'sales:create',

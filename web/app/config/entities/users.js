@@ -11,6 +11,7 @@ export default {
   label: 'entities.users.label',
   icon: 'i-lucide-user-cog',
   route: '/users',
+  group: 'users',
   permissions: {
     read: 'users:read',
     create: 'users:create',

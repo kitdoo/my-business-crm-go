@@ -9,6 +9,7 @@ export default {
   label: 'entities.inventoryMovements.label',
   icon: 'i-lucide-arrow-left-right',
   route: '/inventory-movements',
+  group: 'warehouse',
   permissions: {
     read: 'inventorymovements:read',
     create: 'inventorymovements:create',

@@ -7,6 +7,7 @@ export default {
   label: 'entities.brands.label',
   icon: 'i-lucide-tag',
   route: '/brands',
+  group: 'catalog',
   permissions: {
     read: 'brands:read',
     create: 'brands:create',

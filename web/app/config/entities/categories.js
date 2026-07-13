@@ -9,6 +9,7 @@ export default {
   label: 'entities.categories.label',
   icon: 'i-lucide-shapes',
   route: '/categories',
+  group: 'catalog',
   permissions: {
     read: 'categories:read',
     create: 'categories:create',

@@ -1,7 +1,8 @@
 {
   "nav": {
     "dashboard": "Dashboard",
-    "catalog": "Catalog"
+    "catalog": "Catalog",
+    "help": "Help"
   },
   "entities": {
     "brands": {
@@ -207,6 +208,33 @@
     "changePassword": "Change password",
     "changePasswordSuccess": "Password changed",
     "logout": "Log out"
+  },
+  "help": {
+    "title": "How to work with the CRM",
+    "noRole": "Sign in to see the guide for your role.",
+    "roles": {
+      "admin": {
+        "intro": "As an admin you manage the whole system — from users to sales.",
+        "steps": [
+          { "icon": "i-lucide-user-cog", "title": "Set up users", "description": "Create staff accounts in the Users section and assign them roles." },
+          { "icon": "i-lucide-box", "title": "Fill in the catalog", "description": "Add brands, categories and products in the Brands, categories, products section." },
+          { "icon": "i-lucide-warehouse", "title": "Create warehouses and receive stock", "description": "In the Warehouses, stock, movements section set up a warehouse and record a stock receipt." },
+          { "icon": "i-lucide-shopping-cart", "title": "Process sales", "description": "In the Sales, clients, partners section create clients, partners and sales." },
+          { "icon": "i-lucide-layout-dashboard", "title": "Track performance", "description": "Use the dashboard to see turnover, stock levels and sales by staff and partner." }
+        ]
+      },
+      "employee": {
+        "intro": "As an employee you work with the catalog and process sales.",
+        "steps": [
+          { "icon": "i-lucide-box", "title": "Add products", "description": "In the Brands, categories, products section you can create brands, categories and products." },
+          { "icon": "i-lucide-shopping-cart", "title": "Process sales", "description": "Create new sales in the Sales, clients, partners section." }
+        ]
+      },
+      "guest": {
+        "intro": "Your role doesn't have access to any sections yet. Contact an administrator.",
+        "steps": []
+      }
+    }
   },
   "errors": {
     "generic": "An unexpected error occurred",

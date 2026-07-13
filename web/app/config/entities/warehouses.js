@@ -9,6 +9,7 @@ export default {
   label: 'entities.warehouses.label',
   icon: 'i-lucide-warehouse',
   route: '/warehouses',
+  group: 'warehouse',
   permissions: {
     read: 'warehouses:read',
     create: 'warehouses:create',

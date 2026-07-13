@@ -7,6 +7,7 @@ export default {
   label: 'entities.clients.label',
   icon: 'i-lucide-user-round',
   route: '/clients',
+  group: 'sales',
   permissions: {
     read: 'clients:read',
     create: 'clients:create',

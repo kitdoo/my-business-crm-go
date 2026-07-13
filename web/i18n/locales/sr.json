@@ -1,7 +1,8 @@
 {
   "nav": {
     "dashboard": "Kontrolna tabla",
-    "catalog": "Katalog"
+    "catalog": "Katalog",
+    "help": "Pomoć"
   },
   "entities": {
     "brands": {
@@ -207,6 +208,33 @@
     "changePassword": "Promeni lozinku",
     "changePasswordSuccess": "Lozinka je promenjena",
     "logout": "Odjava"
+  },
+  "help": {
+    "title": "Kako raditi sa CRM sistemom",
+    "noRole": "Prijavite se da biste videli uputstvo za vašu ulogu.",
+    "roles": {
+      "admin": {
+        "intro": "Kao administrator upravljate celim sistemom — od korisnika do prodaje.",
+        "steps": [
+          { "icon": "i-lucide-user-cog", "title": "Podesite korisnike", "description": "Kreirajte naloge zaposlenih u odeljku Korisnici i dodelite im uloge." },
+          { "icon": "i-lucide-box", "title": "Popunite katalog", "description": "Dodajte brendove, kategorije i proizvode u odeljku sa katalogom." },
+          { "icon": "i-lucide-warehouse", "title": "Kreirajte magacine i unesite zalihe", "description": "U odeljku sa magacinima podesite magacin i unesite prijem robe." },
+          { "icon": "i-lucide-shopping-cart", "title": "Evidentirajte prodaje", "description": "U odeljku za prodaju kreirajte klijente, partnere i prodaje." },
+          { "icon": "i-lucide-layout-dashboard", "title": "Pratite pokazatelje", "description": "Na kontrolnoj tabli pratite promet, zalihe i prodaju po zaposlenima i partnerima." }
+        ]
+      },
+      "employee": {
+        "intro": "Kao zaposleni radite sa katalogom i evidentirate prodaje.",
+        "steps": [
+          { "icon": "i-lucide-box", "title": "Dodajte proizvode", "description": "U odeljku sa katalogom možete kreirati brendove, kategorije i proizvode." },
+          { "icon": "i-lucide-shopping-cart", "title": "Evidentirajte prodaje", "description": "Kreirajte nove prodaje u odeljku za prodaju." }
+        ]
+      },
+      "guest": {
+        "intro": "Vaša uloga trenutno nema pristup nijednom delu sistema. Obratite se administratoru.",
+        "steps": []
+      }
+    }
   },
   "errors": {
     "generic": "Došlo je do neočekivane greške",
