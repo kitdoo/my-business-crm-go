@@ -1,11 +1,20 @@
 name: Docker Publish
 
 # Builds and pushes all three images (backend, web, web-public) to GHCR
-# on every version tag (v1.2.3, v1.2.3-beta.1, ...). The VM only ever
-# pulls these — it never builds from source. See docker-compose.yml
-# (image: + build: both set) and .env.docker-compose.example.
+# on every version tag (v1.2.3, v1.2.3-beta.1, ...) and on every push to
+# develop. The VM only ever pulls these — it never builds from source.
+# See docker-compose.yml (image: + build: both set) and
+# .env.docker-compose.example.
+#
+# TEMPORARY: develop pushes are tagged :latest (same floating tag the VM's
+# IMAGE_TAG=latest pulls), so every develop commit goes straight to prod
+# on the next `docker compose pull`. This is intentional while the app is
+# pre-stable; switch develop pushes to a non-`latest` tag once releases
+# start going through git tags instead.
 on:
   push:
+    branches:
+      - develop
     tags:
       - "v*"
   workflow_dispatch:
@@ -28,7 +37,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set image version
+        id: vars
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "app_version=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            sha="$(git rev-parse --short HEAD)"
+            echo "app_version=dev-${sha}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build and push all images
         env:
-          APP_VERSION: ${{ github.ref_name }}
+          APP_VERSION: ${{ steps.vars.outputs.app_version }}
         run: make build-docker-images
