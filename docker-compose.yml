@@ -119,6 +119,12 @@ services:
     # themselves — so required-ness is enforced here with `:?` instead of
     # bare passthrough.
     environment:
+      # Nuxt/Nitro built-in runtimeConfig key — overridable at container
+      # start with no rebuild, so a single-domain deployment (web-public on
+      # "/" and this app reverse-proxied under "/admin/" by nginx, see
+      # docker-compose comment above web-public) is purely a nginx+.env
+      # change. Defaults to "/" (this app owns the whole host) when unset.
+      NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-/}
       NUXT_GRPC_BASE_URL: ${NUXT_GRPC_BASE_URL:-backend:7779}
       NUXT_GRPC_TIMEOUT_MS: ${NUXT_GRPC_TIMEOUT_MS:-15000}
       NUXT_IMAGES_BASE_URL: ${NUXT_IMAGES_BASE_URL:-http://backend:9080}
