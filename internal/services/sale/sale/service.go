@@ -68,9 +68,19 @@ func New(
 func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entities.Sale, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
-	if _, err := s.clients.Get(ctx, in.ClientID); err != nil {
+	clientID := in.ClientID
+	if in.NewClient != nil {
+		// Find-or-create by email (TD §12.3) — the caller never has to
+		// create a client as a separate step before this one.
+		c, err := s.clients.FindOrCreateByEmail(ctx, in.NewClient)
+		if err != nil {
+			return nil, err
+		}
+		clientID = c.ID
+	} else if _, err := s.clients.Get(ctx, clientID); err != nil {
 		return nil, err
 	}
+
 	wh, err := s.warehouses.Get(ctx, in.WarehouseID)
 	if err != nil {
 		return nil, err
@@ -90,7 +100,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	}
 
 	sale := entities.SaleNew(func(sl *entities.Sale) {
-		sl.ClientID = in.ClientID
+		sl.ClientID = clientID
 		sl.WarehouseID = in.WarehouseID
 		sl.PartnerID = in.PartnerID
 		sl.Items = items
@@ -115,6 +125,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 			Type:        entities.MovementTypeSale,
 			Quantity:    -item.Quantity,
 			Comment:     fmt.Sprintf("sale %s", sale.ID),
+			SaleID:      &sale.ID,
 			CreatedBy:   sale.CreatedBy,
 		}); err != nil {
 			s.logger.ErrorContext(ctx, "record sale movement failed; sale and prior items' stock already committed",
@@ -169,11 +180,21 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 }
 
 func (s *Service) Get(ctx context.Context, id string) (*entities.Sale, error) {
-	return s.storage.Get(ctx, id)
+	sl, err := s.storage.Get(ctx, id)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", id), slogx.Error(err))
+		return nil, err
+	}
+	return sl, nil
 }
 
 func (s *Service) List(ctx context.Context, in *entities.SalesList) (*entities.List[entities.Sale], error) {
-	return s.storage.List(ctx, in)
+	list, err := s.storage.List(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "list sales failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }
 
 func isTerminal(status entities.SaleStatus) bool {
@@ -185,6 +206,7 @@ func (s *Service) UpdateStatus(ctx context.Context, in *entities.SaleUpdateStatu
 
 	sl, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != sl.Etag {
@@ -209,6 +231,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 
 	sl, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != sl.Etag {
@@ -231,6 +254,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 			Type:        entities.MovementTypeAdjustment,
 			Quantity:    item.Quantity,
 			Comment:     comment,
+			SaleID:      &sl.ID,
 			CreatedBy:   in.CreatedBy,
 		}); err != nil {
 			s.logger.ErrorContext(ctx, "restock movement on sale cancel failed",

@@ -102,6 +102,19 @@ func (s *Storage) Get(ctx context.Context, productID, warehouseID string) (*enti
 	return converter.Convert(&m, &entities.Inventory{}), nil
 }
 
+// listSortField picks the sort key for the requested field, defaulting to
+// FieldID (stable insertion order) when no sort is requested.
+func listSortField(sort *entities.InventoryListSort) string {
+	if sort == nil {
+		return FieldID
+	}
+	field := FieldQuantity
+	if sort.Direction == entities.SortDirectionDesc {
+		return "-" + field
+	}
+	return field
+}
+
 func (s *Storage) List(ctx context.Context, in *entities.InventoryList) (*entities.List[entities.Inventory], error) {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
@@ -131,7 +144,7 @@ func (s *Storage) List(ctx context.Context, in *entities.InventoryList) (*entiti
 
 	opts := []datamongo.ListCursorOption{
 		datamongo.WithListCursorFilter(filter),
-		datamongo.WithListCursorSort(FieldID),
+		datamongo.WithListCursorSort(listSortField(in.Sort)),
 		datamongo.WithListCursorLimit(limit),
 	}
 	if in.Pagination.Cursor != "" {

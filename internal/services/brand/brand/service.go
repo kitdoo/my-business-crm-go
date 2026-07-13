@@ -56,11 +56,21 @@ func (s *Service) Create(ctx context.Context, in *entities.BrandCreate) (*entiti
 }
 
 func (s *Service) Get(ctx context.Context, id string) (*entities.Brand, error) {
-	return s.storage.Get(ctx, id)
+	b, err := s.storage.Get(ctx, id)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get brand failed", slog.String("id", id), slogx.Error(err))
+		return nil, err
+	}
+	return b, nil
 }
 
 func (s *Service) List(ctx context.Context, in *entities.BrandsList) (*entities.List[entities.Brand], error) {
-	return s.storage.List(ctx, in)
+	list, err := s.storage.List(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "list brands failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }
 
 func (s *Service) Update(ctx context.Context, in *entities.BrandUpdate) (*entities.Brand, error) {
@@ -72,6 +82,7 @@ func (s *Service) Update(ctx context.Context, in *entities.BrandUpdate) (*entiti
 
 	b, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get brand failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != b.Etag {
@@ -92,6 +103,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.BrandDelete) error {
 
 	b, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get brand failed", slog.String("id", in.ID), slogx.Error(err))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != b.Etag {
@@ -101,6 +113,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.BrandDelete) error {
 	if s.products != nil {
 		hasProducts, err := s.products.ExistsForBrand(ctx, b.ID)
 		if err != nil {
+			s.logger.DebugContext(ctx, "check brand products existence failed", slog.String("id", b.ID), slogx.Error(err))
 			return err
 		}
 		if hasProducts {

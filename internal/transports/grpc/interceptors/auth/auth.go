@@ -26,6 +26,7 @@ import (
 	partnersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/partner/v1"
 	pricesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/price/v1"
 	productsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product/v1"
+	productattributedefinitionsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product_attribute_definition/v1"
 	usersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/user/v1"
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
@@ -45,10 +46,11 @@ func UserFromContext(ctx context.Context) (*entities.User, bool) {
 }
 
 // New builds the gRPC auth interceptor. Login is exempt (it is how a token
-// is obtained in the first place). ProductsService.List, PricesService.Get
-// and CategoriesService.List are also exempt — they back the public
-// website's catalog (web-public/), which has anonymous visitors and no
-// login of its own; see web-public/README.md. NotificationsService.Send is
+// is obtained in the first place). ProductsService.List, PricesService.Get,
+// CategoriesService.List and ProductAttributeDefinitionsService.List are
+// also exempt — they back the public website's catalog (web-public/), which
+// has anonymous visitors and no login of its own; see web-public/README.md.
+// NotificationsService.Send is
 // exempt for the same reason (anonymous visitors submit web-public/'s
 // contact/dealer forms through it) but is not left open to anyone who can
 // reach the gRPC port: internal/transports/grpc/interceptors/clientkey
@@ -100,6 +102,7 @@ func New(users usersvc.Service) interceptors.ServerInterceptor {
 			categorysvcpb.CategoriesService_List_FullMethodName,
 			partnersvcpb.PartnersService_ListPublic_FullMethodName,
 			notificationsvcpb.NotificationsService_Send_FullMethodName,
+			productattributedefinitionsvcpb.ProductAttributeDefinitionsService_List_FullMethodName,
 		),
 	)
 }

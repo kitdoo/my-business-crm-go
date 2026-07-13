@@ -65,6 +65,21 @@ func toSalePB(sl *entities.Sale) *salepb.Sale {
 
 func (h *Handler) Create(ctx context.Context, in *salesvcpb.SaleCreateRequest) (*salesvcpb.SaleCreateResponse, error) {
 	create := converter.Convert(in, &entities.SaleCreate{}, withProtoCodecs, converter.WithHandleEmbeddedStructs(true))
+	// clientId/newClient is a oneof (crm.grpc.sale.v1.SaleCreateRequest.
+	// clientRef) — the generic converter above can't map an interface
+	// field by reflection, so it's resolved by hand here.
+	switch ref := in.GetClientRef().(type) {
+	case *salesvcpb.SaleCreateRequest_ClientId:
+		create.ClientID = ref.ClientId
+	case *salesvcpb.SaleCreateRequest_NewClient_:
+		nc := ref.NewClient
+		create.NewClient = &entities.ClientCreate{
+			Name:    nc.GetName(),
+			Phone:   nc.GetPhone(),
+			Email:   nc.GetEmail(),
+			Address: nc.GetAddress(),
+		}
+	}
 	// CreatedBy comes from the authenticated caller, not the request body;
 	// see internal/pkg/reqctx for why this is currently always empty.
 	if userID, ok := reqctx.UserIDFromContext(ctx); ok {

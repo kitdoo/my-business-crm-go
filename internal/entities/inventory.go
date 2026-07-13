@@ -16,6 +16,20 @@ type Inventory struct {
 	Etag        string // OCC token; rolled on every ApplyMovement
 }
 
+// InventoryListSortField is int32-aligned with
+// InventoryListRequest.Sort.Field. Quantity is the only sortable field —
+// Inventory carries no product name to sort by.
+type InventoryListSortField int32
+
+const (
+	InventoryListSortFieldQuantity InventoryListSortField = iota
+)
+
+type InventoryListSort struct {
+	Field     InventoryListSortField
+	Direction SortDirection
+}
+
 // InventoryList is the single List input; scope/filters/pagination all live
 // inside it, per the List(ctx, in *XxxList) convention.
 type InventoryList struct {
@@ -23,5 +37,6 @@ type InventoryList struct {
 	WarehouseID *string
 	MinQuantity *int64
 	MaxQuantity *int64
+	Sort        *InventoryListSort
 	Pagination  ListPagination
 }

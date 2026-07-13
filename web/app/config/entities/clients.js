@@ -21,14 +21,19 @@ export default {
       { key: 'phone', label: 'fields.phone' },
       { key: 'email', label: 'fields.email' },
       { key: 'address', label: 'fields.address' },
-      { key: 'createdAt', label: 'fields.createdAt', component: 'DateLabel' },
     ],
-    filters: [{ key: 'createdAt', type: 'periodFilter', label: 'fields.createdAt' }],
+    filters: [],
     sort: [
       { field: 'FIELD_CREATED_AT', label: 'sort.createdAt' },
       { field: 'FIELD_NAME', label: 'sort.name' },
     ],
     defaultSort: { field: 'FIELD_CREATED_AT', direction: 'SORT_DIRECTION_DESC' },
+  },
+
+  // Viewing a client preloads their sales history underneath the record
+  // fields (EntityViewDrawer's relatedSales — SalesListRequest.clientId).
+  view: {
+    relatedSales: (record) => ({ clientId: record.id }),
   },
 
   form: {

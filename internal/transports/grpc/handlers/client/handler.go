@@ -96,6 +96,9 @@ func (h *Handler) List(ctx context.Context, in *clientsvcpb.ClientsListRequest) 
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withUnixTimeCodec)
 		}
+		if f.Email != nil {
+			listIn.Email = f.Email
+		}
 	}
 
 	result, err := h.svc.List(ctx, listIn)

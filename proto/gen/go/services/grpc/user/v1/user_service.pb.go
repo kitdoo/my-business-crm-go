@@ -980,7 +980,8 @@ type UsersListRequest_Filter struct {
 	state    protoimpl.MessageState `protogen:"open.v1"`
 	Statuses []user.UserStatus      `protobuf:"varint,1,rep,packed,name=statuses,proto3,enum=crm.types.user.UserStatus" json:"statuses,omitempty"`
 	Roles    []user.UserRole        `protobuf:"varint,2,rep,packed,name=roles,proto3,enum=crm.types.user.UserRole" json:"roles,omitempty"`
-	// Matches name, lastName, phone, email.
+	// Matches name, lastName, phone, email. Reserved for a future version;
+	// not implemented yet.
 	SearchQuery   *string              `protobuf:"bytes,3,opt,name=searchQuery,proto3,oneof" json:"searchQuery,omitempty"`
 	CreatedAt     *common.PeriodFilter `protobuf:"bytes,4,opt,name=createdAt,proto3,oneof" json:"createdAt,omitempty"`
 	unknownFields protoimpl.UnknownFields

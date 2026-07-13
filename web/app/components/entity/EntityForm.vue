@@ -15,11 +15,25 @@ const props = defineProps({
   // button on Product's Movements tab pre-filling productId). Ignored
   // once editing an existing record.
   initialValues: { type: Object, default: () => ({}) },
+  // Optional hook: async (record) => void, awaited right after a
+  // successful create (mode="page" only) and before navigating to the
+  // new record's page. For the one entity that needs a second backend
+  // call as part of "creating" it (Product's required price — TD §12.6)
+  // instead of baking that into this generic component. The callback
+  // owns its own error display; if it throws, navigation is skipped so
+  // the operator isn't swept away from a partially-finished creation.
+  beforeCreateRedirect: { type: Function, default: null },
+  // Optional extra validity gate from the host, ANDed with the form's
+  // own field validation — for the #extra-fields slot content (e.g.
+  // Product's required price isn't a form field, so nothing here
+  // validates it on its own).
+  extraValid: { type: Boolean, default: true },
 })
 const emit = defineEmits(['saved', 'cancel', 'deleted'])
 
 const { t } = useI18n()
 const router = useRouter()
+const toast = useToast()
 const config = getEntityConfig(props.entity)
 const runtimeConfig = useRuntimeConfig()
 const { can } = usePermission()
@@ -81,6 +95,7 @@ onMounted(() => {
 })
 
 async function onSubmit() {
+  if (!props.extraValid) return
   try {
     const record = await save()
     if (isDrawer.value) {
@@ -88,8 +103,14 @@ async function onSubmit() {
       return
     }
     if (isCreate && record) {
+      if (props.beforeCreateRedirect) await props.beforeCreateRedirect(record)
       router.push(`${config.route}/${record.id}`)
+      return
     }
+    // Full-page edit stays on the same page after a successful save (no
+    // navigation to react to), so it needs its own confirmation — without
+    // this, clicking Save silently succeeds and looks like it did nothing.
+    toast.add({ title: t('common.saved'), color: 'success' })
   } catch {
     // handled by useApiErrorHandler inside save()
   }
@@ -124,15 +145,6 @@ function fieldsToRender() {
   <div class="space-y-6">
     <div v-if="loading" class="py-8 text-center text-neutral-500">{{ t('common.loading') }}</div>
     <template v-else>
-      <NuxtLink
-        v-if="isDrawer && !isCreate && config.detailPage"
-        :to="`${config.route}/${props.id}`"
-        class="text-sm text-brand-700 hover:underline inline-flex items-center gap-1"
-      >
-        <UIcon name="i-lucide-external-link" class="size-4" />
-        {{ t('common.openFullPage') }}
-      </NuxtLink>
-
       <form class="space-y-6" @submit.prevent="onSubmit">
         <FormGrid>
           <template v-for="field in fieldsToRender()" :key="field.key">
@@ -164,7 +176,7 @@ function fieldsToRender() {
                 :type="field.inputType || 'text'"
                 :required="field.required"
                 :maxlength="field.maxLength"
-                :disabled="field.immutableOnEdit && !isCreate"
+                :readonly="field.immutableOnEdit && !isCreate"
               />
             </UFormField>
             <UFormField
@@ -182,8 +194,6 @@ function fieldsToRender() {
               :label="t(field.label)"
               :error="fieldErrors[field.key]"
               :required="field.required"
-              :tree="field.tree"
-              :exclude-id="field.tree && !isCreate ? props.id : null"
             />
             <RelationMultiSelect
               v-else-if="field.type === 'relationMulti'"
@@ -192,17 +202,13 @@ function fieldsToRender() {
               :label="t(field.label)"
               :error="fieldErrors[field.key]"
             />
-            <KeyValueLocalizedInput
-              v-else-if="field.type === 'keyValueLocalized'"
-              v-model="form[field.key]"
-              :locales="runtimeConfig.public.supportedLocales"
-              :label="t(field.label)"
-            />
             <UFormField v-else-if="field.type === 'images'" :label="t(field.label)" class="md:col-span-2">
               <ProductImageUploader v-model="form[field.key]" />
             </UFormField>
           </template>
         </FormGrid>
+
+        <slot name="extra-fields" />
 
         <div class="flex items-center justify-between">
           <div class="flex gap-2">
@@ -222,7 +228,7 @@ function fieldsToRender() {
           <div class="ml-auto flex gap-2">
             <UButton v-if="isDrawer" color="neutral" variant="soft" @click="onCancel">{{ t('common.cancel') }}</UButton>
             <UButton v-else color="neutral" variant="soft" :to="config.route">{{ t('common.cancel') }}</UButton>
-            <UButton type="submit" :loading="saving">{{ t('common.save') }}</UButton>
+            <UButton type="submit" :disabled="!extraValid" :loading="saving">{{ t('common.save') }}</UButton>
           </div>
         </div>
       </form>

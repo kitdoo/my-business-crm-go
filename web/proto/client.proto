@@ -56,6 +56,9 @@ message ClientsListRequest {
   message Filter {
     optional string searchQuery = 1;
     optional crm.types.common.PeriodFilter createdAt = 2;
+    // Exact match — used to look a client up by email before creating a
+    // sale (find-or-create).
+    optional string email = 3;
   }
   optional Filter filter = 3;
   message Options {

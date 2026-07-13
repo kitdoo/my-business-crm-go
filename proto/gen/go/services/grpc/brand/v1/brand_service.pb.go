@@ -703,10 +703,11 @@ func (x *BrandsListRequest_Sort) GetDirection() common.SortDirection {
 }
 
 type BrandsListRequest_Filter struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Statuses      []brand.BrandStatus    `protobuf:"varint,1,rep,packed,name=statuses,proto3,enum=crm.types.brand.BrandStatus" json:"statuses,omitempty"`
-	SearchQuery   *string                `protobuf:"bytes,2,opt,name=searchQuery,proto3,oneof" json:"searchQuery,omitempty"`
-	CreatedAt     *common.PeriodFilter   `protobuf:"bytes,3,opt,name=createdAt,proto3,oneof" json:"createdAt,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Statuses []brand.BrandStatus    `protobuf:"varint,1,rep,packed,name=statuses,proto3,enum=crm.types.brand.BrandStatus" json:"statuses,omitempty"`
+	// searchQuery is reserved for a future version; not implemented yet.
+	SearchQuery   *string              `protobuf:"bytes,2,opt,name=searchQuery,proto3,oneof" json:"searchQuery,omitempty"`
+	CreatedAt     *common.PeriodFilter `protobuf:"bytes,3,opt,name=createdAt,proto3,oneof" json:"createdAt,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

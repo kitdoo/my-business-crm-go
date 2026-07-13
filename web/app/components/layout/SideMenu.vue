@@ -26,7 +26,8 @@ const groupedSections = computed(() =>
 )
 
 function isActive(item) {
-  return item.to === '/' ? route.path === '/' : route.path.startsWith(item.to)
+  if (item.to === '/') return route.path === '/'
+  return route.path === item.to || route.path.startsWith(`${item.to}/`)
 }
 
 function onSelect(item) {

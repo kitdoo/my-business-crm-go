@@ -53,12 +53,13 @@
     "sales": {
       "label": "Sales",
       "create": "New sale",
-      "newClient": "Create new client",
+      "newClient": "No client found with this email — fill in their details, they'll be created automatically",
       "addItem": "Add item",
       "lineTotal": "Line total",
       "detailTitle": "Sale",
       "items": "Items",
       "changeStatus": "Change status",
+      "statusFlowTerminalNote": "Or at any point",
       "cancel": "Cancel sale",
       "cancelConfirmTitle": "Cancel sale",
       "cancelConfirmBody": "Stock will be returned to the warehouse automatically.",
@@ -73,21 +74,22 @@
     "phone": "Phone",
     "email": "Email",
     "address": "Address",
+    "website": "Website",
     "note": "Note",
     "commissionPercentage": "Commission, %",
-    "parentCategory": "Parent category",
     "lastName": "Last name",
     "role": "Role",
     "password": "Password",
     "currentPassword": "Current password",
     "newPassword": "New password",
     "sku": "SKU",
+    "number": "Number",
     "brand": "Brand",
     "categories": "Categories",
     "details": "Details",
     "images": "Images",
-    "detailKey": "Characteristic name",
-    "detailValue": "Value",
+    "attributePublic": "Public",
+    "attributePrivate": "Private",
     "priceAmount": "Price",
     "discountAmount": "Discount",
     "product": "Product",
@@ -98,14 +100,19 @@
     "maxQuantity": "Max quantity",
     "movementType": "Movement type",
     "comment": "Comment",
+    "sale": "Sale",
     "client": "Client",
     "partner": "Partner",
+    "seller": "Seller",
     "totalAmount": "Total",
     "discountPercentage": "Discount, %"
   },
   "sort": {
     "createdAt": "By creation date",
-    "name": "By name"
+    "name": "By name",
+    "quantity": "By quantity",
+    "label": "Sort by",
+    "direction": "Sort direction"
   },
   "enums": {
     "status": {
@@ -138,7 +145,7 @@
       "MOVEMENT_TYPE_ADJUSTMENT": "Adjustment",
       "MOVEMENT_TYPE_TRANSFER": "Transfer",
       "MOVEMENT_TYPE_UNSPECIFIED": "Unspecified",
-      "SALE_STATUS_DRAFT": "Draft",
+      "SALE_STATUS_DRAFT": "Created",
       "SALE_STATUS_PAID": "Paid",
       "SALE_STATUS_SHIPPED": "Shipped",
       "SALE_STATUS_COMPLETED": "Completed",
@@ -150,6 +157,7 @@
   "common": {
     "create": "Create",
     "save": "Save",
+    "saved": "Saved",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "edit": "Edit",
@@ -161,30 +169,32 @@
     "empty": "No data",
     "loadMore": "Load more",
     "none": "None",
+    "min": "Min",
+    "max": "Max",
     "add": "Add",
-    "openFullPage": "Open full page",
+    "addLanguage": "Add language",
+    "addCharacteristic": "Add characteristic",
     "next": "Next",
     "back": "Back",
     "retry": "Retry"
   },
   "dashboard": {
-    "turnover": "Turnover",
+    "salesAmount": "Sales amount for period",
     "salesReport": "Sales for period",
     "salesCount": "Sales count",
     "popularProducts": "Top products",
     "salesByStaff": "Sales by staff",
     "salesByPartner": "Sales by partner",
     "commission": "Commission",
-    "stockLevels": "Stock levels",
-    "viewAllInventory": "View all inventory",
     "noAccess": "No access to reports"
   },
   "periodFilter": {
     "today": "Today",
     "7d": "7 days",
-    "30d": "30 days",
-    "3m": "3 months",
-    "1y": "1 year"
+    "30d": "Month",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To"
   },
   "products": {
     "mainImage": "Main",
@@ -199,7 +209,7 @@
   },
   "login": {
     "title": "Sign in",
-    "login": "Phone or email",
+    "login": "Email",
     "password": "Password",
     "submit": "Sign in",
     "error": "Sign in failed"
@@ -216,18 +226,46 @@
       "admin": {
         "intro": "As an admin you manage the whole system — from users to sales.",
         "steps": [
-          { "icon": "i-lucide-user-cog", "title": "Set up users", "description": "Create staff accounts in the Users section and assign them roles." },
-          { "icon": "i-lucide-box", "title": "Fill in the catalog", "description": "Add brands, categories and products in the Brands, categories, products section." },
-          { "icon": "i-lucide-warehouse", "title": "Create warehouses and receive stock", "description": "In the Warehouses, stock, movements section set up a warehouse and record a stock receipt." },
-          { "icon": "i-lucide-shopping-cart", "title": "Process sales", "description": "In the Sales, clients, partners section create clients, partners and sales." },
-          { "icon": "i-lucide-layout-dashboard", "title": "Track performance", "description": "Use the dashboard to see turnover, stock levels and sales by staff and partner." }
+          {
+            "icon": "i-lucide-user-cog",
+            "title": "Set up users",
+            "description": "Create staff accounts in the Users section and assign them roles."
+          },
+          {
+            "icon": "i-lucide-box",
+            "title": "Fill in the catalog",
+            "description": "Add brands, categories and products in the Brands, categories, products section."
+          },
+          {
+            "icon": "i-lucide-warehouse",
+            "title": "Create warehouses and receive stock",
+            "description": "In the Warehouses, stock, movements section set up a warehouse and record a stock receipt."
+          },
+          {
+            "icon": "i-lucide-shopping-cart",
+            "title": "Process sales",
+            "description": "In the Sales, clients, partners section create clients, partners and sales."
+          },
+          {
+            "icon": "i-lucide-layout-dashboard",
+            "title": "Track performance",
+            "description": "Use the dashboard to see turnover, stock levels and sales by staff and partner."
+          }
         ]
       },
       "employee": {
         "intro": "As an employee you work with the catalog and process sales.",
         "steps": [
-          { "icon": "i-lucide-box", "title": "Add products", "description": "In the Brands, categories, products section you can create brands, categories and products." },
-          { "icon": "i-lucide-shopping-cart", "title": "Process sales", "description": "Create new sales in the Sales, clients, partners section." }
+          {
+            "icon": "i-lucide-box",
+            "title": "Add products",
+            "description": "In the Brands, categories, products section you can create brands, categories and products."
+          },
+          {
+            "icon": "i-lucide-shopping-cart",
+            "title": "Process sales",
+            "description": "Create new sales in the Sales, clients, partners section."
+          }
         ]
       },
       "guest": {

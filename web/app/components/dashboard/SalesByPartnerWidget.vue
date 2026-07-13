@@ -7,6 +7,10 @@ const loading = ref(true)
 const error = ref('')
 const rows = ref([])
 
+// GetSalesByPartner returns every partner for the period with no
+// limit/sort param — top 6 by amount, sorted client-side.
+const topRows = computed(() => [...rows.value].sort((a, b) => Number(b.totalAmount) - Number(a.totalAmount)).slice(0, 6))
+
 async function load() {
   loading.value = true
   error.value = ''
@@ -25,7 +29,7 @@ watch(() => props.period, load, { immediate: true })
 
 <template>
   <DashboardWidget :title="t('dashboard.salesByPartner')" :loading="loading" :error="error" @retry="load">
-    <div v-if="rows.length === 0" class="text-sm text-neutral-500">{{ t('common.empty') }}</div>
+    <div v-if="topRows.length === 0" class="text-sm text-neutral-500">{{ t('common.empty') }}</div>
     <table v-else class="w-full text-sm">
       <thead>
         <tr class="text-left text-neutral-500">
@@ -36,7 +40,7 @@ watch(() => props.period, load, { immediate: true })
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows" :key="row.partnerId" class="border-b border-neutral-100 last:border-0">
+        <tr v-for="row in topRows" :key="row.partnerId" class="border-b border-neutral-100 last:border-0">
           <td class="py-1 pr-2"><RelationLabel :value="row.partnerId" relation="partners" /></td>
           <td class="py-1 pr-2 text-right text-neutral-500">{{ row.salesCount }}</td>
           <td class="py-1 pr-2 text-right"><MoneyAmountLabel :value="row.totalAmount" /></td>

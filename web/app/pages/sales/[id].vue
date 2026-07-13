@@ -22,6 +22,16 @@ const TERMINAL_STATUSES = ['SALE_STATUS_CANCELLED', 'SALE_STATUS_REFUNDED']
 const canUpdate = computed(() => can('sales:update'))
 const isTerminal = computed(() => sale.value && TERMINAL_STATUSES.includes(sale.value.status))
 
+// ENUMS.SaleStatus.values is already declared in flow order (Draft ->
+// Paid -> Shipped -> Completed), with Cancelled/Refunded as terminal
+// side-branches reachable from any non-terminal status — shown as a
+// tooltip next to the status badge instead of a separate diagram.
+const statusFlowText = computed(() => {
+  const forward = ENUMS.SaleStatus.values.filter((v) => !TERMINAL_STATUSES.includes(v)).map((v) => t(`enums.status.${v}`))
+  const terminal = TERMINAL_STATUSES.map((v) => t(`enums.status.${v}`))
+  return `${forward.join(' → ')}\n${t('entities.sales.statusFlowTerminalNote')}: ${terminal.join(', ')}`
+})
+
 const statusModalOpen = ref(false)
 const pendingStatus = ref(null)
 const statusOptions = computed(() =>
@@ -79,8 +89,13 @@ onMounted(load)
     <div v-if="loading" class="py-8 text-center text-neutral-500">{{ t('common.loading') }}</div>
     <template v-else-if="sale">
       <div class="flex items-center justify-between">
-        <h1 class="text-xl font-semibold">{{ t('entities.sales.detailTitle') }}</h1>
-        <StatusBadge :status="sale.status" :map="STATUS_COLOR_MAP.sale" />
+        <h1 class="text-xl font-semibold">{{ t('entities.sales.detailTitle') }} #{{ sale.number }}</h1>
+        <div class="flex items-center gap-1.5">
+          <StatusBadge :status="sale.status" :map="STATUS_COLOR_MAP.sale" />
+          <UTooltip :text="statusFlowText">
+            <UIcon name="i-lucide-circle-help" class="size-4 text-neutral-400" />
+          </UTooltip>
+        </div>
       </div>
 
       <FormGrid>

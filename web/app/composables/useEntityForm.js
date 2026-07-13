@@ -30,7 +30,7 @@ export function useEntityForm(entityKey, id, initialValues = {}) {
   function blankValue(field) {
     if (field.type === 'localizedString') return { values: {} }
     if (field.type === 'relationMulti' || field.type === 'images') return []
-    if (field.type === 'keyValueLocalized') return {}
+    if (field.type === 'attributeDetails') return {}
     return null
   }
 
@@ -52,7 +52,13 @@ export function useEntityForm(entityKey, id, initialValues = {}) {
       state[field.key] = rec[field.key] ?? blankValue(field)
     }
     form.value = state
-    original.value = state
+    // Deep clone — original must never share references with form. Every
+    // field editor mutates form.value in place (v-model="form[field.key]"),
+    // and form/original pointing at the same nested objects/arrays meant
+    // buildUpdateMask always saw identical values (mutating one mutated
+    // both), so the update FieldMask came out empty and save() silently
+    // no-op'd on every field, not just imageIds.
+    original.value = structuredClone(state)
     etag.value = rec.etag
     record.value = rec
   }

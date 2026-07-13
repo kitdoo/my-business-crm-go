@@ -85,6 +85,7 @@
     "available": "Available",
     "unavailable": "Unavailable",
     "empty": "No products available right now.",
+    "loadError": "The catalog is temporarily unavailable. Please try again shortly.",
     "loadMore": "Load more",
     "contactCta": "Contact us about this product",
     "contactPrefill": "I'm interested in: {sku} — {name}",
@@ -112,7 +113,10 @@
   "contact": {
     "thanks": "Thank you! Your message has been sent.",
     "address": "Veselina Masleše 56, Novi Sad, Serbia",
-    "showroomLabel": "Main showroom"
+    "showroomLabel": "Main showroom",
+    "addressLabel": "Address",
+    "phoneLabel": "Phone",
+    "emailLabel": "Email"
   },
   "cart": {
     "title": "Cart",
@@ -160,10 +164,13 @@
     "usedMaterials": "Materials used",
     "recommendedMaterials": "Recommended / similar",
     "items": {
-      "p1": "Family house — [location]",
-      "p2": "Commercial building — [location]",
-      "p3": "Weekend house — [location]",
-      "p4": "Apartment building — [location]"
+      "p1": "Moscow, Russia",
+      "p2": "Belarus",
+      "p3": "Minsk, Belarus",
+      "p4": "Moscow, Russia",
+      "p5": "Minsk, Belarus",
+      "p6": "Cairo, Egypt",
+      "p7": "Sochi, Russia"
     }
   },
   "seo": {

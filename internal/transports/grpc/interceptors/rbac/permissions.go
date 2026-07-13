@@ -9,6 +9,7 @@ import (
 	partnersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/partner/v1"
 	pricesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/price/v1"
 	productsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product/v1"
+	productattributedefinitionsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product_attribute_definition/v1"
 	reportsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/report/v1"
 	salesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/sale/v1"
 	usersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/user/v1"
@@ -44,9 +45,10 @@ func permission(resource, action string) string { return resource + ":" + action
 // wildcard (see Table.Allowed) — fail closed for anything new that lands
 // here without an explicit entry.
 //
-// Login, ProductsService.List, PricesService.Get and CategoriesService.List
-// are intentionally absent: the auth interceptor exempts them outright (see
-// auth.New), so they never reach the RBAC check.
+// Login, ProductsService.List, PricesService.Get, CategoriesService.List
+// and ProductAttributeDefinitionsService.List are intentionally absent: the
+// auth interceptor exempts them outright (see auth.New), so they never
+// reach the RBAC check.
 var permissions = map[string]string{
 	brandsvcpb.BrandsService_Create_FullMethodName: permission("brands", actionCreate),
 	brandsvcpb.BrandsService_Get_FullMethodName:    permission("brands", actionRead),
@@ -90,6 +92,11 @@ var permissions = map[string]string{
 	productsvcpb.ProductsService_List_FullMethodName:   permission("products", actionRead),
 	productsvcpb.ProductsService_Update_FullMethodName: permission("products", actionUpdate),
 	productsvcpb.ProductsService_Delete_FullMethodName: permission("products", actionDelete),
+
+	// Create/Update/Delete don't exist on this service (TD: seeded via
+	// migrations, read-only over the wire) — List is auth-exempt (see
+	// auth.New), so Get is the only method that needs an entry here.
+	productattributedefinitionsvcpb.ProductAttributeDefinitionsService_Get_FullMethodName: permission("productattributedefinitions", actionRead),
 
 	// Reports are all read-only aggregation endpoints.
 	reportsvcpb.ReportsService_GetSalesReport_FullMethodName:     permission("reports", actionRead),

@@ -1,23 +1,21 @@
 <script setup>
+// The dashboard's one headline number: total sales amount for the period
+// (replaces the former separate Turnover + sales-count/total tiles —
+// TD §8.4 update, one focused figure instead of three).
 const props = defineProps({ period: { type: Object, required: true } })
 const { t } = useI18n()
 const reportApi = useReportApi()
 
 const loading = ref(true)
 const error = ref('')
-const rows = ref([])
-
-const totals = computed(() => ({
-  salesCount: rows.value.reduce((sum, row) => sum + Number(row.salesCount || 0), 0),
-  totalAmount: rows.value.reduce((sum, row) => sum + Number(row.totalAmount || 0), 0),
-}))
+const totalAmount = ref(0)
 
 async function load() {
   loading.value = true
   error.value = ''
   try {
     const res = await reportApi.salesReport(props.period)
-    rows.value = res.rows
+    totalAmount.value = res.rows.reduce((sum, row) => sum + Number(row.totalAmount || 0), 0)
   } catch (err) {
     error.value = err?.data?.error?.message || t('errors.generic')
   } finally {
@@ -29,14 +27,7 @@ watch(() => props.period, load, { immediate: true })
 </script>
 
 <template>
-  <DashboardWidget :title="t('dashboard.salesReport')" :loading="loading" :error="error" @retry="load">
-    <div class="flex justify-between text-sm">
-      <span class="text-neutral-500">{{ t('dashboard.salesCount') }}</span>
-      <span class="font-medium">{{ totals.salesCount }}</span>
-    </div>
-    <div class="flex justify-between text-sm">
-      <span class="text-neutral-500">{{ t('fields.totalAmount') }}</span>
-      <span class="font-medium"><MoneyAmountLabel :value="totals.totalAmount" /></span>
-    </div>
-  </DashboardWidget>
+  <StatTile :label="t('dashboard.salesAmount')" :loading="loading" :error="error">
+    <MoneyAmountLabel :value="totalAmount" />
+  </StatTile>
 </template>

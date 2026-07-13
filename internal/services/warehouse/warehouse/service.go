@@ -61,11 +61,21 @@ func (s *Service) Create(ctx context.Context, in *entities.WarehouseCreate) (*en
 }
 
 func (s *Service) Get(ctx context.Context, id string) (*entities.Warehouse, error) {
-	return s.storage.Get(ctx, id)
+	w, err := s.storage.Get(ctx, id)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", id), slogx.Error(err))
+		return nil, err
+	}
+	return w, nil
 }
 
 func (s *Service) List(ctx context.Context, in *entities.WarehousesList) (*entities.List[entities.Warehouse], error) {
-	return s.storage.List(ctx, in)
+	list, err := s.storage.List(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "list warehouses failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }
 
 func (s *Service) Update(ctx context.Context, in *entities.WarehouseUpdate) (*entities.Warehouse, error) {
@@ -77,6 +87,7 @@ func (s *Service) Update(ctx context.Context, in *entities.WarehouseUpdate) (*en
 
 	w, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != w.Etag {
@@ -97,6 +108,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.WarehouseDelete) erro
 
 	w, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slogx.Error(err))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != w.Etag {
@@ -128,6 +140,7 @@ func (s *Service) Deactivate(ctx context.Context, in *entities.WarehouseDeactiva
 
 	w, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != w.Etag {

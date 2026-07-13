@@ -32,7 +32,9 @@ message CategoryGetResponse {
 }
 
 message CategoriesListRequest {
-  optional string parentId = 1 [(buf.validate.field).string.uuid = true];
+  reserved 1;
+  reserved "parentId";
+
   message Sort {
     enum Field {
       FIELD_CREATED_AT = 0;
@@ -67,12 +69,14 @@ message CategoriesListResponse {
 }
 
 message CategoryCreateRequest {
+  reserved 3;
+  reserved "parentId";
+
   message Options {
     optional google.protobuf.FieldMask readMask = 1;
   }
   crm.types.common.LocalizedString name = 1 [(buf.validate.field).required = true];
   crm.types.common.LocalizedString description = 2;
-  optional string parentId = 3 [(buf.validate.field).string.uuid = true];
   optional Options options = 99;
 }
 
@@ -81,6 +85,9 @@ message CategoryCreateResponse {
 }
 
 message CategoryUpdateRequest {
+  reserved 4;
+  reserved "parentId";
+
   message Options {
     optional google.protobuf.FieldMask updateMask = 1;
     optional string etag = 2;
@@ -88,7 +95,6 @@ message CategoryUpdateRequest {
   string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   optional crm.types.common.LocalizedString name = 2;
   optional crm.types.common.LocalizedString description = 3;
-  optional string parentId = 4 [(buf.validate.field).string.uuid = true];
   optional crm.types.category.CategoryStatus status = 5 [(buf.validate.field).enum.defined_only = true];
   optional Options options = 99;
 }

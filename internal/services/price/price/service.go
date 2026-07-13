@@ -63,7 +63,12 @@ func (s *Service) Create(ctx context.Context, in *entities.ProductPriceCreate) (
 }
 
 func (s *Service) Get(ctx context.Context, productID string) (*entities.ProductPrice, error) {
-	return s.storage.GetByProductID(ctx, productID)
+	p, err := s.storage.GetByProductID(ctx, productID)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get product price failed", slog.String("productId", productID), slogx.Error(err))
+		return nil, err
+	}
+	return p, nil
 }
 
 func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (*entities.ProductPrice, error) {
@@ -71,6 +76,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get product price failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -105,6 +111,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductPriceDelete) e
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get product price failed", slog.String("id", in.ID), slogx.Error(err))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -128,5 +135,10 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductPriceDelete) e
 }
 
 func (s *Service) GetHistory(ctx context.Context, in *entities.ProductPriceGetHistory) (*entities.List[entities.ProductPrice], error) {
-	return s.storage.GetHistory(ctx, in)
+	list, err := s.storage.GetHistory(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get product price history failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }

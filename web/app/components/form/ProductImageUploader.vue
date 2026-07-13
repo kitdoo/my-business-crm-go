@@ -73,8 +73,11 @@ async function onFileChange(e) {
   try {
     const formData = new FormData()
     formData.append('file', file)
-    const { id } = await $fetch('/api/images/upload', { method: 'POST', body: formData })
-    emit('update:modelValue', [...props.modelValue, id])
+    // Backend wraps successful responses in a {"data": ...} envelope
+    // (go-atlas httpserver/writer.Default) — the proxy passes it through
+    // unchanged, so the id is nested under .data.id, not top-level.
+    const { data } = await $fetch('/api/images/upload', { method: 'POST', body: formData })
+    emit('update:modelValue', [...props.modelValue, data.id])
   } catch (err) {
     toast.add({ title: err?.data?.error?.message || t('errors.generic'), color: 'error' })
   } finally {

@@ -204,7 +204,11 @@ func MapError(err error) error {
 	case errors.Is(err, errs.ErrInvalidListCursor):
 		return status.Error(codes.InvalidArgument, errs.ErrInvalidListCursor.Error())
 	case errors.Is(err, errs.ErrLocalizedStringMissingRequiredLocale):
-		return status.Error(codes.InvalidArgument, errs.ErrLocalizedStringMissingRequiredLocale.Error())
+		// err, not the sentinel: the entities layer wraps this with the
+		// actual field name ("name: ..."/"description: ..."), which the
+		// BFF regex-extracts into a per-field UI error (TD §9.4) instead
+		// of an unattributed toast.
+		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, errs.ErrInvalidArgument):
 		return status.Error(codes.InvalidArgument, errs.ErrInvalidArgument.Error())
 	case errors.Is(err, errs.ErrNotImplemented):

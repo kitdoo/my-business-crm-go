@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/altessa-s/go-atlas/domain/converter"
 
@@ -21,8 +22,14 @@ import (
 
 const collectionName = "sales"
 
+// countersCollectionName backs Sale.Number — MongoDB has no native
+// auto-increment, so each Insert atomically increments a single counter
+// document here first (see nextNumber).
+const countersCollectionName = "sale_counters"
+
 const (
 	FieldID           = "_id"
+	FieldNumber       = "number"
 	FieldClientID     = "client_id"
 	FieldWarehouseID  = "warehouse_id"
 	FieldPartnerID    = "partner_id"
@@ -47,6 +54,7 @@ type itemModel struct {
 
 type model struct {
 	ID          string              `bson:"_id"`
+	Number      int64               `bson:"number"`
 	ClientID    string              `bson:"client_id"`
 	WarehouseID string              `bson:"warehouse_id"`
 	PartnerID   *string             `bson:"partner_id"`
@@ -67,6 +75,7 @@ var _ sales.Storage = (*Storage)(nil)
 type Storage struct {
 	db         *datamongo.Mongo
 	collection *mongo.Collection
+	counters   *mongo.Collection
 }
 
 // New builds a Storage backed by db's "sales" collection.
@@ -74,7 +83,29 @@ func New(db *datamongo.Mongo) *Storage {
 	return &Storage{
 		db:         db,
 		collection: db.Database().Collection(collectionName),
+		counters:   db.Database().Collection(countersCollectionName),
 	}
+}
+
+// nextNumber atomically increments and returns the next human-readable
+// Sale.Number. $inc + upsert on a single well-known counter document is
+// the standard MongoDB auto-increment pattern (no native auto-increment
+// exists) — concurrent Inserts each get a distinct, gapless-on-success
+// number from this one round trip.
+func (s *Storage) nextNumber(ctx context.Context) (int64, error) {
+	var doc struct {
+		Seq int64 `bson:"seq"`
+	}
+	err := s.counters.FindOneAndUpdate(
+		ctx,
+		bson.M{FieldID: collectionName},
+		bson.M{"$inc": bson.M{"seq": 1}},
+		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
+	).Decode(&doc)
+	if err != nil {
+		return 0, coreerrs.WrapOperation(err, "increment sale number counter")
+	}
+	return doc.Seq, nil
 }
 
 func activeOnly(filter bson.M) bson.M {
@@ -85,6 +116,12 @@ func activeOnly(filter bson.M) bson.M {
 func (s *Storage) Insert(ctx context.Context, sale *entities.Sale) error {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
+
+	number, err := s.nextNumber(ctx)
+	if err != nil {
+		return err
+	}
+	sale.Number = number
 
 	m := converter.Convert(sale, &model{}, converter.WithHandleEmbeddedStructs(true))
 	m.CursorId = bson.NewObjectID()

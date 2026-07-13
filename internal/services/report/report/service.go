@@ -3,6 +3,9 @@ package report
 
 import (
 	"context"
+	"log/slog"
+
+	slogx "github.com/altessa-s/go-atlas/observability/slog"
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	inventorysvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
@@ -19,31 +22,61 @@ var _ reportsvc.Service = (*Service)(nil)
 type Service struct {
 	storage   reports.Storage
 	inventory inventorysvc.Service
+	logger    *slog.Logger
 }
 
 // New builds a Service.
 func New(storage reports.Storage, inv inventorysvc.Service) *Service {
-	return &Service{storage: storage, inventory: inv}
+	return &Service{
+		storage:   storage,
+		inventory: inv,
+		logger:    slog.Default().With(slogx.Module("service:report")),
+	}
 }
 
 func (s *Service) GetSalesReport(ctx context.Context, period *entities.PeriodFilter) ([]entities.SalesReportRow, error) {
-	return s.storage.GetSalesReport(ctx, period)
+	rows, err := s.storage.GetSalesReport(ctx, period)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get sales report failed", slogx.Error(err))
+		return nil, err
+	}
+	return rows, nil
 }
 
 func (s *Service) GetSalesByStaff(ctx context.Context, period *entities.PeriodFilter) ([]entities.SalesByStaffRow, error) {
-	return s.storage.GetSalesByStaff(ctx, period)
+	rows, err := s.storage.GetSalesByStaff(ctx, period)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get sales by staff report failed", slogx.Error(err))
+		return nil, err
+	}
+	return rows, nil
 }
 
 func (s *Service) GetSalesByPartner(ctx context.Context, period *entities.PeriodFilter) ([]entities.SalesByPartnerRow, error) {
-	return s.storage.GetSalesByPartner(ctx, period)
+	rows, err := s.storage.GetSalesByPartner(ctx, period)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get sales by partner report failed", slogx.Error(err))
+		return nil, err
+	}
+	return rows, nil
 }
 
 func (s *Service) GetPopularProducts(ctx context.Context, period *entities.PeriodFilter, limit int32) ([]entities.PopularProductRow, error) {
-	return s.storage.GetPopularProducts(ctx, period, limit)
+	rows, err := s.storage.GetPopularProducts(ctx, period, limit)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get popular products report failed", slogx.Error(err))
+		return nil, err
+	}
+	return rows, nil
 }
 
 func (s *Service) GetTurnover(ctx context.Context, period *entities.PeriodFilter) ([]entities.TurnoverRow, error) {
-	return s.storage.GetTurnover(ctx, period)
+	rows, err := s.storage.GetTurnover(ctx, period)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get turnover report failed", slogx.Error(err))
+		return nil, err
+	}
+	return rows, nil
 }
 
 // GetStockLevels is not an aggregation of its own — it is a live read of
@@ -58,6 +91,7 @@ func (s *Service) GetStockLevels(ctx context.Context, warehouseID *string) ([]en
 			Pagination:  entities.ListPagination{Cursor: cursor},
 		})
 		if err != nil {
+			s.logger.DebugContext(ctx, "get stock levels failed", slogx.Error(err))
 			return nil, err
 		}
 		for _, item := range result.Items {

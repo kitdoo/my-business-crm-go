@@ -31,6 +31,7 @@ type Partner struct {
 	Note                 string
 	Status               PartnerStatus
 	Address              string
+	Website              string
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 	DeletedAt            *time.Time // nil = active
@@ -74,6 +75,7 @@ type PartnerCreate struct {
 	CommissionPercentage int32
 	Note                 string `normalize:"trim"`
 	Address              string `normalize:"trim"`
+	Website              string `normalize:"trim"`
 }
 
 func (c *PartnerCreate) Merge(dst *Partner) *Partner {
@@ -94,6 +96,7 @@ type PartnerUpdate struct {
 	Note                 *string `normalize:"trim,nil_on_empty"`
 	Status               *PartnerStatus
 	Address              *string `normalize:"trim,nil_on_empty"`
+	Website              *string `normalize:"trim,nil_on_empty"`
 	Etag                 *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
 

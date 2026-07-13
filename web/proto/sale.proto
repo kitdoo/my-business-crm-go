@@ -42,6 +42,7 @@ message Sale {
   int64 totalAmount = 9;
   SaleStatus status = 10;
   string createdBy = 11;
+  int64 number = 12;
   string etag = 101;
 }
 
@@ -100,7 +101,19 @@ message SaleCreateRequest {
     int64 quantity = 2;
     int32 discountPercentage = 3;
   }
-  string clientId = 1;
+  // Mirrors ClientCreateRequest's required fields — the seller types the
+  // client's details here and SalesService finds-or-creates it by email
+  // server-side instead of the caller creating a client first.
+  message NewClient {
+    string name = 1;
+    string phone = 2;
+    string email = 3;
+    string address = 4;
+  }
+  oneof client_ref {
+    string clientId = 1;
+    NewClient newClient = 5;
+  }
   string warehouseId = 2;
   optional string partnerId = 3;
   repeated Item items = 4;

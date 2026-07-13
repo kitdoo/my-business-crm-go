@@ -60,3 +60,16 @@ export async function listActiveCategories() {
   })
   return response.items || []
 }
+
+// Characteristics catalog, filtered to isPublic: true here — never trust
+// the caller, same as PRODUCT_ACTIVE_STATUS above. Used to strip private
+// keys out of Product.details before it reaches a site visitor.
+export async function listPublicAttributeDefinitions() {
+  const response = await call(
+    'product_attribute_definition.proto',
+    'crm.grpc.product_attribute_definition.v1.ProductAttributeDefinitionsService',
+    'List',
+    { filter: { isPublic: true }, pagination: { limit: 200 } },
+  )
+  return response.items || []
+}

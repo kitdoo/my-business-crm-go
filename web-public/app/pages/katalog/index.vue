@@ -36,6 +36,11 @@ const items = ref([])
 const total = ref(0)
 const loading = ref(false)
 const initialLoading = ref(true)
+// Backend unreachable/erroring — shown instead of the empty-catalog state so
+// visitors (and Googlebot) get a real page instead of the SSR crashing the
+// whole route with an unstyled 500 (the sitemap route already degrades the
+// same way for this same dependency, see server/routes/sitemap.xml.js).
+const loadError = ref(false)
 // Backend pagination is cursor-based (no offset), so arbitrary page jumps
 // aren't possible — we keep the cursor of every page we've visited so
 // Prev/Next can move one page at a time.
@@ -61,7 +66,10 @@ async function loadPage(page) {
     total.value = response.total ?? 0
     nextCursor.value = response.nextCursor || null
     currentPage.value = page
+    loadError.value = false
     if (nextCursor.value) cursorHistory.value[page] = nextCursor.value
+  } catch {
+    loadError.value = true
   } finally {
     loading.value = false
     initialLoading.value = false
@@ -89,6 +97,9 @@ watch([activeCategoryId, activeSort], () => {
 useSeoMeta({
   title: t('seo.katalog.title'),
   description: t('seo.katalog.description'),
+  ogTitle: t('seo.katalog.title'),
+  ogDescription: t('seo.katalog.description'),
+  ogImage: '/images/mini_house.jpg',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 </script>
@@ -109,15 +120,21 @@ useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
       </div>
     </div>
 
-    <p v-if="!initialLoading && !items.length" class="text-black/50 py-16 text-center">
+    <p v-if="loadError" class="text-black/50 min-h-[40vh] flex items-center justify-center text-center">
+      {{ t('catalog.loadError') }}
+    </p>
+    <p
+      v-else-if="!initialLoading && !items.length"
+      class="text-black/50 min-h-[40vh] flex items-center justify-center text-center"
+    >
       {{ t('catalog.empty') }}
     </p>
 
-    <div class="catalog-grid">
+    <div v-if="!loadError" class="catalog-grid">
       <ProductCard v-for="p in items" :key="p.id" :product="p" />
     </div>
 
-    <nav v-if="totalPages > 1" class="flex items-center justify-center gap-1.5 mt-10">
+    <nav v-if="!loadError && totalPages > 1" class="flex items-center justify-center gap-1.5 mt-10">
       <button
         class="w-9 h-9 flex items-center justify-center rounded-full border border-black/20 disabled:opacity-30 hover:border-brand-500"
         :disabled="currentPage <= 1 || loading"

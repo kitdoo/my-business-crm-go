@@ -36,7 +36,11 @@ type SaleItem struct {
 // created — reverse a mistake with Cancel, not a generic Update (there is
 // none).
 type Sale struct {
-	ID          string
+	ID string
+	// Number is a human-readable, sequential identifier assigned
+	// atomically by the storage layer on Insert (see
+	// storages/sales/mongo.Storage.nextNumber) — never set by callers.
+	Number      int64
 	ClientID    string
 	WarehouseID string
 	PartnerID   *string
@@ -92,8 +96,12 @@ type SaleCreateItem struct {
 // Sale here (unlike other aggregates): PriceAmount per item and TotalAmount
 // are server-computed from current prices, not copied from the request, so
 // the service assembles entities.Sale.Items itself.
+// SaleCreate carries exactly one of ClientID (an existing client, picked
+// by the caller) or NewClient (find-or-create by email — TD §12.3, the
+// caller never has to create a client as a separate step first).
 type SaleCreate struct {
-	ClientID    string  `normalize:"trim"`
+	ClientID    string `normalize:"trim"`
+	NewClient   *ClientCreate
 	WarehouseID string  `normalize:"trim"`
 	PartnerID   *string `normalize:"trim,nil_on_empty"`
 	Items       []SaleCreateItem

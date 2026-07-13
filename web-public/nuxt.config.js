@@ -3,6 +3,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
   devtools: { enabled: true },
 
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/images/main_logo.png' },
+      ],
+    },
+  },
+
   future: { compatibilityVersion: 4 },
 
   // Node.js server runtime is required — @grpc/grpc-js needs net/http2,
@@ -28,6 +36,14 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // /api/images/:id is same-origin already-proxied (server/api/images/[id].get.js);
+  // the default ipx provider treats it as a local filesystem path (no protocol)
+  // and 404s (IPX_FILE_NOT_FOUND). No resizing/format modifiers are used anywhere,
+  // so skip the provider entirely rather than configuring ipx.http.domains.
+  image: {
+    provider: 'none',
+  },
+
   components: [{ path: '~/components', pathPrefix: false }],
 
   imports: {
@@ -46,6 +62,22 @@ export default defineNuxtConfig({
     strategy: 'prefix_except_default',
     baseUrl: process.env.NUXT_PUBLIC_SITE_URL || '',
     bundle: { optimizeTranslationDirective: false },
+    // Module default reads per-page path overrides from definePageMeta —
+    // 'config' makes it read the centralized `pages` map below instead.
+    customRoutes: 'config',
+    // Per-locale slugs: sr keeps the page's own (Serbian) path since it's
+    // the primary local-SEO surface, en/ru get slugs in their own
+    // language instead of inheriting the Serbian one verbatim. Keyed by
+    // route name (kebab-case of the file path, "index" segments dropped).
+    pages: {
+      katalog: { en: '/catalog', ru: '/katalog' },
+      'katalog-sku': { en: '/catalog/[sku]', ru: '/katalog/[sku]' },
+      kontakt: { en: '/contact', ru: '/kontakt' },
+      'o-nama': { en: '/about', ru: '/o-nas' },
+      projekti: { en: '/projects', ru: '/proekty' },
+      'postani-diler': { en: '/become-a-dealer', ru: '/stat-dilerom' },
+      'postani-diler-hvala': { en: '/become-a-dealer/thank-you', ru: '/stat-dilerom/spasibo' },
+    },
   },
 
   runtimeConfig: {

@@ -40,6 +40,7 @@ type model struct {
 	Type        entities.MovementType `bson:"type"`
 	Quantity    int64                 `bson:"quantity"`
 	Comment     string                `bson:"comment"`
+	SaleID      *string               `bson:"sale_id"`
 	CreatedBy   string                `bson:"created_by"`
 	CreatedAt   time.Time             `bson:"created_at"`
 	CursorId    bson.ObjectID         `bson:"cursor_id"`

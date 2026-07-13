@@ -16,6 +16,7 @@ message Partner {
   string note = 9;
   PartnerStatus status = 10;
   string address = 11;
+  string website = 12;
   string etag = 101;
 }
 

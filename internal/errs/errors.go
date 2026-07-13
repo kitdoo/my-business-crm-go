@@ -19,14 +19,6 @@ var (
 	// while products still reference it.
 	ErrCategoryHasProducts = errors.New("category has products")
 
-	// ErrCategoryParentNotFound is returned when a category's parentId does
-	// not reference an existing category.
-	ErrCategoryParentNotFound = errors.New("category parent not found")
-
-	// ErrCategorySelfParent is returned when a category's parentId points to
-	// itself.
-	ErrCategorySelfParent = errors.New("category cannot be its own parent")
-
 	// ErrWarehouseNotFound is returned when a warehouse lookup finds no
 	// active row.
 	ErrWarehouseNotFound = errors.New("warehouse not found")
@@ -99,6 +91,10 @@ var (
 	// quantity below zero.
 	ErrInsufficientStock = errors.New("insufficient stock")
 
+	// ErrProductAttributeDefinitionNotFound is returned when a
+	// characteristics-catalog lookup finds no row for the given id.
+	ErrProductAttributeDefinitionNotFound = errors.New("product attribute definition not found")
+
 	// ErrSaleNotFound is returned when a sale lookup finds no row.
 	ErrSaleNotFound = errors.New("sale not found")
 
@@ -150,4 +146,8 @@ var (
 	// CRMConfig.Smtp is absent — form submissions cannot be delivered
 	// anywhere until an operator configures it.
 	ErrSMTPNotConfigured = errors.New("smtp not configured")
+
+	// ErrImageNotFound is returned when an uploaded-image metadata lookup
+	// finds no row for the given id.
+	ErrImageNotFound = errors.New("image not found")
 )

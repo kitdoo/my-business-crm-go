@@ -5,6 +5,6 @@ const { t } = useI18n()
 <template>
   <div class="space-y-4">
     <h1 class="text-xl font-semibold">{{ t('entities.products.create') }}</h1>
-    <EntityForm entity="products" />
+    <ProductGeneralForm :id="null" />
   </div>
 </template>

@@ -18,6 +18,10 @@ message Sale {
   int64 totalAmount = 9;
   SaleStatus status = 10;
   string createdBy = 11;
+  // Human-readable, sequential — assigned atomically on Create (never
+  // client-supplied). Not a substitute for id: still the join key
+  // everywhere else, this is display-only.
+  int64 number = 12;
   string etag = 101;
 }
 

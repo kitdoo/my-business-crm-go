@@ -25,6 +25,7 @@ const (
 	FieldID        = "_id"
 	FieldName      = "name"
 	FieldPhone     = "phone"
+	FieldEmail     = "email"
 	FieldCreatedAt = "created_at"
 	FieldUpdatedAt = "updated_at"
 	FieldDeletedAt = "deleted_at"
@@ -178,6 +179,9 @@ func (s *Storage) List(ctx context.Context, in *entities.ClientsList) (*entities
 	}
 
 	filter := activeOnly(bson.M{})
+	if in.Email != nil {
+		filter[FieldEmail] = *in.Email
+	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)
 	}

@@ -17,14 +17,17 @@ const canViewReports = computed(() => can('reports:read'))
       <PeriodFilter v-if="canViewReports" v-model="period" />
     </div>
 
-    <div v-if="canViewReports && period.from" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <TurnoverWidget :period="period" />
-      <SalesReportWidget :period="period" />
-      <PopularProductsWidget :period="period" />
-      <SalesByStaffWidget :period="period" />
-      <SalesByPartnerWidget :period="period" />
-      <StockLevelsWidget />
-    </div>
+    <template v-if="canViewReports && period.from">
+      <div class="flex flex-wrap gap-3">
+        <SalesReportWidget :period="period" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <PopularProductsWidget :period="period" />
+        <SalesByStaffWidget :period="period" />
+        <SalesByPartnerWidget :period="period" />
+      </div>
+    </template>
 
     <p v-else-if="!canViewReports" class="text-sm text-neutral-500">{{ t('dashboard.noAccess') }}</p>
   </div>

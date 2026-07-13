@@ -41,6 +41,14 @@ message InventoryListRequest {
   }
   optional Filter filter = 3;
   optional crm.types.common.Pagination pagination = 4;
+  message Sort {
+    enum Field {
+      FIELD_QUANTITY = 0;
+    }
+    Field field = 1;
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 5;
 }
 
 message InventoryListResponse {

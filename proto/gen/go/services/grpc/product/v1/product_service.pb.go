@@ -786,13 +786,14 @@ func (x *ProductsListRequest_Sort) GetDirection() common.SortDirection {
 }
 
 type ProductsListRequest_Filter struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	Statuses      []product.ProductStatus `protobuf:"varint,1,rep,packed,name=statuses,proto3,enum=crm.types.product.ProductStatus" json:"statuses,omitempty"`
-	SearchQuery   *string                 `protobuf:"bytes,2,opt,name=searchQuery,proto3,oneof" json:"searchQuery,omitempty"`
-	BrandIds      []string                `protobuf:"bytes,3,rep,name=brandIds,proto3" json:"brandIds,omitempty"`
-	CategoryIds   []string                `protobuf:"bytes,4,rep,name=categoryIds,proto3" json:"categoryIds,omitempty"`
-	Skus          []string                `protobuf:"bytes,5,rep,name=skus,proto3" json:"skus,omitempty"`
-	CreatedAt     *common.PeriodFilter    `protobuf:"bytes,6,opt,name=createdAt,proto3,oneof" json:"createdAt,omitempty"`
+	state    protoimpl.MessageState  `protogen:"open.v1"`
+	Statuses []product.ProductStatus `protobuf:"varint,1,rep,packed,name=statuses,proto3,enum=crm.types.product.ProductStatus" json:"statuses,omitempty"`
+	// Reserved for a future version; not implemented yet.
+	SearchQuery   *string              `protobuf:"bytes,2,opt,name=searchQuery,proto3,oneof" json:"searchQuery,omitempty"`
+	BrandIds      []string             `protobuf:"bytes,3,rep,name=brandIds,proto3" json:"brandIds,omitempty"`
+	CategoryIds   []string             `protobuf:"bytes,4,rep,name=categoryIds,proto3" json:"categoryIds,omitempty"`
+	Skus          []string             `protobuf:"bytes,5,rep,name=skus,proto3" json:"skus,omitempty"`
+	CreatedAt     *common.PeriodFilter `protobuf:"bytes,6,opt,name=createdAt,proto3,oneof" json:"createdAt,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

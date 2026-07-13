@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -86,16 +87,15 @@ func (c *ProductCreate) Merge(dst *Product) *Product {
 	return dst
 }
 
-// Validate checks the LocalizedString fields (including every value of
-// Details) for the required locale (see LocalizedString.Validate).
+// Validate checks Name for the required locale (see
+// LocalizedString.Validate). Description/Details are optional and never
+// checked — unlike Name, it's fine to fill in only a non-default locale,
+// or none at all, for any of their entries.
 func (c *ProductCreate) Validate(requiredLocale string) error {
 	if err := c.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	if err := c.Description.Validate(requiredLocale); err != nil {
-		return err
-	}
-	return ValidateLocalizedStringMap(c.Details, requiredLocale)
+	return nil
 }
 
 // ProductUpdate is the Update input. Nil fields mean "leave unchanged". SKU
@@ -123,16 +123,14 @@ func (u *ProductUpdate) Merge(dst *Product) *Product {
 	return dst
 }
 
-// Validate checks the LocalizedString fields (including every value of
-// Details) for the required locale (see LocalizedString.Validate).
+// Validate checks Name for the required locale (see
+// LocalizedString.Validate). Description/Details are optional and never
+// checked — see ProductCreate.Validate.
 func (u *ProductUpdate) Validate(requiredLocale string) error {
 	if err := u.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	if err := u.Description.Validate(requiredLocale); err != nil {
-		return err
-	}
-	return ValidateLocalizedStringMap(u.Details, requiredLocale)
+	return nil
 }
 
 // ProductDelete is the Delete input.

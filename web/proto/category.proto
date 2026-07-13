@@ -6,16 +6,18 @@ import "common.proto";
 
 // Mirrors proto/services/grpc/category/v1/category_service.proto and
 // proto/types/category/category.proto on the backend. Categories are
-// peers, not a strict hierarchy — a product may belong to several at once.
+// peers, not a hierarchy at all — a product may belong to several at once.
 
 message Category {
+  reserved 7;
+  reserved "parentId";
+
   string id = 1;
   int64 createdAt = 2;
   int64 updatedAt = 3;
   optional int64 deletedAt = 4;
   crm.types.common.LocalizedString name = 5;
   crm.types.common.LocalizedString description = 6;
-  optional string parentId = 7;
   CategoryStatus status = 8;
   string etag = 101;
 }
@@ -47,7 +49,9 @@ message CategoryGetResponse {
 }
 
 message CategoriesListRequest {
-  optional string parentId = 1;
+  reserved 1;
+  reserved "parentId";
+
   message Sort {
     enum Field {
       FIELD_CREATED_AT = 0;
@@ -79,12 +83,14 @@ message CategoriesListResponse {
 }
 
 message CategoryCreateRequest {
+  reserved 3;
+  reserved "parentId";
+
   message Options {
     optional google.protobuf.FieldMask readMask = 1;
   }
   crm.types.common.LocalizedString name = 1;
   crm.types.common.LocalizedString description = 2;
-  optional string parentId = 3;
   optional Options options = 99;
 }
 
@@ -93,6 +99,9 @@ message CategoryCreateResponse {
 }
 
 message CategoryUpdateRequest {
+  reserved 4;
+  reserved "parentId";
+
   message Options {
     optional google.protobuf.FieldMask updateMask = 1;
     optional string etag = 2;
@@ -100,7 +109,6 @@ message CategoryUpdateRequest {
   string id = 1;
   optional crm.types.common.LocalizedString name = 2;
   optional crm.types.common.LocalizedString description = 3;
-  optional string parentId = 4;
   optional CategoryStatus status = 5;
   optional Options options = 99;
 }

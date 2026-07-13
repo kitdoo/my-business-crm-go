@@ -1,6 +1,14 @@
 <script setup>
 const { t } = useI18n()
-useSeoMeta({ title: t('seo.about.title'), description: t('seo.about.description') })
+const localeHead = useLocaleHead()
+useSeoMeta({
+  title: t('seo.about.title'),
+  description: t('seo.about.description'),
+  ogTitle: t('seo.about.title'),
+  ogDescription: t('seo.about.description'),
+  ogImage: '/images/showroom1.png',
+})
+useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 </script>
 
 <template>

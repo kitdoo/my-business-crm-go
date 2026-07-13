@@ -2,26 +2,22 @@
 // Generic server-paginated (cursor) table (TD §9.3). Below `md` it renders
 // as a card list instead of a horizontally-scrolled table (TD §6) — adding
 // a column here means editing one entity config file, not this component.
-// Row click / the edit icon both emit 'edit' so the host (EntityListPage)
-// can open the left-side edit drawer; delete is handled locally with a
-// confirm dialog and reloads the table in place. For entities with no
-// generic edit at all (Sale, TD §12.3 — items immutable, status moves
-// only through UpdateStatus/Cancel), pass `rowTo` instead: row click
-// navigates to a full page rather than emitting 'edit'.
-import LocalizedText from '~/components/display/LocalizedText.vue'
-import StatusBadge from '~/components/display/StatusBadge.vue'
-import DateLabel from '~/components/display/DateLabel.vue'
-import RelationLabel from '~/components/display/RelationLabel.vue'
-import EnumLabel from '~/components/display/EnumLabel.vue'
-import MoneyAmountLabel from '~/components/display/MoneyAmountLabel.vue'
-import { STATUS_COLOR_MAP } from '~/design/tokens.js'
+// Row click emits 'view' so the host (EntityListPage) opens a read-only
+// view drawer with an Edit button inside it; the pencil icon is a direct
+// shortcut that emits 'edit' straight into the edit drawer/page. Column
+// -> display-component mapping lives in ~/utils/entityColumns.js, shared
+// with EntityViewDrawer so both render a column's value identically. For
+// entities with no generic edit at all (Sale, TD §12.3 — items immutable,
+// status moves only through UpdateStatus/Cancel), pass `rowTo` instead:
+// row click navigates to a full page rather than emitting 'view'.
+import { columnComponent, columnProps } from '~/utils/entityColumns.js'
 
 const props = defineProps({
   entity: { type: String, required: true },
   fixedFilter: { type: Object, default: () => ({}) },
   rowTo: { type: Function, default: null }, // (item) => route path
 })
-const emit = defineEmits(['edit'])
+const emit = defineEmits(['view', 'edit'])
 
 const { t } = useI18n()
 const config = getEntityConfig(props.entity)
@@ -32,37 +28,50 @@ const { can } = usePermission()
 const items = ref([])
 const loading = ref(true)
 const nextCursor = ref(null)
-const filter = ref({})
+const filter = ref({ ...(config.list.defaultFilter || {}) })
 const sort = ref(config.list.defaultSort)
 
 const deleting = ref(false)
 const confirmDeleteOpen = ref(false)
 const pendingDelete = ref(null)
 
-// canUpdate gates the pencil icon / drawer-edit click; when `rowTo` is
-// set (Sale) there's no drawer to open regardless of the update
-// permission, so the pencil never renders — the row click already does
-// full-page navigation instead.
+// canUpdate gates only the pencil-icon shortcut; when `rowTo` is set
+// (Sale) there's no edit drawer at all regardless of the update
+// permission, so the pencil never renders.
 const canUpdate = computed(() => !props.rowTo && can(config.permissions.update))
 const canDelete = computed(() => can(config.permissions.delete))
 const showActions = computed(() => canUpdate.value || canDelete.value)
 
-const COMPONENTS = { LocalizedText, StatusBadge, DateLabel, RelationLabel, EnumLabel, MoneyAmountLabel }
-
-function columnComponent(col) {
-  return COMPONENTS[col.component]
-}
-function columnProps(col, item) {
-  if (col.component === 'StatusBadge') return { status: item[col.key], map: STATUS_COLOR_MAP[col.statusMap] }
-  if (col.component === 'LocalizedText') return { value: item[col.key] }
-  if (col.component === 'DateLabel') return { value: item[col.key] }
-  if (col.component === 'RelationLabel') return { value: item[col.key], relation: col.relation }
-  if (col.component === 'EnumLabel') return { value: item[col.key] }
-  if (col.component === 'MoneyAmountLabel') return { value: item[col.key] }
-  return {}
-}
 function plainValue(col, item) {
   return item[col.key]
+}
+
+// `select`-type filters (single value in the UI) back a repeated proto
+// field (e.g. Product.categoryIds) — wrap to a one-element array on the
+// way out so EntityFilterBar can stay a plain single-select.
+// `numberRange` (one compact min–max control in the UI) backs two
+// separate wire fields (e.g. Inventory's minQuantity/maxQuantity) — split
+// {min,max} into filterDef.minKey/maxKey. Empty/null values are dropped
+// either way so an unset filter never sends `{key: []}` or `{key: null}`.
+function filterPayload() {
+  const payload = { ...filter.value }
+  for (const filterDef of config.list.filters || []) {
+    const value = payload[filterDef.key]
+    if (filterDef.type === 'select' && value != null) {
+      payload[filterDef.key] = [value]
+      continue
+    }
+    if (filterDef.type === 'numberRange') {
+      delete payload[filterDef.key]
+      if (value?.min != null) payload[filterDef.minKey] = value.min
+      if (value?.max != null) payload[filterDef.maxKey] = value.max
+      continue
+    }
+    if (value == null || (Array.isArray(value) && value.length === 0)) {
+      delete payload[filterDef.key]
+    }
+  }
+  return payload
 }
 
 async function load(reset = true) {
@@ -71,7 +80,7 @@ async function load(reset = true) {
     const params = {
       sort: sort.value,
       pagination: { limit: 25, cursor: reset ? undefined : nextCursor.value },
-      filter: { ...filter.value, ...props.fixedFilter },
+      filter: { ...filterPayload(), ...props.fixedFilter },
     }
     const res = await api.list(params)
     items.value = reset ? res.items : [...items.value, ...res.items]
@@ -83,14 +92,31 @@ async function load(reset = true) {
   }
 }
 
-const clickable = computed(() => !!props.rowTo || canUpdate.value)
+watch(filter, () => load(true), { deep: true })
+watch(sort, () => load(true), { deep: true })
 
+const sortItems = computed(() => (config.list.sort || []).map((s) => ({ label: t(s.label), value: s.field })))
+
+function onSortFieldChange(field) {
+  sort.value = { field, direction: sort.value?.direction || 'SORT_DIRECTION_DESC' }
+}
+
+function toggleSortDirection() {
+  sort.value = {
+    ...sort.value,
+    direction: sort.value?.direction === 'SORT_DIRECTION_ASC' ? 'SORT_DIRECTION_DESC' : 'SORT_DIRECTION_ASC',
+  }
+}
+
+// Every row is clickable: `rowTo` navigates away, otherwise a row click
+// always opens the read-only view drawer (viewing needs only `read`,
+// which is why the row is on screen at all — no update permission gate).
 function onRowClick(item) {
   if (props.rowTo) {
     navigateTo(props.rowTo(item))
     return
   }
-  if (canUpdate.value) emit('edit', item)
+  emit('view', item)
 }
 
 function onEditClick(item) {
@@ -122,6 +148,29 @@ onMounted(() => load(true))
 
 <template>
   <div>
+    <div v-if="config.list.filters?.length || sortItems.length" class="flex flex-wrap items-end justify-between gap-3 mb-4">
+      <EntityFilterBar v-if="config.list.filters?.length" :filters="config.list.filters" v-model="filter" />
+
+      <div v-if="sortItems.length" class="flex items-end gap-1">
+        <UFormField :label="t('sort.label')">
+          <USelectMenu
+            :model-value="sort?.field"
+            :items="sortItems"
+            value-key="value"
+            class="w-40"
+            @update:model-value="onSortFieldChange"
+          />
+        </UFormField>
+        <UButton
+          :icon="sort?.direction === 'SORT_DIRECTION_ASC' ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'"
+          color="neutral"
+          variant="soft"
+          :aria-label="t('sort.direction')"
+          @click="toggleSortDirection"
+        />
+      </div>
+    </div>
+
     <div v-if="loading && items.length === 0" class="py-8 text-center text-neutral-500">
       {{ t('common.loading') }}
     </div>
@@ -143,8 +192,7 @@ onMounted(() => load(true))
           <tr
             v-for="item in items"
             :key="item.id"
-            class="border-b border-neutral-100"
-            :class="clickable ? 'hover:bg-neutral-50 cursor-pointer' : ''"
+            class="border-b border-neutral-100 hover:bg-neutral-50 cursor-pointer"
             @click="onRowClick(item)"
           >
             <td v-for="col in config.list.columns" :key="col.key" class="py-2 px-3">
@@ -182,8 +230,7 @@ onMounted(() => load(true))
         <div
           v-for="item in items"
           :key="item.id"
-          class="rounded-lg border border-neutral-200 p-3 space-y-1"
-          :class="clickable ? 'cursor-pointer' : ''"
+          class="rounded-lg border border-neutral-200 p-3 space-y-1 cursor-pointer"
           @click="onRowClick(item)"
         >
           <div v-for="col in config.list.columns" :key="col.key" class="flex justify-between text-sm">
@@ -199,7 +246,7 @@ onMounted(() => load(true))
               variant="ghost"
               size="xs"
               :aria-label="t('common.edit')"
-              @click="onEdit(item)"
+              @click="onEditClick(item)"
             />
             <UButton
               v-if="canDelete"

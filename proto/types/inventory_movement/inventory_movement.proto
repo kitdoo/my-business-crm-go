@@ -13,6 +13,10 @@ message InventoryMovement {
   int64 quantity = 6;
   string comment = 7;
   string createdBy = 8;
+  // Set on every Type=Sale movement (SalesService.Create sets it
+  // directly); optional on a manual Create for any other type an
+  // operator wants to associate with a sale by hand.
+  optional string saleId = 9;
 }
 
 enum MovementType {

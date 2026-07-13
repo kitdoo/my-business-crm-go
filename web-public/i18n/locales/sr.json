@@ -85,6 +85,7 @@
     "available": "Dostupno",
     "unavailable": "Nije dostupno",
     "empty": "Trenutno nema dostupnih proizvoda.",
+    "loadError": "Katalog trenutno nije dostupan. Pokušajte ponovo malo kasnije.",
     "loadMore": "Učitaj još",
     "contactCta": "Kontaktirajte nas povodom ovog proizvoda",
     "contactPrefill": "Interesuje me: {sku} — {name}",
@@ -113,7 +114,10 @@
   "contact": {
     "thanks": "Hvala! Vaša poruka je poslata.",
     "address": "Veselina Masleše 56, Novi Sad, Srbija",
-    "showroomLabel": "Glavni izložbeni salon"
+    "showroomLabel": "Glavni izložbeni salon",
+    "addressLabel": "Adresa",
+    "phoneLabel": "Telefon",
+    "emailLabel": "Email"
   },
   "cart": {
     "title": "Korpa",
@@ -161,10 +165,13 @@
     "usedMaterials": "Korišćeni materijali",
     "recommendedMaterials": "Preporučeno / slično",
     "items": {
-      "p1": "Porodična kuća — [lokacija]",
-      "p2": "Poslovni objekat — [lokacija]",
-      "p3": "Vikendica — [lokacija]",
-      "p4": "Stambena zgrada — [lokacija]"
+      "p1": "Moskva, Rusija",
+      "p2": "Belorusija",
+      "p3": "Minsk, Belorusija",
+      "p4": "Moskva, Rusija",
+      "p5": "Minsk, Belorusija",
+      "p6": "Kairo, Egipat",
+      "p7": "Soči, Rusija"
     }
   },
   "seo": {

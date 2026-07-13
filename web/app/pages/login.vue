@@ -34,7 +34,7 @@ async function onSubmit() {
         <h1 class="text-lg font-semibold mb-4 text-black">{{ t('login.title') }}</h1>
         <form class="space-y-4" @submit.prevent="onSubmit">
           <UFormField :label="t('login.login')">
-            <UInput v-model="form.login" class="w-full" autocomplete="username" required />
+            <UInput v-model="form.login" type="email" class="w-full" autocomplete="username" required />
           </UFormField>
           <UFormField :label="t('login.password')">
             <UInput v-model="form.password" type="password" class="w-full" autocomplete="current-password" required />

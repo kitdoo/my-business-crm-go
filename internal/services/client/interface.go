@@ -15,4 +15,10 @@ type Service interface {
 	List(ctx context.Context, in *entities.ClientsList) (*entities.List[entities.Client], error)
 	Update(ctx context.Context, in *entities.ClientUpdate) (*entities.Client, error)
 	Delete(ctx context.Context, in *entities.ClientDelete) error
+	// FindOrCreateByEmail returns the active client whose Email matches
+	// in.Email, ignoring the rest of in (an existing match is trusted
+	// as-is, never overwritten); creates a new client from in when no
+	// match exists. Used by SalesService.Create so a seller never has to
+	// create a client as a separate step first (TD §12.3).
+	FindOrCreateByEmail(ctx context.Context, in *entities.ClientCreate) (*entities.Client, error)
 }

@@ -71,10 +71,26 @@ message SaleCreateRequest {
     int64 quantity = 2 [(buf.validate.field).required = true, (buf.validate.field).int64.gt = 0];
     int32 discountPercentage = 3 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   }
+  // Mirrors ClientCreateRequest's required fields (crm.grpc.client.v1) —
+  // the caller doesn't separately create a client first; the seller
+  // types the client's details here and SalesService finds-or-creates it
+  // by email server-side (matching an existing active client by email
+  // reuses it as-is, ignoring the rest of these fields, rather than
+  // risking a silent overwrite).
+  message NewClient {
+    string name = 1 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 255];
+    string phone = 2 [(buf.validate.field).required = true, (buf.validate.field).string.max_len = 32];
+    string email = 3 [(buf.validate.field).required = true, (buf.validate.field).string.email = true];
+    string address = 4 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 512];
+  }
   message Options {
     optional google.protobuf.FieldMask readMask = 1;
   }
-  string clientId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  oneof client_ref {
+    option (buf.validate.oneof).required = true;
+    string clientId = 1 [(buf.validate.field).string.uuid = true];
+    NewClient newClient = 5;
+  }
   string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   optional string partnerId = 3 [(buf.validate.field).string.uuid = true];
   repeated Item items = 4 [(buf.validate.field).required = true, (buf.validate.field).repeated.min_items = 1];

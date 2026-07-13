@@ -4,6 +4,7 @@
 // Not a generic EntityForm — ProductPrice isn't a generic entity — but
 // reuses the same buildUpdateMask/etag/useApiErrorHandler conventions.
 import { buildUpdateMask } from '~/utils/buildUpdateMask.js'
+import { toAmount, toBasisPoints } from '~/utils/priceAmount.js'
 
 const props = defineProps({
   productId: { type: String, required: true },
@@ -28,15 +29,6 @@ const canWrite = computed(() => can('prices:create') || can('prices:update'))
 const historyOpen = ref(false)
 const historyLoading = ref(false)
 const historyItems = ref([])
-
-// Basis points (backend/wire) <-> plain currency amount (what the user
-// types), per TD §5.4 — never send/display raw basis points to the user.
-function toAmount(basisPoints) {
-  return basisPoints == null ? null : basisPoints / 100
-}
-function toBasisPoints(amount) {
-  return amount == null ? null : Math.round(amount * 100)
-}
 
 async function load() {
   loading.value = true

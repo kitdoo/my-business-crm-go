@@ -1,10 +1,15 @@
 <script setup>
 // Fully generic list page: table + "Create" button gated on
-// entity.permissions.create (TD §9.3). Create and row-edit both open the
-// same right-side drawer with <EntityForm mode="drawer"> (TD §8.3) instead
-// of navigating to a separate page.
+// entity.permissions.create (TD §9.3). A row click opens a right-side
+// drawer in read-only "view" mode (<EntityViewDrawer>) with an Edit
+// button inside it; only Create and that Edit button ever open the
+// editable <EntityForm mode="drawer">. `viewOverride` lets a list show a
+// *different* entity's view when a row is clicked — used by
+// Inventory/InventoryMovements (TD §12.4) to open the Product view
+// instead of their own read-only fields.
 const props = defineProps({
   entity: { type: String, required: true },
+  viewOverride: { type: Function, default: null }, // (item) => { entity, id }
 })
 
 const { t } = useI18n()
@@ -15,16 +20,49 @@ const canCreate = computed(() => can(config.permissions.create))
 
 const tableRef = ref(null)
 const drawerOpen = ref(false)
-const editingId = ref(null)
+const drawerMode = ref(null) // 'view' | 'edit' | 'create'
+const activeEntity = ref(props.entity)
+const activeId = ref(null)
 
 function openCreate() {
-  editingId.value = null
+  if (config.detailPage) {
+    navigateTo(`${config.route}/new`)
+    return
+  }
+  activeEntity.value = props.entity
+  activeId.value = null
+  drawerMode.value = 'create'
   drawerOpen.value = true
 }
 
-function openEdit(item) {
-  editingId.value = item.id
+function openView(item) {
+  const target = props.viewOverride ? props.viewOverride(item) : { entity: props.entity, id: item.id }
+  activeEntity.value = target.entity
+  activeId.value = target.id
+  drawerMode.value = 'view'
   drawerOpen.value = true
+}
+
+function openEditFor(entityKey, id) {
+  const targetConfig = getEntityConfig(entityKey)
+  if (targetConfig.detailPage) {
+    drawerOpen.value = false
+    navigateTo(`${targetConfig.route}/${id}`)
+    return
+  }
+  activeEntity.value = entityKey
+  activeId.value = id
+  drawerMode.value = 'edit'
+  drawerOpen.value = true
+}
+
+// Pencil-icon shortcut on the table always edits this list's own entity.
+function onEditClick(item) {
+  openEditFor(props.entity, item.id)
+}
+
+function onEditFromView() {
+  openEditFor(activeEntity.value, activeId.value)
 }
 
 function onSaved() {
@@ -46,23 +84,36 @@ function onDeleted() {
         {{ t('common.create') }}
       </UButton>
     </div>
-    <EntityDataTable ref="tableRef" :entity="entity" @edit="openEdit" />
+    <EntityDataTable ref="tableRef" :entity="entity" @view="openView" @edit="onEditClick" />
 
     <USlideover v-model:open="drawerOpen" side="right">
       <template #content>
-        <div class="p-6 space-y-4 w-full max-w-md">
-          <h2 class="text-lg font-semibold">
-            {{ editingId ? t(`entities.${entity}.edit`) : t(`entities.${entity}.create`) }}
-          </h2>
-          <EntityForm
-            :key="editingId ?? 'create'"
-            :entity="entity"
-            :id="editingId"
-            mode="drawer"
-            @saved="onSaved"
-            @cancel="drawerOpen = false"
-            @deleted="onDeleted"
+        <div
+          class="p-6 space-y-4 w-full"
+          :class="drawerMode === 'view' && getEntityConfig(activeEntity).view?.relatedSales ? 'max-w-2xl' : 'max-w-md'"
+        >
+          <EntityViewDrawer
+            v-if="drawerMode === 'view'"
+            :entity="activeEntity"
+            :id="activeId"
+            :related-sales="getEntityConfig(activeEntity).view?.relatedSales"
+            @edit="onEditFromView"
+            @close="drawerOpen = false"
           />
+          <template v-else>
+            <h2 class="text-lg font-semibold">
+              {{ drawerMode === 'edit' ? t(`entities.${activeEntity}.edit`) : t(`entities.${activeEntity}.create`) }}
+            </h2>
+            <EntityForm
+              :key="`${activeEntity}:${activeId ?? 'create'}`"
+              :entity="activeEntity"
+              :id="activeId"
+              mode="drawer"
+              @saved="onSaved"
+              @cancel="drawerOpen = false"
+              @deleted="onDeleted"
+            />
+          </template>
         </div>
       </template>
     </USlideover>

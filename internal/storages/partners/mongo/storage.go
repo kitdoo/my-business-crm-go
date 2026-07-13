@@ -44,6 +44,7 @@ type model struct {
 	Note                 string                 `bson:"note"`
 	Status               entities.PartnerStatus `bson:"status"`
 	Address              string                 `bson:"address"`
+	Website              string                 `bson:"website"`
 	CreatedAt            time.Time              `bson:"created_at,omitonupdate"`
 	UpdatedAt            time.Time              `bson:"updated_at"`
 	DeletedAt            *time.Time             `bson:"deleted_at,omitonupdate"`

@@ -22,15 +22,3 @@ func (l LocalizedString) Validate(requiredLocale string) error {
 	}
 	return nil
 }
-
-// ValidateLocalizedStringMap validates every value of a
-// map[string]LocalizedString field (e.g. Product.Details) against
-// requiredLocale.
-func ValidateLocalizedStringMap(m map[string]LocalizedString, requiredLocale string) error {
-	for _, v := range m {
-		if err := v.Validate(requiredLocale); err != nil {
-			return err
-		}
-	}
-	return nil
-}

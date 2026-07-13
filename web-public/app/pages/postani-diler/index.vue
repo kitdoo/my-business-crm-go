@@ -10,6 +10,9 @@ const partners = computed(() => partnersData.value?.items || [])
 useSeoMeta({
   title: t('seo.dealer.title'),
   description: t('seo.dealer.description'),
+  ogTitle: t('seo.dealer.title'),
+  ogDescription: t('seo.dealer.description'),
+  ogImage: '/images/why_phomi.jpg',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 
@@ -29,7 +32,9 @@ function onSubmitted() {
         <p class="text-black/70 leading-relaxed mb-8">{{ t('dealer.whyText2') }}</p>
 
         <p class="text-black/70 mb-6">{{ t('dealer.intro') }}</p>
-        <DealerForm @submitted="onSubmitted" />
+        <div class="w-full bg-gray-100 rounded-sm p-6 lg:p-8">
+          <DealerForm @submitted="onSubmitted" />
+        </div>
       </div>
 
       <div class="lg:col-span-2">

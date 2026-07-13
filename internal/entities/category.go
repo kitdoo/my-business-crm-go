@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,14 +19,12 @@ const (
 	CategoryStatusInactive
 )
 
-// Category is a peer classification a product may belong to; categories are
-// not a strict hierarchy (a product may carry several at once), but each
-// category may still nest under a ParentID for display grouping.
+// Category is a peer classification a product may belong to — categories
+// are not a hierarchy at all, a product may carry several at once.
 type Category struct {
 	ID          string
 	Name        LocalizedString
 	Description LocalizedString
-	ParentID    *string
 	Status      CategoryStatus
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
@@ -66,7 +65,6 @@ func (c *Category) BeforeUpdate() {
 type CategoryCreate struct {
 	Name        LocalizedString
 	Description LocalizedString
-	ParentID    *string `normalize:"trim,nil_on_empty"`
 }
 
 func (c *CategoryCreate) Merge(dst *Category) *Category {
@@ -77,13 +75,15 @@ func (c *CategoryCreate) Merge(dst *Category) *Category {
 	return dst
 }
 
-// Validate checks the LocalizedString fields for the required locale (see
-// LocalizedString.Validate).
+// Validate checks Name for the required locale (see
+// LocalizedString.Validate). Description is optional and never checked —
+// unlike Name, it's fine to fill in only a non-default locale, or none
+// at all.
 func (c *CategoryCreate) Validate(requiredLocale string) error {
 	if err := c.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	return c.Description.Validate(requiredLocale)
+	return nil
 }
 
 // CategoryUpdate is the Update input. Nil fields mean "leave unchanged".
@@ -91,7 +91,6 @@ type CategoryUpdate struct {
 	ID          string `normalize:"trim"`
 	Name        LocalizedString
 	Description LocalizedString
-	ParentID    *string `normalize:"trim,nil_on_empty"`
 	Status      *CategoryStatus
 	Etag        *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
@@ -104,13 +103,14 @@ func (u *CategoryUpdate) Merge(dst *Category) *Category {
 	return dst
 }
 
-// Validate checks the LocalizedString fields for the required locale (see
-// LocalizedString.Validate).
+// Validate checks Name for the required locale (see
+// LocalizedString.Validate). Description is optional and never checked —
+// see CategoryCreate.Validate.
 func (u *CategoryUpdate) Validate(requiredLocale string) error {
 	if err := u.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	return u.Description.Validate(requiredLocale)
+	return nil
 }
 
 // CategoryDelete is the Delete input.
@@ -135,7 +135,6 @@ type CategoriesListSort struct {
 // CategoriesList is the single List input; scope/filters/sort/pagination all
 // live inside it, per the List(ctx, in *XxxList) convention.
 type CategoriesList struct {
-	ParentID          *string `normalize:"trim,nil_on_empty"`
 	Statuses          []CategoryStatus
 	CreatedAt         *PeriodFilter
 	Sort              CategoriesListSort

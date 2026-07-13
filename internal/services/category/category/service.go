@@ -3,7 +3,6 @@ package category
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"time"
 
@@ -39,26 +38,6 @@ func New(storage categories.Storage, products categorysvc.ProductsExistenceCheck
 	}
 }
 
-// validateParent rejects a self-referencing parent and confirms parentID
-// resolves to an existing category, translating a not-found into
-// errs.ErrCategoryParentNotFound so it is distinguishable from a missing
-// subject category.
-func (s *Service) validateParent(ctx context.Context, id string, parentID *string) error {
-	if parentID == nil {
-		return nil
-	}
-	if *parentID == id {
-		return errs.ErrCategorySelfParent
-	}
-	if _, err := s.storage.Get(ctx, *parentID); err != nil {
-		if errors.Is(err, errs.ErrCategoryNotFound) {
-			return errs.ErrCategoryParentNotFound
-		}
-		return err
-	}
-	return nil
-}
-
 func (s *Service) Create(ctx context.Context, in *entities.CategoryCreate) (*entities.Category, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
@@ -67,9 +46,6 @@ func (s *Service) Create(ctx context.Context, in *entities.CategoryCreate) (*ent
 	}
 
 	c := entities.CategoryNew()
-	if err := s.validateParent(ctx, c.ID, in.ParentID); err != nil {
-		return nil, err
-	}
 	in.Merge(c)
 
 	if err := s.storage.Insert(ctx, c); err != nil {
@@ -80,11 +56,21 @@ func (s *Service) Create(ctx context.Context, in *entities.CategoryCreate) (*ent
 }
 
 func (s *Service) Get(ctx context.Context, id string) (*entities.Category, error) {
-	return s.storage.Get(ctx, id)
+	c, err := s.storage.Get(ctx, id)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get category failed", slog.String("id", id), slogx.Error(err))
+		return nil, err
+	}
+	return c, nil
 }
 
 func (s *Service) List(ctx context.Context, in *entities.CategoriesList) (*entities.List[entities.Category], error) {
-	return s.storage.List(ctx, in)
+	list, err := s.storage.List(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "list categories failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }
 
 func (s *Service) Update(ctx context.Context, in *entities.CategoryUpdate) (*entities.Category, error) {
@@ -96,13 +82,11 @@ func (s *Service) Update(ctx context.Context, in *entities.CategoryUpdate) (*ent
 
 	c, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get category failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != c.Etag {
 		return nil, errs.ErrStaleEntity
-	}
-	if err := s.validateParent(ctx, c.ID, in.ParentID); err != nil {
-		return nil, err
 	}
 	oldEtag := c.Etag
 	in.Merge(c)
@@ -119,6 +103,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.CategoryDelete) error
 
 	c, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get category failed", slog.String("id", in.ID), slogx.Error(err))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != c.Etag {
@@ -128,6 +113,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.CategoryDelete) error
 	if s.products != nil {
 		hasProducts, err := s.products.ExistsForCategory(ctx, c.ID)
 		if err != nil {
+			s.logger.DebugContext(ctx, "check category products existence failed", slog.String("id", c.ID), slogx.Error(err))
 			return err
 		}
 		if hasProducts {

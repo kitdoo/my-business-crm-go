@@ -34,9 +34,18 @@ import (
 // bridge a map directly onto a wrapper message on its own, so this codec -
 // analogous to unixtime.New() - is the sanctioned extension point instead of
 // a hand-written protoTo.../entityTo... function.
+//
+// Details (map[string]entities.LocalizedString -> map[string]*commonpb.LocalizedString)
+// is why this also matches the non-pointer commonpb.LocalizedString as a dst
+// type: the converter's map-value path allocates a *commonpb.LocalizedString
+// and passes its .Elem() (the pointed-to struct, not the pointer) down to
+// this codec, unlike a plain top-level field where dst is the pointer
+// itself. Without this, every Details entry round-tripped as an empty
+// LocalizedString — silently dropping every characteristic value on write.
 func localizedStringCodec() convcodec.Codec {
 	lsType := reflect.TypeFor[entities.LocalizedString]()
 	pbType := reflect.TypeFor[*commonpb.LocalizedString]()
+	pbValueType := pbType.Elem()
 
 	return func(fieldName string, src, dst reflect.Value, next convcodec.CodecHandler) {
 		switch {
@@ -47,6 +56,14 @@ func localizedStringCodec() convcodec.Codec {
 			}
 			ls, _ := src.Interface().(entities.LocalizedString)
 			dst.Set(reflect.ValueOf(&commonpb.LocalizedString{Values: map[string]string(ls)}))
+		case src.Type() == lsType && dst.Type() == pbValueType:
+			// dst is the dereferenced struct (not addressed through a
+			// pointer field) — set its Values field directly rather than
+			// dst.Set(reflect.ValueOf(commonpb.LocalizedString{...})),
+			// which would copy the message's embedded protoimpl.MessageState
+			// (and its mutex) by value.
+			ls, _ := src.Interface().(entities.LocalizedString)
+			dst.FieldByName("Values").Set(reflect.ValueOf(map[string]string(ls)))
 		case src.Type() == pbType && dst.Type() == lsType:
 			if src.IsNil() {
 				dst.Set(reflect.Zero(lsType))
@@ -214,7 +231,11 @@ func MapError(err error) error {
 	case errors.Is(err, errs.ErrInvalidListCursor):
 		return status.Error(codes.InvalidArgument, errs.ErrInvalidListCursor.Error())
 	case errors.Is(err, errs.ErrLocalizedStringMissingRequiredLocale):
-		return status.Error(codes.InvalidArgument, errs.ErrLocalizedStringMissingRequiredLocale.Error())
+		// err, not the sentinel: the entities layer wraps this with the
+		// actual field name ("name: ..."/"description: ..."), which the
+		// BFF regex-extracts into a per-field UI error (TD §9.4) instead
+		// of an unattributed toast.
+		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, errs.ErrInvalidArgument):
 		return status.Error(codes.InvalidArgument, errs.ErrInvalidArgument.Error())
 	case errors.Is(err, errs.ErrNotImplemented):

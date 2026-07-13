@@ -22,11 +22,11 @@ export default {
       { key: 'updatedAt', label: 'fields.updatedAt', component: 'DateLabel' },
     ],
     filters: [
-      { key: 'minQuantity', type: 'number', label: 'fields.minQuantity' },
-      { key: 'maxQuantity', type: 'number', label: 'fields.maxQuantity' },
+      { key: 'quantity', type: 'numberRange', label: 'fields.quantity', minKey: 'minQuantity', maxKey: 'maxQuantity' },
     ],
-    // InventoryListRequest has no Sort message on the backend at all.
-    sort: [],
+    // Quantity is the only sortable field — Inventory carries no product
+    // name to sort by (would need a join against Products).
+    sort: [{ field: 'FIELD_QUANTITY', label: 'sort.quantity' }],
     defaultSort: null,
   },
 

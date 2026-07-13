@@ -4,11 +4,22 @@ const localeHead = useLocaleHead()
 const route = useRoute()
 const localePath = useLocalePath()
 const { getProduct } = useCatalogApi()
-const { addItem } = useCart()
+const { addItem, setQty, getQty, removeItem } = useCart()
 
 const { data: product, error } = await useAsyncData(`product-${route.params.sku}`, () => getProduct(route.params.sku))
 if (error.value) {
   throw createError({ statusCode: 404, statusMessage: 'Not found' })
+}
+
+const qtyInCart = computed(() => getQty(product.value?.sku))
+
+function increment() {
+  if (qtyInCart.value) setQty(product.value.sku, qtyInCart.value + 1)
+  else addItem(product.value)
+}
+function decrement() {
+  if (qtyInCart.value <= 1) removeItem(product.value.sku)
+  else setQty(product.value.sku, qtyInCart.value - 1)
 }
 
 const activeImage = ref(0)
@@ -69,7 +80,16 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
         </dl>
 
         <div class="flex flex-col sm:flex-row gap-3">
-          <UButton variant="cta-outline" size="xl" class="py-4 text-base flex-1" @click="addItem(product)">
+          <div v-if="qtyInCart" class="flex items-center justify-center gap-4 border border-brand-500 rounded-md py-4 flex-1">
+            <button class="w-8 h-8 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="decrement">
+              <UIcon name="i-lucide-minus" class="w-4 h-4" />
+            </button>
+            <span class="text-base font-medium w-6 text-center">{{ qtyInCart }}</span>
+            <button class="w-8 h-8 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="increment">
+              <UIcon name="i-lucide-plus" class="w-4 h-4" />
+            </button>
+          </div>
+          <UButton v-else variant="cta-outline" size="xl" class="py-4 text-base flex-1" @click="addItem(product)">
             {{ t('cart.addToCart') }}
           </UButton>
           <UButton :to="contactHref" variant="cta-outline" size="xl" class="py-4 text-base flex-1">

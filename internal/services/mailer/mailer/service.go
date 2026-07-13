@@ -4,10 +4,12 @@ package mailer
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
 	"strings"
+	"time"
 
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
 	mailersvc "github.com/kitdoo/my-business-crm-go/internal/services/mailer"
@@ -60,11 +62,18 @@ func (s *Service) Send(_ context.Context, msg mailersvc.Message) error {
 	return smtp.SendMail(addr, auth, s.cfg.From, []string{msg.To}, body)
 }
 
+// buildMessage composes the raw RFC 5322 message. Date and Message-ID are
+// required by most receiving servers' spam filters — without them,
+// net/smtp.SendMail can succeed (SMTP accepts the message) while the
+// message is silently dropped or spam-boxed downstream, with no error
+// surfacing on our end.
 func buildMessage(from string, msg mailersvc.Message) []byte {
 	var b strings.Builder
 	fmt.Fprintf(&b, "From: %s\r\n", from)
 	fmt.Fprintf(&b, "To: %s\r\n", msg.To)
 	fmt.Fprintf(&b, "Subject: %s\r\n", msg.Subject)
+	fmt.Fprintf(&b, "Date: %s\r\n", time.Now().Format(time.RFC1123Z))
+	fmt.Fprintf(&b, "Message-ID: %s\r\n", newMessageID(from))
 	if msg.ReplyTo != "" {
 		fmt.Fprintf(&b, "Reply-To: %s\r\n", msg.ReplyTo)
 	}
@@ -73,6 +82,18 @@ func buildMessage(from string, msg mailersvc.Message) []byte {
 	b.WriteString("\r\n")
 	b.WriteString(msg.Body)
 	return []byte(b.String())
+}
+
+// newMessageID builds a unique Message-ID, using the domain part of from
+// (falling back to "localhost" if from has no "@") as required by RFC 5322.
+func newMessageID(from string) string {
+	domain := "localhost"
+	if i := strings.LastIndex(from, "@"); i >= 0 && i+1 < len(from) {
+		domain = from[i+1:]
+	}
+	var raw [16]byte
+	_, _ = rand.Read(raw[:])
+	return fmt.Sprintf("<%x@%s>", raw, domain)
 }
 
 // sendImplicitTLS handles port 465, which expects TLS from the first

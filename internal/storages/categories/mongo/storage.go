@@ -27,7 +27,6 @@ const (
 	// (see common_localized_string.proto), used as a deterministic single
 	// key since Name itself is a multi-locale map.
 	FieldNameSr    = "name.sr"
-	FieldParentID  = "parent_id"
 	FieldStatus    = "status"
 	FieldCreatedAt = "created_at"
 	FieldUpdatedAt = "updated_at"
@@ -42,7 +41,6 @@ type model struct {
 	ID          string                   `bson:"_id"`
 	Name        entities.LocalizedString `bson:"name"`
 	Description entities.LocalizedString `bson:"description"`
-	ParentID    *string                  `bson:"parent_id"`
 	Status      entities.CategoryStatus  `bson:"status"`
 	CreatedAt   time.Time                `bson:"created_at,omitonupdate"`
 	UpdatedAt   time.Time                `bson:"updated_at"`
@@ -162,9 +160,6 @@ func (s *Storage) List(ctx context.Context, in *entities.CategoriesList) (*entit
 	}
 
 	filter := activeOnly(bson.M{})
-	if in.ParentID != nil {
-		filter[FieldParentID] = *in.ParentID
-	}
 	if len(in.Statuses) > 0 {
 		filter[FieldStatus] = bson.M{"$in": in.Statuses}
 	}

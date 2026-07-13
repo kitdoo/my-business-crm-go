@@ -7,10 +7,10 @@ const { menuOpen } = useLayoutState()
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="h-screen overflow-hidden flex flex-col">
     <TopBar />
     <div class="flex flex-1 min-h-0">
-      <aside class="hidden lg:block">
+      <aside class="hidden lg:block overflow-y-auto">
         <SideMenu />
       </aside>
 

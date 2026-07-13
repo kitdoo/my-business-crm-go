@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -120,16 +121,15 @@ func (c *UserCreate) Merge(dst *User) *User {
 	return dst
 }
 
-// Validate checks the LocalizedString fields for the required locale (see
-// LocalizedString.Validate).
+// Validate checks Name for the required locale (see
+// LocalizedString.Validate). LastName/Description are optional and never
+// checked — unlike Name, it's fine to fill in only a non-default locale,
+// or none at all.
 func (c *UserCreate) Validate(requiredLocale string) error {
 	if err := c.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	if err := c.LastName.Validate(requiredLocale); err != nil {
-		return err
-	}
-	return c.Description.Validate(requiredLocale)
+	return nil
 }
 
 // UserUpdate is the Update input. Nil fields mean "leave unchanged".
@@ -153,16 +153,14 @@ func (u *UserUpdate) Merge(dst *User) *User {
 	return dst
 }
 
-// Validate checks the LocalizedString fields for the required locale (see
-// LocalizedString.Validate).
+// Validate checks Name for the required locale (see
+// LocalizedString.Validate). LastName/Description are optional and never
+// checked — see UserCreate.Validate.
 func (u *UserUpdate) Validate(requiredLocale string) error {
 	if err := u.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	if err := u.LastName.Validate(requiredLocale); err != nil {
-		return err
-	}
-	return u.Description.Validate(requiredLocale)
+	return nil
 }
 
 // UserDelete is the Delete input.

@@ -100,11 +100,21 @@ func (s *Service) Create(ctx context.Context, in *entities.ProductCreate) (*enti
 }
 
 func (s *Service) Get(ctx context.Context, id string) (*entities.Product, error) {
-	return s.storage.Get(ctx, id)
+	p, err := s.storage.Get(ctx, id)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get product failed", slog.String("id", id), slogx.Error(err))
+		return nil, err
+	}
+	return p, nil
 }
 
 func (s *Service) List(ctx context.Context, in *entities.ProductsList) (*entities.List[entities.Product], error) {
-	return s.storage.List(ctx, in)
+	list, err := s.storage.List(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "list products failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }
 
 func (s *Service) Update(ctx context.Context, in *entities.ProductUpdate) (*entities.Product, error) {
@@ -116,6 +126,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductUpdate) (*enti
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get product failed", slog.String("id", in.ID), slogx.Error(err))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -147,6 +158,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductDelete) error 
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
+		s.logger.DebugContext(ctx, "get product failed", slog.String("id", in.ID), slogx.Error(err))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {

@@ -26,6 +26,8 @@ import (
 	priceservice "github.com/kitdoo/my-business-crm-go/internal/services/price/price"
 	"github.com/kitdoo/my-business-crm-go/internal/services/product"
 	productservice "github.com/kitdoo/my-business-crm-go/internal/services/product/product"
+	productattributedefinitionsvc "github.com/kitdoo/my-business-crm-go/internal/services/productattributedefinition"
+	productattributedefinitionservice "github.com/kitdoo/my-business-crm-go/internal/services/productattributedefinition/productattributedefinition"
 	reportsvc "github.com/kitdoo/my-business-crm-go/internal/services/report"
 	reportservice "github.com/kitdoo/my-business-crm-go/internal/services/report/report"
 	salesvc "github.com/kitdoo/my-business-crm-go/internal/services/sale"
@@ -50,6 +52,8 @@ import (
 	pricesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/prices/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
 	productsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/products/mongo"
+	productattributedefinitions "github.com/kitdoo/my-business-crm-go/internal/storages/productattributedefinitions"
+	productattributedefinitionsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/productattributedefinitions/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/reports"
 	reportsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/reports/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/sales"
@@ -67,6 +71,7 @@ import (
 	partnerhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/partner"
 	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
+	productattributedefinitionhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/productattributedefinition"
 	reporthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/report"
 	salehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/sale"
 	userhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/user"
@@ -114,6 +119,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(productsmongo.New, fx.As(new(products.Storage)))),
 		fx.Provide(fx.Annotate(newProductService, fx.As(new(product.Service)))),
 		fx.Provide(AsGRPCHandler(producthandler.New)),
+
+		fx.Provide(fx.Annotate(productattributedefinitionsmongo.New, fx.As(new(productattributedefinitions.Storage)))),
+		fx.Provide(fx.Annotate(productattributedefinitionservice.New, fx.As(new(productattributedefinitionsvc.Service)))),
+		fx.Provide(AsGRPCHandler(productattributedefinitionhandler.New)),
 
 		fx.Provide(fx.Annotate(pricesmongo.New, fx.As(new(prices.Storage)))),
 		fx.Provide(fx.Annotate(newPriceService, fx.As(new(price.Service)))),

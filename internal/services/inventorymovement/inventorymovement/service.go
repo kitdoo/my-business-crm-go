@@ -75,9 +75,19 @@ func (s *Service) Create(ctx context.Context, in *entities.InventoryMovementCrea
 }
 
 func (s *Service) List(ctx context.Context, in *entities.InventoryMovementsList) (*entities.List[entities.InventoryMovement], error) {
-	return s.storage.List(ctx, in)
+	list, err := s.storage.List(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "list inventory movements failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }
 
 func (s *Service) GetHistory(ctx context.Context, in *entities.InventoryMovementGetHistory) (*entities.List[entities.InventoryMovement], error) {
-	return s.storage.GetHistory(ctx, in)
+	list, err := s.storage.GetHistory(ctx, in)
+	if err != nil {
+		s.logger.DebugContext(ctx, "get inventory movement history failed", slogx.Error(err))
+		return nil, err
+	}
+	return list, nil
 }

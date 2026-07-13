@@ -20,12 +20,9 @@ export default {
       { key: 'name', label: 'fields.name', component: 'LocalizedText' },
       { key: 'description', label: 'fields.description', component: 'LocalizedText' },
       { key: 'status', label: 'fields.status', component: 'StatusBadge', statusMap: 'brand' },
-      { key: 'createdAt', label: 'fields.createdAt', component: 'DateLabel' },
     ],
-    filters: [
-      { key: 'statuses', type: 'multiselect', label: 'fields.status', optionsFrom: 'enum:BrandStatus' },
-      { key: 'createdAt', type: 'periodFilter', label: 'fields.createdAt' },
-    ],
+    filters: [{ key: 'statuses', type: 'select', label: 'fields.status', optionsFrom: 'enum:BrandStatus' }],
+    defaultFilter: { statuses: 'BRAND_STATUS_ACTIVE' },
     sort: [
       { field: 'FIELD_CREATED_AT', label: 'sort.createdAt' },
       { field: 'FIELD_NAME', label: 'sort.name' },

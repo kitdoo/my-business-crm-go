@@ -42,3 +42,4 @@ var
 !.env.example
 
 vendor/
+tmp/

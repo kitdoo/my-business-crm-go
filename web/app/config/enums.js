@@ -26,6 +26,10 @@ export const ENUMS = {
     values: ['PRODUCT_STATUS_DRAFT', 'PRODUCT_STATUS_ACTIVE', 'PRODUCT_STATUS_INACTIVE'],
     labelKey: (value) => `enums.productStatus.${value}`,
   },
+  WarehouseStatus: {
+    values: ['WAREHOUSE_STATUS_ACTIVE', 'WAREHOUSE_STATUS_INACTIVE'],
+    labelKey: (value) => `enums.warehouseStatus.${value}`,
+  },
   // MOVEMENT_TYPE_SALE is deliberately excluded — it's an internal type
   // created only by SalesService.Create, never picked by hand (TD §12.4).
   MovementType: {

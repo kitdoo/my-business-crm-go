@@ -1,0 +1,44 @@
+syntax = "proto3";
+package crm.grpc.product_attribute_definition.v1;
+
+import "common.proto";
+
+// Mirrors proto/services/grpc/product_attribute_definition/v1/product_attribute_definition_service.proto
+// and proto/types/product_attribute_definition/product_attribute_definition.proto
+// on the backend. Read-only, like Inventory — no admin CRUD UI, definitions
+// are seeded/managed directly in the database by a developer.
+
+message ProductAttributeDefinition {
+  string id = 1;
+  string key = 2;
+  crm.types.common.LocalizedString label = 3;
+  bool isPublic = 4;
+  int32 sortOrder = 5;
+  int64 createdAt = 6;
+}
+
+service ProductAttributeDefinitionsService {
+  rpc Get (ProductAttributeDefinitionGetRequest) returns (ProductAttributeDefinitionGetResponse) {}
+  rpc List (ProductAttributeDefinitionsListRequest) returns (ProductAttributeDefinitionsListResponse) {}
+}
+
+message ProductAttributeDefinitionGetRequest {
+  string id = 1;
+}
+
+message ProductAttributeDefinitionGetResponse {
+  ProductAttributeDefinition productAttributeDefinition = 1;
+}
+
+message ProductAttributeDefinitionsListRequest {
+  message Filter {
+    optional bool isPublic = 1;
+  }
+  optional Filter filter = 1;
+  optional crm.types.common.Pagination pagination = 2;
+}
+
+message ProductAttributeDefinitionsListResponse {
+  repeated ProductAttributeDefinition items = 1;
+  optional string nextCursor = 2;
+}

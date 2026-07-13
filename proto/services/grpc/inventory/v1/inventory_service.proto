@@ -3,6 +3,7 @@ package crm.grpc.inventory.v1;
 
 import "buf/validate/validate.proto";
 import "types/common/common_pagination.proto";
+import "types/common/common_sort_direction.proto";
 import "types/inventory/inventory.proto";
 
 option go_package = ".;inventorypb";
@@ -31,6 +32,17 @@ message InventoryListRequest {
   }
   optional Filter filter = 3;
   optional crm.types.common.Pagination pagination = 4;
+  // Quantity is the only sortable field — Inventory carries no product
+  // name to sort by (that would need a join against Products, out of
+  // scope here).
+  message Sort {
+    enum Field {
+      FIELD_QUANTITY = 0;
+    }
+    Field field = 1 [(buf.validate.field).enum.defined_only = true];
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 5;
 }
 
 message InventoryListResponse {

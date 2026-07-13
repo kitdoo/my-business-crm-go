@@ -18,7 +18,7 @@ const preview = projects.slice(0, 2)
         class="block rounded-sm overflow-hidden group"
       >
         <NuxtImg
-          :src="p.image"
+          :src="p.images[0]"
           :alt="t(p.titleKey)"
           loading="lazy"
           class="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"

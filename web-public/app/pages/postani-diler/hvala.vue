@@ -1,7 +1,12 @@
 <script setup>
 const { t } = useI18n()
 const localePath = useLocalePath()
-useSeoMeta({ title: t('seo.dealerThanks.title') })
+const localeHead = useLocaleHead()
+// Reached only post-submit, no unique content of its own — kept out of the
+// sitemap (see server/routes/sitemap.xml.js STATIC_PATHS) and out of the
+// index for the same reason.
+useSeoMeta({ title: t('seo.dealerThanks.title'), robots: 'noindex, follow' })
+useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 </script>
 
 <template>

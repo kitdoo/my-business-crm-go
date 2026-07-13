@@ -22,11 +22,11 @@ export default {
       { key: 'type', label: 'fields.movementType', component: 'EnumLabel' },
       { key: 'quantity', label: 'fields.quantity' },
       { key: 'comment', label: 'fields.comment' },
+      { key: 'saleId', label: 'fields.sale', component: 'SaleLink' },
       { key: 'createdAt', label: 'fields.createdAt', component: 'DateLabel' },
     ],
     filters: [
       { key: 'types', type: 'multiselect', label: 'fields.movementType', optionsFrom: 'enum:MovementType' },
-      { key: 'productIds', type: 'multiselect', label: 'fields.product', optionsFrom: 'relation:products' },
       { key: 'createdAt', type: 'periodFilter', label: 'fields.createdAt' },
     ],
     // InventoryMovementsListRequest has no Sort message on the backend.
@@ -41,6 +41,7 @@ export default {
       { key: 'type', type: 'enum', enum: 'MovementType', label: 'fields.movementType', required: true },
       { key: 'quantity', type: 'number', label: 'fields.quantity', required: true },
       { key: 'comment', type: 'text', label: 'fields.comment', maxLength: 1024 },
+      { key: 'saleId', type: 'relation', relation: 'sales', label: 'fields.sale' },
     ],
   },
 }

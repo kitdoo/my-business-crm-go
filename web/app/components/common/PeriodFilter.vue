@@ -1,7 +1,7 @@
 <script setup>
 // Period presets (TD §8.4/§9.3) — reused by every report widget on the
-// dashboard, all sharing one selected range. Custom/arbitrary range
-// isn't implemented yet, only the three presets.
+// dashboard, all sharing one selected range. today/7d/month presets plus
+// an arbitrary custom range via <DateRangePicker>.
 const props = defineProps({
   modelValue: { type: Object, default: () => ({}) }, // { from, to } unix seconds
 })
@@ -12,8 +12,6 @@ const PRESETS = [
   { key: 'today', label: 'periodFilter.today', days: 0 },
   { key: '7d', label: 'periodFilter.7d', days: 7 },
   { key: '30d', label: 'periodFilter.30d', days: 30 },
-  { key: '3m', label: 'periodFilter.3m', days: 90 },
-  { key: '1y', label: 'periodFilter.1y', days: 365 },
 ]
 const active = ref('7d')
 
@@ -23,6 +21,11 @@ function apply(preset) {
   const from =
     preset.days === 0 ? Math.floor(new Date(new Date().setHours(0, 0, 0, 0)).getTime() / 1000) : to - preset.days * 86400
   emit('update:modelValue', { from, to })
+}
+
+function applyCustom(range) {
+  active.value = 'custom'
+  emit('update:modelValue', range)
 }
 
 onMounted(() => apply(PRESETS[1]))
@@ -39,5 +42,7 @@ onMounted(() => apply(PRESETS[1]))
     >
       {{ t(preset.label) }}
     </UButton>
+
+    <DateRangePicker :active="active === 'custom'" @update:model-value="applyCustom" />
   </div>
 </template>

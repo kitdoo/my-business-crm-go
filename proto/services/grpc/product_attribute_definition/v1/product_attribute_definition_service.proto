@@ -1,0 +1,41 @@
+syntax = "proto3";
+package crm.grpc.product_attribute_definition.v1;
+
+import "buf/validate/validate.proto";
+import "types/common/common_pagination.proto";
+import "types/product_attribute_definition/product_attribute_definition.proto";
+
+option go_package = ".;productattributedefinitionpb";
+
+// Read-only — no admin CRUD UI, definitions are seeded/managed directly in
+// the database by a developer (TZ characteristics catalog). Anonymous —
+// exempted from auth like ProductsService.List/CategoriesService.List, so
+// web-public can call it directly; List's Filter.isPublic is honored as
+// passed, the same "caller passes whatever filter, BFF is responsible for
+// it" trust model already documented in
+// web-public/server/utils/catalogClient.js.
+service ProductAttributeDefinitionsService {
+  rpc Get (ProductAttributeDefinitionGetRequest) returns (ProductAttributeDefinitionGetResponse) {}
+  rpc List (ProductAttributeDefinitionsListRequest) returns (ProductAttributeDefinitionsListResponse) {}
+}
+
+message ProductAttributeDefinitionGetRequest {
+  string id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+}
+
+message ProductAttributeDefinitionGetResponse {
+  crm.types.product_attribute_definition.ProductAttributeDefinition productAttributeDefinition = 1;
+}
+
+message ProductAttributeDefinitionsListRequest {
+  message Filter {
+    optional bool isPublic = 1;
+  }
+  optional Filter filter = 1;
+  optional crm.types.common.Pagination pagination = 2;
+}
+
+message ProductAttributeDefinitionsListResponse {
+  repeated crm.types.product_attribute_definition.ProductAttributeDefinition items = 1;
+  optional string nextCursor = 2;
+}

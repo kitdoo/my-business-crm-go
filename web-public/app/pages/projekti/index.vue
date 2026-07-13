@@ -8,6 +8,9 @@ const localePath = useLocalePath()
 useSeoMeta({
   title: t('seo.projects.title'),
   description: t('seo.projects.description'),
+  ogTitle: t('seo.projects.title'),
+  ogDescription: t('seo.projects.description'),
+  ogImage: '/images/project_1.jpg',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 
@@ -26,14 +29,13 @@ function materialTiles(p) {
   <div class="mx-auto max-w-7xl px-4 lg:px-8 py-12 lg:py-16">
     <h1 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide mb-10">{{ t('nav.zavrseniProjekti') }}</h1>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-14">
-      <article v-for="p in projects" :key="p.id" class="flex flex-col sm:flex-row gap-4">
-        <figure class="w-full sm:w-3/5 flex-shrink-0">
-          <NuxtImg :src="p.image" :alt="t(p.titleKey)" loading="lazy" class="w-full aspect-square object-cover rounded-sm" />
-          <figcaption class="mt-3 text-sm text-black/70">{{ t(p.titleKey) }}</figcaption>
+    <div class="flex flex-col gap-16 lg:gap-20">
+      <article v-for="p in projects" :key="p.id" class="w-full flex flex-col lg:flex-row gap-6">
+        <figure class="w-full lg:w-[60%] flex-shrink-0">
+          <ImageSlider :images="p.images" :alt="t(p.titleKey)" :caption="t(p.titleKey)" class="aspect-[4/3]" />
         </figure>
 
-        <div class="flex-1 flex flex-col gap-3">
+        <div class="w-full lg:w-[40%] flex flex-col gap-3">
           <NuxtLink
             v-for="m in materialTiles(p)"
             :key="m.id"

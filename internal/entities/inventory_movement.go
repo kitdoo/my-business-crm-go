@@ -35,8 +35,14 @@ type InventoryMovement struct {
 	WarehouseID string
 	Type        MovementType
 	// Quantity is signed: positive for Receipt, negative for Sale/WriteOff.
-	Quantity  int64
-	Comment   string
+	Quantity int64
+	Comment  string
+	// SaleID links this movement to the Sale that caused it — always set
+	// on Type=Sale (SalesService.Create sets it directly, not just via
+	// Comment text); optionally settable on a manual Create too, for a
+	// non-sale movement an operator wants to associate with a sale by
+	// hand.
+	SaleID    *string
 	CreatedBy string
 	CreatedAt time.Time
 }
@@ -59,8 +65,9 @@ type InventoryMovementCreate struct {
 	WarehouseID string `normalize:"trim"`
 	Type        MovementType
 	Quantity    int64
-	Comment     string `normalize:"trim"`
-	CreatedBy   string `normalize:"trim"`
+	Comment     string  `normalize:"trim"`
+	SaleID      *string `normalize:"trim,nil_on_empty"`
+	CreatedBy   string  `normalize:"trim"`
 }
 
 func (c *InventoryMovementCreate) Merge(dst *InventoryMovement) *InventoryMovement {

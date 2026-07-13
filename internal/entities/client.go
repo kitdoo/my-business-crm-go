@@ -109,6 +109,9 @@ type ClientsListSort struct {
 // ClientsList is the single List input; scope/filters/sort/pagination all
 // live inside it, per the List(ctx, in *XxxList) convention.
 type ClientsList struct {
+	// Email is an exact match — used to find a client by email before
+	// creating a sale (SalesService.Create's find-or-create).
+	Email             *string `normalize:"trim,nil_on_empty"`
 	CreatedAt         *PeriodFilter
 	Sort              ClientsListSort
 	Pagination        ListPagination

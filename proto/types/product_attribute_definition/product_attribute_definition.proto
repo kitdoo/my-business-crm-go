@@ -1,0 +1,21 @@
+syntax = "proto3";
+package crm.types.product_attribute_definition;
+
+import "types/common/common_localized_string.proto";
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/product_attribute_definition;productattributedefinitionpb";
+
+// ProductAttributeDefinition is the backend-defined catalog of
+// Product.Details keys (TZ characteristics) — read-only from every
+// frontend, managed by a developer via migration/seed. isPublic controls
+// whether a key may leave the CRM: web-public filters Product.Details down
+// to only the keys of definitions with isPublic = true before serving them
+// to site visitors.
+message ProductAttributeDefinition {
+  string id = 1;
+  string key = 2;
+  crm.types.common.LocalizedString label = 3;
+  bool isPublic = 4;
+  int32 sortOrder = 5;
+  int64 createdAt = 6;
+}

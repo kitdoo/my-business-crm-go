@@ -23,6 +23,8 @@ function onSaved() {
 
 <template>
   <div class="space-y-4">
+    <ProductStockSummary :product-id="productId" />
+
     <div class="flex justify-end">
       <UButton v-if="canCreate" icon="i-lucide-plus" @click="drawerOpen = true">
         {{ t('entities.inventoryMovements.create') }}

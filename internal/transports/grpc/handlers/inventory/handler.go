@@ -71,6 +71,12 @@ func (h *Handler) List(ctx context.Context, in *inventorysvcpb.InventoryListRequ
 			listIn.MaxQuantity = f.MaxQuantity
 		}
 	}
+	if sort := in.GetSort(); sort != nil {
+		listIn.Sort = &entities.InventoryListSort{
+			Field:     entities.InventoryListSortField(sort.GetField()),
+			Direction: entities.SortDirection(sort.GetDirection()),
+		}
+	}
 
 	result, err := h.svc.List(ctx, listIn)
 	if err != nil {

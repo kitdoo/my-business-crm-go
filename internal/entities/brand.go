@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -88,9 +89,9 @@ func (c *BrandCreate) Merge(dst *Brand) *Brand {
 // LocalizedString.Validate).
 func (c *BrandCreate) Validate(requiredLocale string) error {
 	if err := c.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	return c.Description.Validate(requiredLocale)
+	return nil
 }
 
 // BrandUpdate is the Update input. Nil fields mean "leave unchanged".
@@ -114,9 +115,9 @@ func (u *BrandUpdate) Merge(dst *Brand) *Brand {
 // LocalizedString.Validate).
 func (u *BrandUpdate) Validate(requiredLocale string) error {
 	if err := u.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	return u.Description.Validate(requiredLocale)
+	return nil
 }
 
 // BrandDelete is the Delete input.

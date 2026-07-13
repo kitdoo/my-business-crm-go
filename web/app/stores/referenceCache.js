@@ -61,10 +61,14 @@ export const useReferenceCacheStore = defineStore('referenceCache', {
         // covers both the no-filterKey case and a filterKey the backend
         // doesn't actually honor (silently returning an unrelated page
         // instead of filtering), so a config mistake degrades to slightly
-        // more requests instead of blank labels.
+        // more requests instead of blank labels. allSettled, not all — one
+        // stale/deleted id 404ing must not blank out every other label in
+        // the same batch tick.
         if (missing.length > 0) {
-          const items = await Promise.all(missing.map((id) => get(id)))
-          for (const item of items) if (item) this.setCached(entityKey, item)
+          const results = await Promise.allSettled(missing.map((id) => get(id)))
+          for (const result of results) {
+            if (result.status === 'fulfilled' && result.value) this.setCached(entityKey, result.value)
+          }
         }
       } finally {
         for (const id of ids) {

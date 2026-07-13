@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -22,6 +23,7 @@ import (
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
 	usersvc "github.com/kitdoo/my-business-crm-go/internal/services/user"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/images"
 )
 
 // DefaultMaxSizeBytes is used when the configured maxSizeBytes is unset.
@@ -45,6 +47,7 @@ type Handler struct {
 	dir     string
 	maxSize int64
 	users   usersvc.Service
+	images  images.Storage
 	logger  *slog.Logger
 }
 
@@ -52,7 +55,7 @@ var _ httpserver.Handler = (*Handler)(nil)
 
 // New builds a Handler, creating dir if it does not exist. maxSize <= 0
 // falls back to DefaultMaxSizeBytes.
-func New(dir string, maxSize int64, users usersvc.Service) (*Handler, error) {
+func New(dir string, maxSize int64, users usersvc.Service, imagesStorage images.Storage) (*Handler, error) {
 	if maxSize <= 0 {
 		maxSize = DefaultMaxSizeBytes
 	}
@@ -63,6 +66,7 @@ func New(dir string, maxSize int64, users usersvc.Service) (*Handler, error) {
 		dir:     dir,
 		maxSize: maxSize,
 		users:   users,
+		images:  imagesStorage,
 		logger:  slog.Default().With(slogx.Module("http:image")),
 	}, nil
 }
@@ -125,6 +129,19 @@ func (h *Handler) upload(rw writer.ReadWriter) {
 		return
 	}
 
+	// Best-effort past this point: the file is already written and usable
+	// (serve falls back to sniffing magic bytes if this record is missing),
+	// so a metadata-store hiccup is logged loudly rather than failing an
+	// upload whose bytes are already safely on disk.
+	if err := h.images.Insert(ctx, &entities.Image{
+		ID:          id,
+		ContentType: contentType,
+		SizeBytes:   int64(len(data)),
+		CreatedAt:   time.Now().UTC(),
+	}); err != nil {
+		h.logger.ErrorContext(ctx, "insert image metadata failed", slog.String("id", id), slogx.Error(err))
+	}
+
 	_ = rw.Write(map[string]string{"id": id})
 }
 
@@ -143,8 +160,20 @@ func (h *Handler) serve(rw writer.ReadWriter) {
 		return
 	}
 
+	// The metadata record is the source of truth for Content-Type (set at
+	// upload time from the same sniff that validated the file); falling
+	// back to re-sniffing keeps files uploaded before this record existed
+	// working the same as always.
+	contentType := ""
+	if meta, err := h.images.Get(rw.Request().Context(), id); err == nil {
+		contentType = meta.ContentType
+	}
+	if contentType == "" {
+		contentType = http.DetectContentType(data)
+	}
+
 	w := rw.ResponseWriter()
-	w.Header().Set("Content-Type", http.DetectContentType(data))
+	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 	w.WriteHeader(http.StatusOK)

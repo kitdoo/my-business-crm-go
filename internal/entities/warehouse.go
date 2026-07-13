@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -79,9 +80,9 @@ func (c *WarehouseCreate) Merge(dst *Warehouse) *Warehouse {
 // LocalizedString.Validate).
 func (c *WarehouseCreate) Validate(requiredLocale string) error {
 	if err := c.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	return c.Description.Validate(requiredLocale)
+	return nil
 }
 
 // WarehouseUpdate is the Update input. Nil fields mean "leave unchanged".
@@ -105,9 +106,9 @@ func (u *WarehouseUpdate) Merge(dst *Warehouse) *Warehouse {
 // LocalizedString.Validate).
 func (u *WarehouseUpdate) Validate(requiredLocale string) error {
 	if err := u.Name.Validate(requiredLocale); err != nil {
-		return err
+		return fmt.Errorf("name: %w", err)
 	}
-	return u.Description.Validate(requiredLocale)
+	return nil
 }
 
 // WarehouseDelete is the Delete input.
