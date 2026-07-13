@@ -18,6 +18,7 @@ ENV NITRO_HOST=0.0.0.0
 
 WORKDIR /app
 COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/proto ./proto
 
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]

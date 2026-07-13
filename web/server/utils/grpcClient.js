@@ -1,12 +1,18 @@
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import * as grpc from '@grpc/grpc-js'
 import protoLoader from '@grpc/proto-loader'
 
 // Node gRPC client, alive only inside server/api/** (Nitro). Browser code
 // must never import this file — see docs TD §1.1/§2.
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const PROTO_DIR = path.resolve(__dirname, '../../proto')
+//
+// Resolved from process.cwd() rather than __dirname: Nitro's rollup build
+// concatenates this file into a single bundled chunk, so import.meta.url
+// no longer reflects web/server/utils/ — it points at wherever that chunk
+// physically lands (e.g. .output/server/chunks/nitro/nitro.mjs), and a
+// __dirname-relative path silently breaks in production. process.cwd() is
+// the app's WORKDIR both in dev (web/) and in the Docker image (/app),
+// where the Dockerfile copies proto/ alongside .output/.
+const PROTO_DIR = path.resolve(process.cwd(), 'proto')
 
 const packageDefCache = new Map()
 const serviceClientCache = new Map()
