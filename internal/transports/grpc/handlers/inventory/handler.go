@@ -48,7 +48,7 @@ func optionalString(s string) *string {
 }
 
 func (h *Handler) Get(ctx context.Context, in *inventorysvcpb.InventoryGetRequest) (*inventorysvcpb.InventoryGetResponse, error) {
-	i, err := h.svc.Get(ctx, in.GetProductId(), in.GetWarehouseId())
+	i, err := h.svc.Get(ctx, in.GetVariantId(), in.GetWarehouseId())
 	if err != nil {
 		return nil, MapError(err)
 	}
@@ -57,7 +57,7 @@ func (h *Handler) Get(ctx context.Context, in *inventorysvcpb.InventoryGetReques
 
 func (h *Handler) List(ctx context.Context, in *inventorysvcpb.InventoryListRequest) (*inventorysvcpb.InventoryListResponse, error) {
 	listIn := &entities.InventoryList{
-		ProductID:   optionalString(in.GetProductId()),
+		VariantID:   optionalString(in.GetVariantId()),
 		WarehouseID: optionalString(in.GetWarehouseId()),
 	}
 	if pg := in.GetPagination(); pg != nil {

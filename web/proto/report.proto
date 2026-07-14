@@ -30,7 +30,7 @@ message SalesByPartnerRow {
 }
 
 message PopularProductRow {
-  string productId = 1;
+  string variantId = 1;
   int64 quantitySold = 2;
   int64 totalAmount = 3;
 }
@@ -42,7 +42,7 @@ message TurnoverRow {
 }
 
 message StockLevelRow {
-  string productId = 1;
+  string variantId = 1;
   string warehouseId = 2;
   int64 quantity = 3;
 }

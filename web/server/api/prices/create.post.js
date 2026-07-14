@@ -3,7 +3,7 @@ import { getPricesClient } from '~~/server/utils/pricesClient'
 import { mapGrpcError } from '~~/server/utils/mapGrpcError'
 import { requireSession } from '~~/server/utils/session'
 
-// { productId, priceAmount, discountAmount? } -> ProductPrice
+// { variantId, priceAmount, discountAmount? } -> ProductPrice
 export default defineEventHandler(async (event) => {
   const session = requireSession(event)
   const body = (await readBody(event).catch(() => ({}))) || {}
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     const response = await grpcCall(
       client,
       'Create',
-      { productId: body.productId, priceAmount: body.priceAmount, discountAmount: body.discountAmount },
+      { variantId: body.variantId, priceAmount: body.priceAmount, discountAmount: body.discountAmount },
       { token: session.token },
     )
     return response.price

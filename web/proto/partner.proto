@@ -20,6 +20,7 @@ message Partner {
   string note = 9;
   PartnerStatus status = 10;
   string address = 11;
+  string website = 12;
   string etag = 101;
 }
 
@@ -89,6 +90,7 @@ message PartnerCreateRequest {
   int32 commissionPercentage = 4;
   string note = 5;
   string address = 6;
+  string website = 7;
   optional Options options = 99;
 }
 
@@ -109,6 +111,7 @@ message PartnerUpdateRequest {
   optional string note = 6;
   optional PartnerStatus status = 7;
   optional string address = 8;
+  optional string website = 9;
   optional Options options = 99;
 }
 

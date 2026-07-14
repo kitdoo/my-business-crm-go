@@ -1,10 +1,10 @@
 <script setup>
-// Movements tab on the Product detail page (TD §12.1): the read-only
-// ledger filtered to this product, plus a "New movement" button that
-// pre-fills productId (EntityForm's initialValues) so the operator
-// doesn't have to re-pick the product they're already looking at.
+// Movements tab on the ProductVariant detail page: the read-only ledger
+// filtered to this variant, plus a "New movement" button that pre-fills
+// variantId (EntityForm's initialValues) so the operator doesn't have to
+// re-pick the variant they're already looking at.
 const props = defineProps({
-  productId: { type: String, required: true },
+  variantId: { type: String, required: true },
 })
 
 const { t } = useI18n()
@@ -23,14 +23,14 @@ function onSaved() {
 
 <template>
   <div class="space-y-4">
-    <ProductStockSummary :product-id="productId" />
+    <ProductStockSummary :variant-id="variantId" />
 
     <div class="flex justify-end">
       <UButton v-if="canCreate" icon="i-lucide-plus" @click="drawerOpen = true">
         {{ t('entities.inventoryMovements.create') }}
       </UButton>
     </div>
-    <EntityDataTable ref="tableRef" entity="inventoryMovements" :fixed-filter="{ productIds: [productId] }" />
+    <EntityDataTable ref="tableRef" entity="inventoryMovements" :fixed-filter="{ variantIds: [variantId] }" />
 
     <USlideover v-model:open="drawerOpen" side="right">
       <template #content>
@@ -39,7 +39,7 @@ function onSaved() {
           <EntityForm
             entity="inventoryMovements"
             mode="drawer"
-            :initial-values="{ productId }"
+            :initial-values="{ variantId }"
             @saved="onSaved"
             @cancel="drawerOpen = false"
           />

@@ -17,7 +17,7 @@ import (
 	invmovementsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
 	partnersvc "github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	pricesvc "github.com/kitdoo/my-business-crm-go/internal/services/price"
-	productsvc "github.com/kitdoo/my-business-crm-go/internal/services/product"
+	variantsvc "github.com/kitdoo/my-business-crm-go/internal/services/productvariant"
 	salesvc "github.com/kitdoo/my-business-crm-go/internal/services/sale"
 	warehousesvc "github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/sales"
@@ -26,7 +26,7 @@ import (
 var _ salesvc.Service = (*Service)(nil)
 
 // Service is the sale.Service implementation. clients/warehouses/partners/
-// products/prices/inventory are the respective entities' Service, not
+// variants/prices/inventory are the respective entities' Service, not
 // their Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A service
 // controls only its own storage" rule.
 type Service struct {
@@ -34,7 +34,7 @@ type Service struct {
 	clients    clientsvc.Service
 	warehouses warehousesvc.Service
 	partners   partnersvc.Service
-	products   productsvc.Service
+	variants   variantsvc.Service
 	prices     pricesvc.Service
 	inventory  inventorysvc.Service
 	movements  invmovementsvc.Service
@@ -47,7 +47,7 @@ func New(
 	clients clientsvc.Service,
 	warehouses warehousesvc.Service,
 	partners partnersvc.Service,
-	products productsvc.Service,
+	variants variantsvc.Service,
 	prices pricesvc.Service,
 	inventory inventorysvc.Service,
 	movements invmovementsvc.Service,
@@ -57,7 +57,7 @@ func New(
 		clients:    clients,
 		warehouses: warehouses,
 		partners:   partners,
-		products:   products,
+		variants:   variants,
 		prices:     prices,
 		inventory:  inventory,
 		movements:  movements,
@@ -120,7 +120,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	// used here, consistent with InventoryMovement.Create.
 	for _, item := range sale.Items {
 		if _, err := s.movements.Create(ctx, &entities.InventoryMovementCreate{
-			ProductID:   item.ProductID,
+			VariantID:   item.VariantID,
 			WarehouseID: sale.WarehouseID,
 			Type:        entities.MovementTypeSale,
 			Quantity:    -item.Quantity,
@@ -129,7 +129,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 			CreatedBy:   sale.CreatedBy,
 		}); err != nil {
 			s.logger.ErrorContext(ctx, "record sale movement failed; sale and prior items' stock already committed",
-				slog.String("saleId", sale.ID), slog.String("productId", item.ProductID), slogx.Error(err))
+				slog.String("saleId", sale.ID), slog.String("variantId", item.VariantID), slogx.Error(err))
 			return nil, err
 		}
 	}
@@ -137,7 +137,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	return sale, nil
 }
 
-// buildItems validates each product's existence and stock availability at
+// buildItems validates each variant's existence and stock availability at
 // warehouseID, captures its current price, and computes per-line and total
 // amounts (basis points).
 func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entities.SaleCreateItem) ([]entities.SaleItem, int64, error) {
@@ -145,16 +145,16 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 	var total int64
 
 	for _, req := range in {
-		if _, err := s.products.Get(ctx, req.ProductID); err != nil {
+		if _, err := s.variants.Get(ctx, req.VariantID); err != nil {
 			return nil, 0, err
 		}
 
-		price, err := s.prices.Get(ctx, req.ProductID)
+		price, err := s.prices.Get(ctx, req.VariantID)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		stock, err := s.inventory.Get(ctx, req.ProductID, warehouseID)
+		stock, err := s.inventory.Get(ctx, req.VariantID, warehouseID)
 		if err != nil {
 			if errors.Is(err, errs.ErrInventoryNotFound) {
 				return nil, 0, errs.ErrInsufficientStock
@@ -169,7 +169,7 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 		total += line
 
 		items = append(items, entities.SaleItem{
-			ProductID:          req.ProductID,
+			VariantID:          req.VariantID,
 			Quantity:           req.Quantity,
 			PriceAmount:        price.PriceAmount,
 			DiscountPercentage: req.DiscountPercentage,
@@ -249,7 +249,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 	// Best-effort restock: see Create for why this isn't transactional.
 	for _, item := range sl.Items {
 		if _, err := s.movements.Create(ctx, &entities.InventoryMovementCreate{
-			ProductID:   item.ProductID,
+			VariantID:   item.VariantID,
 			WarehouseID: sl.WarehouseID,
 			Type:        entities.MovementTypeAdjustment,
 			Quantity:    item.Quantity,
@@ -258,7 +258,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 			CreatedBy:   in.CreatedBy,
 		}); err != nil {
 			s.logger.ErrorContext(ctx, "restock movement on sale cancel failed",
-				slog.String("saleId", sl.ID), slog.String("productId", item.ProductID), slogx.Error(err))
+				slog.String("saleId", sl.ID), slog.String("variantId", item.VariantID), slogx.Error(err))
 			return nil, err
 		}
 	}

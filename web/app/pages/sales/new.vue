@@ -55,13 +55,13 @@ const clientValid = computed(() => {
 })
 
 let nextItemId = 0
-const items = ref([{ id: nextItemId++, productId: null, quantity: 1, discountPercentage: 0, priceAmount: null, currency: null }])
+const items = ref([{ id: nextItemId++, variantId: null, quantity: 1, discountPercentage: 0, priceAmount: null, currency: null }])
 
-const itemsValid = computed(() => items.value.length > 0 && items.value.every((item) => item.productId && item.quantity > 0))
+const itemsValid = computed(() => items.value.length > 0 && items.value.every((item) => item.variantId && item.quantity > 0))
 const formValid = computed(() => clientValid.value && !!warehouseId.value && itemsValid.value)
 
 function addItem() {
-  items.value = [...items.value, { id: nextItemId++, productId: null, quantity: 1, discountPercentage: 0, priceAmount: null, currency: null }]
+  items.value = [...items.value, { id: nextItemId++, variantId: null, quantity: 1, discountPercentage: 0, priceAmount: null, currency: null }]
 }
 function removeItem(id) {
   items.value = items.value.filter((item) => item.id !== id)
@@ -70,9 +70,9 @@ function removeItem(id) {
 async function onProductSelected(item) {
   item.priceAmount = null
   item.currency = null
-  if (!item.productId) return
+  if (!item.variantId) return
   try {
-    const price = await priceApi.get(item.productId)
+    const price = await priceApi.get(item.variantId)
     item.priceAmount = price.priceAmount
     item.currency = price.currency
   } catch {
@@ -110,7 +110,7 @@ async function onSubmit() {
       warehouseId: warehouseId.value,
       partnerId: partnerId.value,
       items: items.value.map((item) => ({
-        productId: item.productId,
+        variantId: item.variantId,
         quantity: item.quantity,
         discountPercentage: item.discountPercentage,
       })),
@@ -170,14 +170,14 @@ async function onSubmit() {
       <div v-for="item in items" :key="item.id" class="rounded-md border border-default p-3 space-y-3">
         <div class="flex items-start gap-2">
           <RelationSelect
-            :model-value="item.productId"
-            relation="products"
-            :label="t('fields.product')"
+            :model-value="item.variantId"
+            relation="productVariants"
+            :label="t('fields.variant')"
             required
             class="flex-1"
             @update:model-value="
               (v) => {
-                item.productId = v
+                item.variantId = v
                 onProductSelected(item)
               }
             "

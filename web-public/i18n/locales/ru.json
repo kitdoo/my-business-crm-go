@@ -59,7 +59,35 @@
     },
     "whyPhomi": {
       "title": "Почему PHOMI?",
-      "cta": "Каталог материалов"
+      "cta": "Каталог материалов",
+      "infographic": {
+        "titleLine1": "ПОЧЕМУ",
+        "titleLine2": "PHOMI?",
+        "items": {
+          "noWaterAbsorption": "НЕ ВПИТЫВАЕТ ВОДУ",
+          "notPlastic": "НЕ ПЛАСТИК",
+          "nonFlammable": "НЕ ГОРИТ",
+          "unbreakable": "НЕ ЛОМАЕТСЯ",
+          "frostResistant": "НЕ ТРЕСКАЕТСЯ ПРИ ЗАМОРОЗКЕ",
+          "lightThinFlexible": "ЛЁГКИЙ, ТОНКИЙ И ГИБКИЙ",
+          "fadeResistant": "НЕ ВЫЦВЕТАЕТ"
+        }
+      }
+    },
+    "install": {
+      "infographic": {
+        "titleLine1": "КАК МОНТИРУЕТСЯ",
+        "titleLine2": "PHOMI?",
+        "items": {
+          "applyingAdhesive": "НАНЕСЕНИЕ КЛЕЯ",
+          "installingInsulation": "МОНТАЖ ИЗОЛЯЦИИ",
+          "fixingInsulation": "КРЕПЛЕНИЕ ИЗОЛЯЦИИ",
+          "phomiLayer": "PHOMI",
+          "reinforcementLayer": "АРМИРУЮЩИЙ СЛОЙ 160 г/м²",
+          "outdoorTileAdhesive": "КЛЕЙ ДЛЯ НАРУЖНОЙ ПЛИТКИ",
+          "grouting": "ЗАТИРКА ШВОВ"
+        }
+      }
     },
     "dezenStats": {
       "title": "У нас более",
@@ -84,11 +112,16 @@
     "allCategories": "Все категории",
     "available": "В наличии",
     "unavailable": "Недоступно",
+    "filter": {
+      "inStock": "В наличии",
+      "onOrder": "Под заказ"
+    },
     "empty": "Сейчас нет доступных товаров.",
     "loadError": "Каталог временно недоступен. Попробуйте немного позже.",
     "loadMore": "Загрузить ещё",
     "contactCta": "Связаться с нами по этому товару",
     "contactPrefill": "Интересует: {sku} — {name}",
+    "otherVariants": "Другие варианты",
     "intro": "PHOMI предлагает широкий выбор материалов — под камень, дерево, кирпич и бетон, а также солнечные и дисплейные панели — в едином лёгком и гибком решении. Они одинаково хорошо подходят для фасадов и интерьеров, обеспечивая современный вид при быстром и простом монтаже.",
     "sort": {
       "label": "Сортировка",
@@ -162,7 +195,6 @@
   },
   "projects": {
     "usedMaterials": "Использованные материалы",
-    "recommendedMaterials": "Рекомендовано / похоже",
     "items": {
       "p1": "Москва, Россия",
       "p2": "Беларусь",

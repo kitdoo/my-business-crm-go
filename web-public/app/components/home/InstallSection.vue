@@ -1,12 +1,13 @@
 <script setup>
-const { t } = useI18n()
+// Gradient origin 'tr' matches the source graphic's bright corner so the
+// full-width backdrop blends seamlessly with the centered card.
+const gradientStyle = useInfographicGradient(computed(() => 'tr'))
 </script>
 
 <template>
-  <!-- how_to_install.jpg is a finished infographic ("KAKO SE UGRAĐUJE
-       PHOMI?" + install-layer callouts baked into the image) — full width,
-       natural (unconstrained) height so nothing gets cropped. -->
-  <section class="w-full bg-[#1a1a1a] flex justify-center">
-    <NuxtImg src="/images/how_to_install.jpg" :alt="t('home.advantages.install.title')" loading="lazy" class="w-full lg:max-w-[70vw] h-auto" />
+  <section class="w-full flex justify-center py-8 lg:py-12 px-4" :style="gradientStyle">
+    <div class="w-full max-w-4xl">
+      <InstallInfographic />
+    </div>
   </section>
 </template>

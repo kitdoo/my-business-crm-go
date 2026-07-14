@@ -1,5 +1,5 @@
 <script setup>
-// Price tab on the Product detail page (TD §12.1): current price
+// Price tab on the ProductVariant detail page: current price
 // (create-if-none, else edit) + a read-only history table underneath.
 // Not a generic EntityForm — ProductPrice isn't a generic entity — but
 // reuses the same buildUpdateMask/etag/useApiErrorHandler conventions.
@@ -7,7 +7,7 @@ import { buildUpdateMask } from '~/utils/buildUpdateMask.js'
 import { toAmount, toBasisPoints } from '~/utils/priceAmount.js'
 
 const props = defineProps({
-  productId: { type: String, required: true },
+  variantId: { type: String, required: true },
 })
 
 const { t } = useI18n()
@@ -33,7 +33,7 @@ const historyItems = ref([])
 async function load() {
   loading.value = true
   try {
-    const rec = await priceApi.get(props.productId)
+    const rec = await priceApi.get(props.variantId)
     price.value = rec
     form.value = { priceAmount: toAmount(rec.priceAmount), discountAmount: toAmount(rec.discountAmount) }
     original.value = { ...form.value }
@@ -56,7 +56,7 @@ async function onSubmit() {
   try {
     if (!price.value) {
       const rec = await priceApi.create(
-        props.productId,
+        props.variantId,
         toBasisPoints(form.value.priceAmount),
         toBasisPoints(form.value.discountAmount),
       )
@@ -91,7 +91,7 @@ async function toggleHistory() {
   if (historyOpen.value && historyItems.value.length === 0) {
     historyLoading.value = true
     try {
-      const res = await priceApi.history(props.productId, { pagination: { limit: 25 } })
+      const res = await priceApi.history(props.variantId, { pagination: { limit: 25 } })
       historyItems.value = res.items
     } catch (err) {
       handle(err)

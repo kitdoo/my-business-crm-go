@@ -7,11 +7,11 @@ useSeoMeta({
   description: t('seo.contact.description'),
   ogTitle: t('seo.contact.title'),
   ogDescription: t('seo.contact.description'),
-  ogImage: '/images/showroom2.png',
+  ogImage: '/images/showroom/2.png',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 
-const showroomImages = ['/images/showroom1.png', '/images/showroom2.png', '/images/showroom3.png']
+const showroomImages = ['/images/showroom/1.png', '/images/showroom/2.png', '/images/showroom/3.png']
 const activeImage = ref(0)
 
 function prevImage() {

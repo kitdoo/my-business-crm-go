@@ -34,6 +34,8 @@
 #    employee:
 #      - "products:read"
 #      - "products:create"
+#      - "productvariants:read"
+#      - "productvariants:create"
 #      - "categories:read"
 #      - "categories:create"
 #      - "brands:read"

@@ -6,7 +6,7 @@ const preview = projects.slice(0, 2)
 </script>
 
 <template>
-  <section class="mx-auto max-w-7xl px-4 lg:px-8 py-8 lg:py-12">
+  <section class="mx-auto max-w-7xl 2xl:max-w-[1800px] px-4 lg:px-8 py-8 lg:py-12">
     <h2 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide text-center mb-5">
       {{ t('home.projectsPreview.title') }}
     </h2>

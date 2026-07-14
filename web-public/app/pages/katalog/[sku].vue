@@ -29,6 +29,13 @@ const imageUrls = computed(() => (product.value?.imageIds?.length
 
 const detailsEntries = computed(() => Object.entries(product.value?.details || {}))
 
+// Sibling variants (other colors/sizes of the same product) to switch
+// between — excludes the one currently shown.
+const otherVariants = computed(() => (product.value?.variants || []).filter((v) => v.sku !== product.value?.sku))
+function variantImageUrl(variant) {
+  return variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}` : '/images/product-placeholder.svg'
+}
+
 const productName = computed(() => product.value?.name?.values?.[locale.value] || product.value?.name?.values?.sr || '')
 const productDescription = computed(() => (product.value?.description?.values?.[locale.value] || product.value?.description?.values?.sr || '').slice(0, 160))
 
@@ -72,12 +79,26 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
 
         <p class="text-black/70 leading-relaxed mb-6"><LocalizedText :value="product.description" /></p>
 
-        <dl v-if="detailsEntries.length" class="space-y-2 mb-8 text-sm">
+        <dl v-if="detailsEntries.length" class="space-y-2 mb-6 text-sm">
           <div v-for="[key, value] in detailsEntries" :key="key" class="flex justify-between border-b border-black/10 pb-2">
             <dt class="text-black/50">{{ key }}</dt>
             <dd><LocalizedText :value="value" /></dd>
           </div>
         </dl>
+
+        <div v-if="otherVariants.length" class="mb-8">
+          <p class="text-sm text-black/50 mb-2">{{ t('catalog.otherVariants') }}</p>
+          <div class="flex gap-2 flex-wrap">
+            <NuxtLink
+              v-for="variant in otherVariants"
+              :key="variant.sku"
+              :to="localePath(`/katalog/${variant.sku}`)"
+              class="w-14 h-14 rounded overflow-hidden border-2 border-transparent hover:border-brand-500"
+            >
+              <img :src="variantImageUrl(variant)" alt="" class="w-full h-full object-cover" />
+            </NuxtLink>
+          </div>
+        </div>
 
         <div class="flex flex-col sm:flex-row gap-3">
           <div v-if="qtyInCart" class="flex items-center justify-center gap-4 border border-brand-500 rounded-md py-4 flex-1">

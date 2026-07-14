@@ -96,7 +96,7 @@ func (s *Service) GetStockLevels(ctx context.Context, warehouseID *string) ([]en
 		}
 		for _, item := range result.Items {
 			rows = append(rows, entities.StockLevelRow{
-				ProductID:   item.ProductID,
+				VariantID:   item.VariantID,
 				WarehouseID: item.WarehouseID,
 				Quantity:    item.Quantity,
 			})

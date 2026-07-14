@@ -1,11 +1,11 @@
 <script setup>
-// Read-only "how much is where" summary for a product (TD §12.1/§12.4) —
-// Inventory has no Create/Update/Delete permissions at all (stock only
-// changes through InventoryMovementsService), so there is nothing to edit
-// here. Reused by both the Movements tab (products/[id].vue) and the
-// product view drawer (EntityViewDrawer.vue).
+// Read-only "how much is where" summary for a product variant (TD
+// §12.1/§12.4) — Inventory has no Create/Update/Delete permissions at all
+// (stock only changes through InventoryMovementsService), so there is
+// nothing to edit here. Shown in the variant view drawer
+// (EntityViewDrawer.vue) via config.view.priceStockSummary.
 const props = defineProps({
-  productId: { type: String, required: true },
+  variantId: { type: String, required: true },
 })
 
 const { t } = useI18n()
@@ -16,14 +16,14 @@ const items = ref([])
 async function load() {
   loading.value = true
   try {
-    const res = await api.list({ filter: { productId: props.productId }, pagination: { limit: 200 } })
+    const res = await api.list({ filter: { variantId: props.variantId }, pagination: { limit: 200 } })
     items.value = res.items || []
   } finally {
     loading.value = false
   }
 }
 
-watch(() => props.productId, load, { immediate: true })
+watch(() => props.variantId, load, { immediate: true })
 </script>
 
 <template>

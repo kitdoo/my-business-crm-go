@@ -1,13 +1,13 @@
 <script setup>
-const { t } = useI18n()
+// Gradient origin 'br' matches the source graphic's bright corner so the
+// full-width backdrop blends seamlessly with the centered card.
+const gradientStyle = useInfographicGradient(computed(() => 'br'))
 </script>
 
 <template>
-  <!-- why_phomi.jpg is a finished infographic ("ZAŠTO PHOMI?" + callouts
-       baked into the image) — full width, natural (unconstrained) height so
-       nothing gets cropped. The catalog CTA lives on DezenStatsSection right
-       above this, so no duplicate button here. -->
-  <section class="w-full bg-[#1a1a1a] flex justify-center">
-    <NuxtImg src="/images/why_phomi.jpg" :alt="t('home.whyPhomi.title')" loading="lazy" class="w-full lg:max-w-[70vw] h-auto" />
+  <section class="w-full flex justify-center py-8 lg:py-12 px-4" :style="gradientStyle">
+    <div class="w-full max-w-4xl">
+      <WhyPhomiInfographic />
+    </div>
   </section>
 </template>

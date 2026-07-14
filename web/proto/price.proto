@@ -6,7 +6,7 @@ import "common.proto";
 
 // Mirrors proto/services/grpc/price/v1/price_service.proto and
 // proto/types/price/product_price.proto on the backend. Not a generic
-// EntityRegistry entity (TD §10/§12.1) — Get is keyed by productId, not
+// EntityRegistry entity (TD §10/§12.1) — Get is keyed by variantId, not
 // id, and it lives as a tab on the Product detail page, not its own list.
 
 message ProductPrice {
@@ -14,7 +14,7 @@ message ProductPrice {
   int64 createdAt = 2;
   int64 updatedAt = 3;
   optional int64 deletedAt = 4;
-  string productId = 5;
+  string variantId = 5;
   // Basis points (amount * 100).
   int64 priceAmount = 6;
   // ISO 4217 code, e.g. "RSD". Not settable via Create/Update.
@@ -32,7 +32,7 @@ service PricesService {
 }
 
 message ProductPriceGetRequest {
-  string productId = 1;
+  string variantId = 1;
 }
 
 message ProductPriceGetResponse {
@@ -40,7 +40,7 @@ message ProductPriceGetResponse {
 }
 
 message ProductPriceCreateRequest {
-  string productId = 1;
+  string variantId = 1;
   int64 priceAmount = 2;
   optional int64 discountAmount = 3;
 }
@@ -75,7 +75,7 @@ message ProductPriceDeleteRequest {
 message ProductPriceDeleteResponse {}
 
 message ProductPriceGetHistoryRequest {
-  string productId = 1;
+  string variantId = 1;
   message Filter {
     optional crm.types.common.PeriodFilter createdAt = 1;
   }

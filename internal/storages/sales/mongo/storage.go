@@ -33,7 +33,7 @@ const (
 	FieldClientID     = "client_id"
 	FieldWarehouseID  = "warehouse_id"
 	FieldPartnerID    = "partner_id"
-	FieldItemProducts = "items.product_id"
+	FieldItemVariants = "items.variant_id"
 	FieldStatus       = "status"
 	FieldCreatedBy    = "created_by"
 	FieldCreatedAt    = "created_at"
@@ -46,7 +46,7 @@ const (
 const defaultListLimit = datamongo.DefaultListLimit
 
 type itemModel struct {
-	ProductID          string `bson:"product_id"`
+	VariantID          string `bson:"variant_id"`
 	Quantity           int64  `bson:"quantity"`
 	PriceAmount        int64  `bson:"price_amount"`
 	DiscountPercentage int32  `bson:"discount_percentage"`
@@ -196,8 +196,8 @@ func (s *Storage) List(ctx context.Context, in *entities.SalesList) (*entities.L
 	if len(in.CreatedBy) > 0 {
 		filter[FieldCreatedBy] = bson.M{"$in": in.CreatedBy}
 	}
-	if len(in.ProductIDs) > 0 {
-		filter[FieldItemProducts] = bson.M{"$in": in.ProductIDs}
+	if len(in.VariantIDs) > 0 {
+		filter[FieldItemVariants] = bson.M{"$in": in.VariantIDs}
 	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)

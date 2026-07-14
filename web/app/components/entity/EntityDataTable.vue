@@ -148,26 +148,35 @@ onMounted(() => load(true))
 
 <template>
   <div>
-    <div v-if="config.list.filters?.length || sortItems.length" class="flex flex-wrap items-end justify-between gap-3 mb-4">
-      <EntityFilterBar v-if="config.list.filters?.length" :filters="config.list.filters" v-model="filter" />
+    <div
+      v-if="config.list.filters?.length || sortItems.length || $slots.actions"
+      class="flex flex-wrap items-end justify-between gap-3 mb-4"
+    >
+      <div class="flex flex-wrap items-end gap-3">
+        <EntityFilterBar v-if="config.list.filters?.length" :filters="config.list.filters" v-model="filter" />
 
-      <div v-if="sortItems.length" class="flex items-end gap-1">
-        <UFormField :label="t('sort.label')">
-          <USelectMenu
-            :model-value="sort?.field"
-            :items="sortItems"
-            value-key="value"
-            class="w-40"
-            @update:model-value="onSortFieldChange"
+        <div v-if="sortItems.length" class="flex items-end gap-1">
+          <UFormField :label="t('sort.label')">
+            <USelectMenu
+              :model-value="sort?.field"
+              :items="sortItems"
+              value-key="value"
+              class="w-40"
+              @update:model-value="onSortFieldChange"
+            />
+          </UFormField>
+          <UButton
+            :icon="sort?.direction === 'SORT_DIRECTION_ASC' ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'"
+            color="neutral"
+            variant="soft"
+            :aria-label="t('sort.direction')"
+            @click="toggleSortDirection"
           />
-        </UFormField>
-        <UButton
-          :icon="sort?.direction === 'SORT_DIRECTION_ASC' ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'"
-          color="neutral"
-          variant="soft"
-          :aria-label="t('sort.direction')"
-          @click="toggleSortDirection"
-        />
+        </div>
+      </div>
+
+      <div v-if="$slots.actions" class="flex items-center gap-2">
+        <slot name="actions" />
       </div>
     </div>
 

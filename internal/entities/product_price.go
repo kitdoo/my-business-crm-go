@@ -9,12 +9,12 @@ import (
 )
 
 // ProductPrice is the current price for a product. Only one active row
-// exists per ProductID at a time; prior values live in the price history
+// exists per VariantID at a time; prior values live in the price history
 // log (see storages/prices.Storage.GetHistory), snapshotted on every
 // Update.
 type ProductPrice struct {
 	ID        string
-	ProductID string // unique among active rows
+	VariantID string // unique among active rows
 	// PriceAmount is in basis points (amount * 100).
 	PriceAmount int64
 	// Currency is the system-wide ISO 4217 code, stamped at creation from
@@ -56,7 +56,7 @@ func (p *ProductPrice) BeforeUpdate() {
 // ProductPriceCreate is the Create input. Currency is not part of it — the
 // service stamps it from config.
 type ProductPriceCreate struct {
-	ProductID      string `normalize:"trim"`
+	VariantID      string `normalize:"trim"`
 	PriceAmount    int64
 	DiscountAmount *int64
 	Currency       string
@@ -95,7 +95,7 @@ type ProductPriceDelete struct {
 
 // ProductPriceGetHistory is the GetHistory input.
 type ProductPriceGetHistory struct {
-	ProductID  string `normalize:"trim"`
+	VariantID  string `normalize:"trim"`
 	CreatedAt  *PeriodFilter
 	Pagination ListPagination
 }

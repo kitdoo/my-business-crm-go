@@ -43,6 +43,11 @@
       "create": "New product",
       "edit": "Edit product"
     },
+    "productVariants": {
+      "label": "Variants",
+      "create": "New variant",
+      "edit": "Edit variant"
+    },
     "inventory": {
       "label": "Inventory"
     },
@@ -93,6 +98,8 @@
     "priceAmount": "Price",
     "discountAmount": "Discount",
     "product": "Product",
+    "variant": "Variant",
+    "attributes": "Attributes",
     "warehouse": "Warehouse",
     "quantity": "Quantity",
     "updatedAt": "Updated",
@@ -112,7 +119,8 @@
     "name": "By name",
     "quantity": "By quantity",
     "label": "Sort by",
-    "direction": "Sort direction"
+    "direction": "Sort direction",
+    "sku": "By SKU"
   },
   "enums": {
     "status": {
@@ -139,6 +147,10 @@
       "PRODUCT_STATUS_ACTIVE": "Active",
       "PRODUCT_STATUS_INACTIVE": "Inactive",
       "PRODUCT_STATUS_UNSPECIFIED": "Unspecified",
+      "PRODUCT_VARIANT_STATUS_DRAFT": "Draft",
+      "PRODUCT_VARIANT_STATUS_ACTIVE": "Active",
+      "PRODUCT_VARIANT_STATUS_INACTIVE": "Inactive",
+      "PRODUCT_VARIANT_STATUS_UNSPECIFIED": "Unspecified",
       "MOVEMENT_TYPE_RECEIPT": "Receipt",
       "MOVEMENT_TYPE_SALE": "Sale",
       "MOVEMENT_TYPE_WRITE_OFF": "Write-off",

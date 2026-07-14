@@ -19,6 +19,7 @@ const props = defineProps({
   modelValue: { type: Object, default: () => ({}) },
   locales: { type: Array, required: true },
   label: { type: String, default: '' },
+  disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
@@ -91,6 +92,7 @@ function removeCharacteristic(key) {
               </UBadge>
             </div>
             <UButton
+              v-if="!disabled"
               icon="i-lucide-x"
               size="xs"
               color="neutral"
@@ -103,12 +105,13 @@ function removeCharacteristic(key) {
             :model-value="valueFor(def.key)"
             :locales="locales"
             required-locale="sr"
+            :disabled="disabled"
             @update:model-value="(v) => updateValue(def.key, v)"
           />
         </div>
       </div>
 
-      <UDropdownMenu v-if="availableDefinitions.length" :items="addItems">
+      <UDropdownMenu v-if="!disabled && availableDefinitions.length" :items="addItems">
         <UButton icon="i-lucide-plus" size="xs" variant="soft" color="neutral">
           {{ t('common.addCharacteristic') }}
         </UButton>

@@ -7,7 +7,7 @@ option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/inv
 message InventoryMovement {
   string id = 1;
   int64 createdAt = 2;
-  string productId = 3;
+  string variantId = 3;
   string warehouseId = 4;
   MovementType type = 5;
   int64 quantity = 6;

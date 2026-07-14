@@ -18,6 +18,7 @@ const props = defineProps({
   multiline: { type: Boolean, default: false },
   error: { type: String, default: '' },
   required: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
@@ -74,7 +75,7 @@ function removeLocale(locale) {
           @update:model-value="(v) => updateLocale(locale, v)"
         />
         <UButton
-          v-if="locale !== requiredLocale"
+          v-if="locale !== requiredLocale && !disabled"
           icon="i-lucide-x"
           size="xs"
           color="neutral"
@@ -85,7 +86,7 @@ function removeLocale(locale) {
         />
       </div>
 
-      <UDropdownMenu v-if="availableLocales.length" :items="addLocaleItems">
+      <UDropdownMenu v-if="!disabled && availableLocales.length" :items="addLocaleItems">
         <UButton icon="i-lucide-plus" size="xs" variant="soft" color="neutral">{{ t('common.addLanguage') }}</UButton>
       </UDropdownMenu>
     </div>

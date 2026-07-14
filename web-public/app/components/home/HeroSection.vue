@@ -8,7 +8,7 @@ const { t } = useI18n()
        viewport from y=0, right behind the transparent TopBar. -->
   <section class="relative -mt-28 lg:-mt-32 h-screen min-h-[560px] flex items-center justify-end">
     <NuxtImg
-      src="/images/background_main.jpg"
+      src="/images/background/top.jpeg"
       alt=""
       class="absolute inset-0 w-full h-full object-cover"
       preload

@@ -12,7 +12,7 @@ import "common.proto";
 message Inventory {
   string id = 1;
   int64 updatedAt = 2;
-  string productId = 3;
+  string variantId = 3;
   string warehouseId = 4;
   int64 quantity = 5;
   string etag = 101;
@@ -24,7 +24,7 @@ service InventoryService {
 }
 
 message InventoryGetRequest {
-  string productId = 1;
+  string variantId = 1;
   string warehouseId = 2;
 }
 
@@ -33,7 +33,7 @@ message InventoryGetResponse {
 }
 
 message InventoryListRequest {
-  optional string productId = 1;
+  optional string variantId = 1;
   optional string warehouseId = 2;
   message Filter {
     optional int64 minQuantity = 1;

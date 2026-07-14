@@ -16,5 +16,21 @@ type Service interface {
 	Get(ctx context.Context, id string) (*entities.Product, error)
 	List(ctx context.Context, in *entities.ProductsList) (*entities.List[entities.Product], error)
 	Update(ctx context.Context, in *entities.ProductUpdate) (*entities.Product, error)
+	// Delete returns errs.ErrProductHasVariants if any active
+	// ProductVariant still references the product.
 	Delete(ctx context.Context, in *entities.ProductDelete) error
+}
+
+// VariantsExistenceChecker reports whether any active ProductVariant
+// still references a product. This is satisfied by productvariants.Storage
+// directly (not productvariant.Service) as a deliberate, narrow exception
+// to "depend on the foreign entity's Service" (see
+// SERVICE_DEVELOPMENT_STANDARD.md, Services Layer §1): productvariant.Service
+// already depends on product.Service for its own Create FK validation, so
+// wiring this direction through productvariant.Service too would be a
+// circular dependency. A nil checker is treated as "no variants aggregate
+// to check against" and skips the guard entirely (used only where fx
+// cannot wire a real one).
+type VariantsExistenceChecker interface {
+	ExistsForProduct(ctx context.Context, productID string) (bool, error)
 }

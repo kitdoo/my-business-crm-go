@@ -12,7 +12,7 @@ import (
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	inventorysvc "github.com/kitdoo/my-business-crm-go/internal/services/inventory"
 	invsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
-	productsvc "github.com/kitdoo/my-business-crm-go/internal/services/product"
+	variantsvc "github.com/kitdoo/my-business-crm-go/internal/services/productvariant"
 	warehousesvc "github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/inventorymovements"
 )
@@ -20,7 +20,7 @@ import (
 var _ invsvc.Service = (*Service)(nil)
 
 // Service is the inventorymovement.Service implementation. inventory,
-// products, and warehouses are the respective entities' Service, not
+// variants, and warehouses are the respective entities' Service, not
 // their Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A service
 // controls only its own storage" rule. inventory.Service.ApplyMovement in
 // particular is the sanctioned write path into Inventory; every other
@@ -28,17 +28,17 @@ var _ invsvc.Service = (*Service)(nil)
 type Service struct {
 	storage    inventorymovements.Storage
 	inventory  inventorysvc.Service
-	products   productsvc.Service
+	variants   variantsvc.Service
 	warehouses warehousesvc.Service
 	logger     *slog.Logger
 }
 
 // New builds a Service.
-func New(storage inventorymovements.Storage, inv inventorysvc.Service, products productsvc.Service, warehouses warehousesvc.Service) *Service {
+func New(storage inventorymovements.Storage, inv inventorysvc.Service, variants variantsvc.Service, warehouses warehousesvc.Service) *Service {
 	return &Service{
 		storage:    storage,
 		inventory:  inv,
-		products:   products,
+		variants:   variants,
 		warehouses: warehouses,
 		logger:     slog.Default().With(slogx.Module("service:inventorymovement")),
 	}
@@ -47,14 +47,14 @@ func New(storage inventorymovements.Storage, inv inventorysvc.Service, products 
 func (s *Service) Create(ctx context.Context, in *entities.InventoryMovementCreate) (*entities.InventoryMovement, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
-	if _, err := s.products.Get(ctx, in.ProductID); err != nil {
+	if _, err := s.variants.Get(ctx, in.VariantID); err != nil {
 		return nil, err
 	}
 	if _, err := s.warehouses.Get(ctx, in.WarehouseID); err != nil {
 		return nil, err
 	}
 
-	if _, err := s.inventory.ApplyMovement(ctx, in.ProductID, in.WarehouseID, in.Quantity); err != nil {
+	if _, err := s.inventory.ApplyMovement(ctx, in.VariantID, in.WarehouseID, in.Quantity); err != nil {
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func (s *Service) Create(ctx context.Context, in *entities.InventoryMovementCrea
 		// treated as a rollback candidate (no cross-collection
 		// transaction is used here, matching the rest of this codebase).
 		s.logger.ErrorContext(ctx, "insert inventory movement failed after stock was already adjusted",
-			slog.String("productId", m.ProductID), slog.String("warehouseId", m.WarehouseID), slogx.Error(err))
+			slog.String("variantId", m.VariantID), slog.String("warehouseId", m.WarehouseID), slogx.Error(err))
 		return nil, err
 	}
 	return m, nil

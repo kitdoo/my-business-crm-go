@@ -22,7 +22,7 @@ function onSubmitted() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl px-4 lg:px-8 py-12 lg:py-16">
+  <div class="mx-auto max-w-7xl 2xl:max-w-[1800px] px-4 lg:px-8 py-12 lg:py-16">
     <h1 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide mb-10">{{ t('nav.postaniDiler') }}</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">

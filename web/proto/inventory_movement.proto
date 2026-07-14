@@ -11,7 +11,7 @@ import "common.proto";
 message InventoryMovement {
   string id = 1;
   int64 createdAt = 2;
-  string productId = 3;
+  string variantId = 3;
   string warehouseId = 4;
   MovementType type = 5;
   int64 quantity = 6;
@@ -37,7 +37,7 @@ service InventoryMovementsService {
 }
 
 message InventoryMovementCreateRequest {
-  string productId = 1;
+  string variantId = 1;
   string warehouseId = 2;
   MovementType type = 3;
   // Signed — positive for Receipt, negative for Sale/WriteOff.
@@ -54,7 +54,7 @@ message InventoryMovementsListRequest {
   optional string warehouseId = 1;
   message Filter {
     repeated MovementType types = 1;
-    repeated string productIds = 2;
+    repeated string variantIds = 2;
     repeated string createdBy = 3;
     optional crm.types.common.PeriodFilter createdAt = 4;
   }
@@ -68,7 +68,7 @@ message InventoryMovementsListResponse {
 }
 
 message InventoryMovementGetHistoryRequest {
-  string productId = 1;
+  string variantId = 1;
   string warehouseId = 2;
   message Filter {
     repeated MovementType types = 1;

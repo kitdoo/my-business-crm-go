@@ -28,6 +28,8 @@ import (
 	productservice "github.com/kitdoo/my-business-crm-go/internal/services/product/product"
 	productattributedefinitionsvc "github.com/kitdoo/my-business-crm-go/internal/services/productattributedefinition"
 	productattributedefinitionservice "github.com/kitdoo/my-business-crm-go/internal/services/productattributedefinition/productattributedefinition"
+	productvariantsvc "github.com/kitdoo/my-business-crm-go/internal/services/productvariant"
+	productvariantservice "github.com/kitdoo/my-business-crm-go/internal/services/productvariant/productvariant"
 	reportsvc "github.com/kitdoo/my-business-crm-go/internal/services/report"
 	reportservice "github.com/kitdoo/my-business-crm-go/internal/services/report/report"
 	salesvc "github.com/kitdoo/my-business-crm-go/internal/services/sale"
@@ -54,6 +56,8 @@ import (
 	productsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/products/mongo"
 	productattributedefinitions "github.com/kitdoo/my-business-crm-go/internal/storages/productattributedefinitions"
 	productattributedefinitionsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/productattributedefinitions/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/productvariants"
+	productvariantsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/productvariants/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/reports"
 	reportsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/reports/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/sales"
@@ -72,6 +76,7 @@ import (
 	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
 	productattributedefinitionhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/productattributedefinition"
+	productvarianthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/productvariant"
 	reporthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/report"
 	salehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/sale"
 	userhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/user"
@@ -123,6 +128,10 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(productattributedefinitionsmongo.New, fx.As(new(productattributedefinitions.Storage)))),
 		fx.Provide(fx.Annotate(productattributedefinitionservice.New, fx.As(new(productattributedefinitionsvc.Service)))),
 		fx.Provide(AsGRPCHandler(productattributedefinitionhandler.New)),
+
+		fx.Provide(fx.Annotate(productvariantsmongo.New, fx.As(new(productvariants.Storage)))),
+		fx.Provide(fx.Annotate(productvariantservice.New, fx.As(new(productvariantsvc.Service)))),
+		fx.Provide(AsGRPCHandler(productvarianthandler.New)),
 
 		fx.Provide(fx.Annotate(pricesmongo.New, fx.As(new(prices.Storage)))),
 		fx.Provide(fx.Annotate(newPriceService, fx.As(new(price.Service)))),
@@ -194,12 +203,12 @@ const defaultCurrency = "RSD"
 // newPriceService resolves the system-wide currency from cfg.CRM.Currency,
 // falling back to defaultCurrency when the optional crm config section (or
 // just its currency field) is absent.
-func newPriceService(storage prices.Storage, productsSvc product.Service, cfg *appconfig.Config) *priceservice.Service {
+func newPriceService(storage prices.Storage, variantsSvc productvariantsvc.Service, cfg *appconfig.Config) *priceservice.Service {
 	currency := defaultCurrency
 	if cfg.CRM != nil && cfg.CRM.Currency != "" {
 		currency = cfg.CRM.Currency
 	}
-	return priceservice.New(storage, productsSvc, currency)
+	return priceservice.New(storage, variantsSvc, currency)
 }
 
 // newWarehouseService wires warehouse.Service with inventory.Service as
@@ -209,10 +218,13 @@ func newWarehouseService(storage warehouses.Storage, inventorySvc invsvc.Service
 }
 
 // newProductService wires product.Service with brand.Service/
-// category.Service for FK validation (Create/Update), and resolves the
-// required LocalizedString locale from cfg.CRM.DefaultLocale.
-func newProductService(storage products.Storage, brandSvc brand.Service, categorySvc category.Service, cfg *appconfig.Config) *productservice.Service {
-	return productservice.New(storage, brandSvc, categorySvc, resolveDefaultLocale(cfg))
+// category.Service for FK validation (Create/Update) and
+// productvariants.Storage as its VariantsExistenceChecker (Delete guard) —
+// see newBrandService for why this stays Storage-shaped rather than
+// depending on productvariant.Service. Resolves the required
+// LocalizedString locale from cfg.CRM.DefaultLocale.
+func newProductService(storage products.Storage, brandSvc brand.Service, categorySvc category.Service, variantsStorage productvariants.Storage, cfg *appconfig.Config) *productservice.Service {
+	return productservice.New(storage, brandSvc, categorySvc, variantsStorage, resolveDefaultLocale(cfg))
 }
 
 // newMailerService resolves the SMTP connection/auth data from

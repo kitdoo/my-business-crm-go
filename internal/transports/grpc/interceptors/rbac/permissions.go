@@ -10,6 +10,7 @@ import (
 	pricesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/price/v1"
 	productsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product/v1"
 	productattributedefinitionsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product_attribute_definition/v1"
+	productvariantsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product_variant/v1"
 	reportsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/report/v1"
 	salesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/sale/v1"
 	usersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/user/v1"
@@ -97,6 +98,12 @@ var permissions = map[string]string{
 	// migrations, read-only over the wire) — List is auth-exempt (see
 	// auth.New), so Get is the only method that needs an entry here.
 	productattributedefinitionsvcpb.ProductAttributeDefinitionsService_Get_FullMethodName: permission("productattributedefinitions", actionRead),
+
+	// List is auth-exempt (see auth.New) — it backs the public catalog.
+	productvariantsvcpb.ProductVariantsService_Create_FullMethodName: permission("productvariants", actionCreate),
+	productvariantsvcpb.ProductVariantsService_Get_FullMethodName:    permission("productvariants", actionRead),
+	productvariantsvcpb.ProductVariantsService_Update_FullMethodName: permission("productvariants", actionUpdate),
+	productvariantsvcpb.ProductVariantsService_Delete_FullMethodName: permission("productvariants", actionDelete),
 
 	// Reports are all read-only aggregation endpoints.
 	reportsvcpb.ReportsService_GetSalesReport_FullMethodName:     permission("reports", actionRead),

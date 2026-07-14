@@ -23,8 +23,7 @@ import (
 const collectionName = "products"
 
 const (
-	FieldID  = "_id"
-	FieldSKU = "sku"
+	FieldID = "_id"
 	// FieldNameSr is the sort key for Name. "sr" is the mandatory locale
 	// (see common_localized_string.proto), used as a deterministic single
 	// key since Name itself is a multi-locale map.
@@ -43,13 +42,11 @@ const defaultListLimit = datamongo.DefaultListLimit
 
 type model struct {
 	ID          string                              `bson:"_id"`
-	SKU         string                              `bson:"sku,omitonupdate"`
 	Name        entities.LocalizedString            `bson:"name"`
 	Description entities.LocalizedString            `bson:"description"`
 	BrandID     string                              `bson:"brand_id"`
 	CategoryIDs []string                            `bson:"category_ids"`
 	Details     map[string]entities.LocalizedString `bson:"details"`
-	ImageIDs    []string                            `bson:"image_ids"`
 	Status      entities.ProductStatus              `bson:"status"`
 	CreatedAt   time.Time                           `bson:"created_at,omitonupdate"`
 	UpdatedAt   time.Time                           `bson:"updated_at"`
@@ -79,19 +76,6 @@ func activeOnly(filter bson.M) bson.M {
 	return filter
 }
 
-// classifyDuplicate maps a Mongo duplicate-key error to a domain sentinel by
-// the conflicting field, never by string matching.
-func classifyDuplicate(err error) error {
-	isDup, fields := datamongo.IsErrorDuplicate(err)
-	if !isDup || fields == nil {
-		return nil
-	}
-	if fields.Contains(FieldSKU) {
-		return errs.ErrProductSKUConflict
-	}
-	return nil
-}
-
 func (s *Storage) Insert(ctx context.Context, p *entities.Product) error {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
@@ -103,9 +87,6 @@ func (s *Storage) Insert(ctx context.Context, p *entities.Product) error {
 		return coreerrs.WrapOperation(err, "convert product document")
 	}
 	if _, err := s.collection.InsertOne(ctx, doc); err != nil {
-		if dupErr := classifyDuplicate(err); dupErr != nil {
-			return dupErr
-		}
 		return coreerrs.WrapOperation(err, "insert product")
 	}
 	return nil
@@ -139,9 +120,6 @@ func (s *Storage) Update(ctx context.Context, p *entities.Product, oldEtag strin
 	}
 	res, err := s.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		if dupErr := classifyDuplicate(err); dupErr != nil {
-			return dupErr
-		}
 		return coreerrs.WrapOperation(err, "update product")
 	}
 	if res.MatchedCount == 0 {
@@ -203,8 +181,8 @@ func (s *Storage) List(ctx context.Context, in *entities.ProductsList) (*entitie
 	if len(in.CategoryIDs) > 0 {
 		filter[FieldCategoryID] = bson.M{"$in": in.CategoryIDs}
 	}
-	if len(in.SKUs) > 0 {
-		filter[FieldSKU] = bson.M{"$in": in.SKUs}
+	if len(in.IDs) > 0 {
+		filter[FieldID] = bson.M{"$in": in.IDs}
 	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)

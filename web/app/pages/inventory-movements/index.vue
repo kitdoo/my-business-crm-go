@@ -1,7 +1,7 @@
 <script setup>
-// Row click opens the Product view drawer (TD §12.4) rather than a
+// Row click opens the ProductVariant view drawer (TD §12.4) rather than a
 // movement-record view — same rationale as pages/inventory/index.vue.
-const viewOverride = (item) => ({ entity: 'products', id: item.productId })
+const viewOverride = (item) => ({ entity: 'productVariants', id: item.variantId })
 </script>
 
 <template>

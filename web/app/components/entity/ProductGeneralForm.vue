@@ -1,13 +1,18 @@
 <script setup>
 // Bespoke replacement for generic <EntityForm entity="products"> (TD
 // §12.1/§12.6) — Product needs a grouped block layout (brand/categories,
-// name/description, sku(+price on create), characteristics/images) that
-// the generic field-by-field <FormGrid> loop can't express, plus a
-// required-price side effect on create. Reuses useEntityForm as-is (same
-// load/save/etag/mask logic every other entity form gets) — only the
-// template layout differs.
+// name/description, characteristics) that the generic field-by-field
+// <FormGrid> loop can't express. sku/price/images live on ProductVariant
+// (see ProductVariantGeneralForm.vue) — this form only ever handles the
+// Product's own shared fields; variants are added afterwards from the
+// Variants tab (multiple, one at a time — see ProductVariantsTab.vue).
+//
+// Existing products default to a locked (read-only) view with a pencil
+// button to unlock editing — the fields are shown via a native <fieldset
+// disabled>, which cascades to every input inside without each field
+// component needing its own `disabled` prop. A brand-new product (no id
+// yet) is never locked: there's nothing to look at until it's saved.
 import { getEnumOptions } from '~/config/enums.js'
-import { toAmount, toBasisPoints } from '~/utils/priceAmount.js'
 
 const props = defineProps({
   id: { type: String, default: null },
@@ -20,44 +25,56 @@ const config = getEntityConfig('products')
 const runtimeConfig = useRuntimeConfig()
 const { can } = usePermission()
 const api = useEntityApi('products')
-const priceApi = usePriceApi()
 const { handle } = useApiErrorHandler()
 
 const { form, etag, loading, saving, fieldErrors, etagConflict, isCreate, load, save, reloadAfterConflict } =
   useEntityForm('products', props.id, {})
 
-const priceAmount = ref(null)
-const discountAmount = ref(null)
-const priceError = ref('')
-
+const locked = ref(!isCreate)
 const confirmDeleteOpen = ref(false)
 const canDelete = computed(() => !isCreate && can(config.permissions.delete))
+const canUpdate = computed(() => !isCreate && can(config.permissions.update))
+
+// Status is editOnly (see config/entities/products.js) so it never lands
+// in `form` on create — Create has no status field server-side
+// (ProductNew always starts Draft, see entities/product.go) — picking
+// Active here means an immediate follow-up Update call in onSubmit.
+const createStatus = ref('PRODUCT_STATUS_DRAFT')
 
 onMounted(() => {
   if (!isCreate) load()
 })
 
+function onEdit() {
+  locked.value = false
+}
+
+function onCancelEdit() {
+  fieldErrors.value = {}
+  load()
+  locked.value = true
+}
+
 async function onSubmit() {
-  priceError.value = ''
-  if (isCreate && (priceAmount.value == null || priceAmount.value < 0)) {
-    priceError.value = t('forms.validationError')
-    return
-  }
   try {
     const record = await save()
     if (!record) return
 
     if (isCreate) {
-      try {
-        await priceApi.create(record.id, toBasisPoints(priceAmount.value), toBasisPoints(discountAmount.value))
-      } catch (err) {
-        handle(err)
-        return
+      let created = record
+      if (createStatus.value !== 'PRODUCT_STATUS_DRAFT') {
+        try {
+          created = await api.update(record.id, { status: createStatus.value }, ['status'], record.etag)
+        } catch (err) {
+          handle(err)
+          return
+        }
       }
-      router.push(`${config.route}/${record.id}`)
+      router.push(`${config.route}/${created.id}`)
       return
     }
 
+    locked.value = true
     toast.add({ title: t('common.saved'), color: 'success' })
   } catch {
     // handled by useApiErrorHandler inside save()
@@ -78,78 +95,82 @@ async function onDelete() {
   <div class="space-y-6">
     <div v-if="loading" class="py-8 text-center text-neutral-500">{{ t('common.loading') }}</div>
     <form v-else class="space-y-6" @submit.prevent="onSubmit">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <RelationSelect
-          v-model="form.brandId"
-          relation="brands"
-          :label="t('fields.brand')"
-          :error="fieldErrors.brandId"
-          required
-        />
-        <RelationMultiSelect
-          v-model="form.categoryIds"
-          relation="categories"
-          :label="t('fields.categories')"
-          :error="fieldErrors.categoryIds"
-        />
+      <div v-if="locked && canUpdate" class="flex items-center justify-end">
+        <UButton icon="i-lucide-pencil" color="neutral" variant="soft" @click="onEdit">
+          {{ t('common.edit') }}
+        </UButton>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <LocalizedStringInput
-          v-model="form.name"
-          :locales="runtimeConfig.public.supportedLocales"
-          required-locale="sr"
-          :label="t('fields.name')"
-          :error="fieldErrors.name"
-          required
-        />
-        <LocalizedStringInput
-          v-model="form.description"
-          :locales="runtimeConfig.public.supportedLocales"
-          required-locale="sr"
-          :label="t('fields.description')"
-          :error="fieldErrors.description"
-        />
-      </div>
+      <fieldset :disabled="locked" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <RelationSelect
+            v-model="form.brandId"
+            relation="brands"
+            :label="t('fields.brand')"
+            :error="fieldErrors.brandId"
+            required
+          />
+          <RelationMultiSelect
+            v-model="form.categoryIds"
+            relation="categories"
+            :label="t('fields.categories')"
+            :error="fieldErrors.categoryIds"
+          />
+        </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <UFormField :label="t('fields.sku')" required :error="fieldErrors.sku">
-          <UInput v-model="form.sku" class="w-full" required :maxlength="64" :readonly="!isCreate" />
-        </UFormField>
-        <template v-if="isCreate">
-          <UFormField :label="t('fields.priceAmount')" required :error="priceError">
-            <UInputNumber v-model="priceAmount" class="w-full" :min="0" :step="0.01" />
-          </UFormField>
-          <UFormField :label="t('fields.discountAmount')">
-            <UInputNumber v-model="discountAmount" class="w-full" :min="0" :step="0.01" />
-          </UFormField>
-        </template>
-        <UFormField v-else :label="t('fields.status')" :error="fieldErrors.status">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <LocalizedStringInput
+            v-model="form.name"
+            :locales="runtimeConfig.public.supportedLocales"
+            required-locale="sr"
+            :label="t('fields.name')"
+            :error="fieldErrors.name"
+            :disabled="locked"
+            required
+          />
+          <LocalizedStringInput
+            v-model="form.description"
+            :locales="runtimeConfig.public.supportedLocales"
+            required-locale="sr"
+            :label="t('fields.description')"
+            :error="fieldErrors.description"
+            :disabled="locked"
+          />
+        </div>
+
+        <UFormField v-if="!isCreate" :label="t('fields.status')" :error="fieldErrors.status" class="max-w-xs">
           <USelect
             v-model="form.status"
             :items="getEnumOptions('ProductStatus').map((v) => ({ label: t(`enums.status.${v}`), value: v }))"
             class="w-full"
           />
         </UFormField>
-      </div>
+        <UFormField v-else :label="t('fields.status')" class="max-w-xs">
+          <USelect
+            v-model="createStatus"
+            :items="[
+              { label: t('enums.status.PRODUCT_STATUS_DRAFT'), value: 'PRODUCT_STATUS_DRAFT' },
+              { label: t('enums.status.PRODUCT_STATUS_ACTIVE'), value: 'PRODUCT_STATUS_ACTIVE' },
+            ]"
+            class="w-full"
+          />
+        </UFormField>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AttributeDetailsInput
           v-model="form.details"
           :locales="runtimeConfig.public.supportedLocales"
           :label="t('fields.details')"
+          :disabled="locked"
         />
-        <UFormField :label="t('fields.images')">
-          <ProductImageUploader v-model="form.imageIds" />
-        </UFormField>
-      </div>
+      </fieldset>
 
-      <div class="flex items-center justify-between">
+      <div v-if="!locked" class="flex items-center justify-between">
         <UButton v-if="canDelete" color="error" variant="soft" @click="confirmDeleteOpen = true">
           {{ t('common.delete') }}
         </UButton>
         <div class="ml-auto flex gap-2">
-          <UButton color="neutral" variant="soft" :to="config.route">{{ t('common.cancel') }}</UButton>
+          <UButton v-if="isCreate" color="neutral" variant="soft" :to="config.route">{{ t('common.cancel') }}</UButton>
+          <UButton v-else color="neutral" variant="soft" @click="onCancelEdit">{{ t('common.cancel') }}</UButton>
           <UButton type="submit" :loading="saving">{{ t('common.save') }}</UButton>
         </div>
       </div>

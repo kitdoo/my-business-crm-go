@@ -20,19 +20,20 @@ const (
 	ProductStatusInactive
 )
 
-// Product carries no price or stock — those live in ProductPrice and
-// Inventory.
+// Product is a catalog card grouping one or more ProductVariant — it
+// carries no sku, images, price, or stock; those live on ProductVariant
+// (SKU, ImageIDs) and, per variant, on ProductPrice and Inventory. A
+// product is not itself purchasable — see ProductVariant.
 type Product struct {
 	ID          string
-	SKU         string // unique
 	Name        LocalizedString
 	Description LocalizedString
 	BrandID     string
 	CategoryIDs []string
-	// Details is characteristic name -> localized value (material, size, …).
-	Details map[string]LocalizedString
-	// ImageIDs are display order, first is main; populated via Update only.
-	ImageIDs  []string
+	// Details is characteristic name -> localized value, shared across
+	// every variant (material, collection, …). Variant-differentiating
+	// characteristics (color, size, …) live on ProductVariant.Attributes.
+	Details   map[string]LocalizedString
 	Status    ProductStatus
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -71,7 +72,6 @@ func (p *Product) BeforeUpdate() {
 // ProductCreate is the Create input. Merge applies it onto a freshly
 // constructed Product via the converter.
 type ProductCreate struct {
-	SKU         string `normalize:"trim"`
 	Name        LocalizedString
 	Description LocalizedString
 	BrandID     string `normalize:"trim"`
@@ -98,11 +98,10 @@ func (c *ProductCreate) Validate(requiredLocale string) error {
 	return nil
 }
 
-// ProductUpdate is the Update input. Nil fields mean "leave unchanged". SKU
-// is immutable and has no field here. CategoryIDs/ImageIDs are full
-// replacements applied only when present in the request's update mask (a
-// repeated field has no wire-level presence), so the handler only sets them
-// when requested.
+// ProductUpdate is the Update input. Nil fields mean "leave unchanged".
+// CategoryIDs is a full replacement applied only when present in the
+// request's update mask (a repeated field has no wire-level presence), so
+// the handler only sets it when requested.
 type ProductUpdate struct {
 	ID          string `normalize:"trim"`
 	Name        LocalizedString
@@ -110,7 +109,6 @@ type ProductUpdate struct {
 	BrandID     *string `normalize:"trim,nil_on_empty"`
 	CategoryIDs []string
 	Details     map[string]LocalizedString
-	ImageIDs    []string
 	Status      *ProductStatus
 	Etag        *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
@@ -160,7 +158,7 @@ type ProductsList struct {
 	Statuses          []ProductStatus
 	BrandIDs          []string
 	CategoryIDs       []string
-	SKUs              []string
+	IDs               []string
 	CreatedAt         *PeriodFilter
 	Sort              ProductsListSort
 	Pagination        ListPagination

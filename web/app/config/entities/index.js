@@ -5,6 +5,7 @@ import inventory from './inventory.js'
 import inventoryMovements from './inventoryMovements.js'
 import partners from './partners.js'
 import products from './products.js'
+import productVariants from './productVariants.js'
 import sales from './sales.js'
 import users from './users.js'
 import warehouses from './warehouses.js'
@@ -20,6 +21,7 @@ const ENTITIES = {
   inventoryMovements,
   partners,
   products,
+  productVariants,
   sales,
   users,
   warehouses,

@@ -158,7 +158,7 @@ func (h *Handler) List(ctx context.Context, in *productsvcpb.ProductsListRequest
 		})
 		listIn.BrandIDs = f.GetBrandIds()
 		listIn.CategoryIDs = f.GetCategoryIds()
-		listIn.SKUs = f.GetSkus()
+		listIn.IDs = f.GetIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withPeriodCodec)
 		}
@@ -220,8 +220,8 @@ func MapError(err error) error {
 		return nil
 	case errors.Is(err, errs.ErrProductNotFound):
 		return status.Error(codes.NotFound, errs.ErrProductNotFound.Error())
-	case errors.Is(err, errs.ErrProductSKUConflict):
-		return status.Error(codes.AlreadyExists, errs.ErrProductSKUConflict.Error())
+	case errors.Is(err, errs.ErrProductHasVariants):
+		return status.Error(codes.FailedPrecondition, errs.ErrProductHasVariants.Error())
 	case errors.Is(err, errs.ErrProductBrandNotFound):
 		return status.Error(codes.InvalidArgument, errs.ErrProductBrandNotFound.Error())
 	case errors.Is(err, errs.ErrProductCategoryNotFound):

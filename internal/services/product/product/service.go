@@ -31,6 +31,7 @@ type Service struct {
 	storage        products.Storage
 	brands         brandsvc.Service
 	categories     categorysvc.Service
+	variants       productsvc.VariantsExistenceChecker // optional; nil until the variants aggregate exists
 	requiredLocale string
 	logger         *slog.Logger
 }
@@ -38,12 +39,14 @@ type Service struct {
 // New builds a Service. requiredLocale is the locale every non-empty
 // LocalizedString field must include (see
 // entities.LocalizedString.Validate); it comes from
-// CRMConfig.DefaultLocale.
-func New(storage products.Storage, brands brandsvc.Service, categories categorysvc.Service, requiredLocale string) *Service {
+// CRMConfig.DefaultLocale. variants may be nil (see
+// productsvc.VariantsExistenceChecker).
+func New(storage products.Storage, brands brandsvc.Service, categories categorysvc.Service, variants productsvc.VariantsExistenceChecker, requiredLocale string) *Service {
 	return &Service{
 		storage:        storage,
 		brands:         brands,
 		categories:     categories,
+		variants:       variants,
 		requiredLocale: requiredLocale,
 		logger:         slog.Default().With(slogx.Module("service:product")),
 	}
@@ -93,7 +96,7 @@ func (s *Service) Create(ctx context.Context, in *entities.ProductCreate) (*enti
 	in.Merge(p)
 
 	if err := s.storage.Insert(ctx, p); err != nil {
-		s.logger.DebugContext(ctx, "insert product failed", slog.String("sku", p.SKU), slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert product failed", slog.String("id", p.ID), slogx.Error(err))
 		return nil, err
 	}
 	return p, nil
@@ -163,6 +166,17 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductDelete) error 
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
 		return errs.ErrStaleEntity
+	}
+
+	if s.variants != nil {
+		hasVariants, err := s.variants.ExistsForProduct(ctx, p.ID)
+		if err != nil {
+			s.logger.DebugContext(ctx, "check product variants existence failed", slog.String("id", p.ID), slogx.Error(err))
+			return err
+		}
+		if hasVariants {
+			return errs.ErrProductHasVariants
+		}
 	}
 
 	oldEtag := p.Etag

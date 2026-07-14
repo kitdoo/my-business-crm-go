@@ -78,7 +78,7 @@ func (h *Handler) List(ctx context.Context, in *inventorymovementsvcpb.Inventory
 		listIn.Types = coreslices.To(f.GetTypes(), func(t inventorymovementpb.MovementType) entities.MovementType {
 			return entities.MovementType(t)
 		})
-		listIn.ProductIDs = f.GetProductIds()
+		listIn.VariantIDs = f.GetVariantIds()
 		listIn.CreatedBy = f.GetCreatedBy()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withUnixTimeCodec)
@@ -103,7 +103,7 @@ func (h *Handler) List(ctx context.Context, in *inventorymovementsvcpb.Inventory
 
 func (h *Handler) GetHistory(ctx context.Context, in *inventorymovementsvcpb.InventoryMovementGetHistoryRequest) (*inventorymovementsvcpb.InventoryMovementGetHistoryResponse, error) {
 	historyIn := &entities.InventoryMovementGetHistory{
-		ProductID:   in.GetProductId(),
+		VariantID:   in.GetVariantId(),
 		WarehouseID: in.GetWarehouseId(),
 	}
 	if pg := in.GetPagination(); pg != nil {
@@ -140,8 +140,8 @@ func MapError(err error) error {
 	switch {
 	case err == nil:
 		return nil
-	case errors.Is(err, errs.ErrProductNotFound):
-		return status.Error(codes.InvalidArgument, errs.ErrProductNotFound.Error())
+	case errors.Is(err, errs.ErrProductVariantNotFound):
+		return status.Error(codes.InvalidArgument, errs.ErrProductVariantNotFound.Error())
 	case errors.Is(err, errs.ErrWarehouseNotFound):
 		return status.Error(codes.InvalidArgument, errs.ErrWarehouseNotFound.Error())
 	case errors.Is(err, errs.ErrInsufficientStock):

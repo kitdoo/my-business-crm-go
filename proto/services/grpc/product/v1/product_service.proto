@@ -50,8 +50,14 @@ message ProductsListRequest {
     optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
     repeated string brandIds = 3 [(buf.validate.field).repeated.items.string.uuid = true];
     repeated string categoryIds = 4 [(buf.validate.field).repeated.items.string.uuid = true];
-    repeated string skus = 5;
+    reserved 5;
+    reserved "skus";
     optional crm.types.common.PeriodFilter createdAt = 6;
+    // Fetch specific products by id — the public site's only way to
+    // resolve a ProductVariant's parent Product, since Get requires auth
+    // and List is the sole anonymous-exempt method (see
+    // internal/transports/grpc/interceptors/auth.New).
+    repeated string ids = 7 [(buf.validate.field).repeated.items.string.uuid = true];
   }
   optional Filter filter = 5;
   message Options {
@@ -71,7 +77,8 @@ message ProductCreateRequest {
   message Options {
     optional google.protobuf.FieldMask readMask = 1;
   }
-  string sku = 1 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 64];
+  reserved 1;
+  reserved "sku";
   crm.types.common.LocalizedString name = 2 [(buf.validate.field).required = true];
   crm.types.common.LocalizedString description = 3;
   string brandId = 4 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
@@ -96,9 +103,8 @@ message ProductUpdateRequest {
   optional string brandId = 4 [(buf.validate.field).string.uuid = true];
   repeated string categoryIds = 5 [(buf.validate.field).repeated.items.string.uuid = true];
   map<string, crm.types.common.LocalizedString> details = 6;
-  // Full replacement, in display order; applied only when "imageIds" is in
-  // options.updateMask (a repeated field has no wire-level presence).
-  repeated string imageIds = 7 [(buf.validate.field).repeated.items.string.min_len = 1];
+  reserved 7;
+  reserved "imageIds";
   optional crm.types.product.ProductStatus status = 8 [(buf.validate.field).enum.defined_only = true];
   optional Options options = 99;
 }

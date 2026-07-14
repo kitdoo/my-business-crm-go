@@ -126,7 +126,7 @@ func (h *Handler) List(ctx context.Context, in *salesvcpb.SalesListRequest) (*sa
 			return entities.SaleStatus(st)
 		})
 		listIn.CreatedBy = f.GetCreatedBy()
-		listIn.ProductIDs = f.GetProductIds()
+		listIn.VariantIDs = f.GetVariantIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withProtoCodecs)
 		}

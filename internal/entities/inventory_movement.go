@@ -21,7 +21,7 @@ const (
 	MovementTypeAdjustment
 	// MovementTypeTransfer is warehouse-to-warehouse; recorded as a paired
 	// debit/credit movement — the caller issues two Create calls, one per
-	// leg, since a single movement always targets one (productId,
+	// leg, since a single movement always targets one (variantId,
 	// warehouseId) pair.
 	MovementTypeTransfer
 )
@@ -31,7 +31,7 @@ const (
 // the general entity rules for this aggregate.
 type InventoryMovement struct {
 	ID          string
-	ProductID   string
+	VariantID   string
 	WarehouseID string
 	Type        MovementType
 	// Quantity is signed: positive for Receipt, negative for Sale/WriteOff.
@@ -61,7 +61,7 @@ func InventoryMovementNew(init ...func(*InventoryMovement)) *InventoryMovement {
 // handler from the request context (see internal/pkg/reqctx), not by the
 // client — the proto Create request carries no createdBy field.
 type InventoryMovementCreate struct {
-	ProductID   string `normalize:"trim"`
+	VariantID   string `normalize:"trim"`
 	WarehouseID string `normalize:"trim"`
 	Type        MovementType
 	Quantity    int64
@@ -83,16 +83,16 @@ func (c *InventoryMovementCreate) Merge(dst *InventoryMovement) *InventoryMoveme
 type InventoryMovementsList struct {
 	WarehouseID *string
 	Types       []MovementType
-	ProductIDs  []string
+	VariantIDs  []string
 	CreatedBy   []string
 	CreatedAt   *PeriodFilter
 	Pagination  ListPagination
 }
 
 // InventoryMovementGetHistory is the GetHistory input — the full ledger for
-// one (productId, warehouseId) pair.
+// one (variantId, warehouseId) pair.
 type InventoryMovementGetHistory struct {
-	ProductID   string
+	VariantID   string
 	WarehouseID string
 	Types       []MovementType
 	CreatedAt   *PeriodFilter

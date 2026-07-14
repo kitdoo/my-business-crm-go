@@ -75,6 +75,22 @@ var (
 	// categoryIds does not reference an existing category.
 	ErrProductCategoryNotFound = errors.New("product category not found")
 
+	// ErrProductHasVariants is returned when a product's Delete is
+	// attempted while it still has active variants.
+	ErrProductHasVariants = errors.New("product has variants")
+
+	// ErrProductVariantNotFound is returned when a variant lookup finds no
+	// active row.
+	ErrProductVariantNotFound = errors.New("product variant not found")
+
+	// ErrProductVariantSKUConflict is returned when a variant's SKU
+	// collides with another active variant's SKU.
+	ErrProductVariantSKUConflict = errors.New("product variant sku conflict")
+
+	// ErrProductVariantProductNotFound is returned when a variant's
+	// productId does not reference an existing product.
+	ErrProductVariantProductNotFound = errors.New("product variant product not found")
+
 	// ErrProductPriceNotFound is returned when a price lookup finds no
 	// active row.
 	ErrProductPriceNotFound = errors.New("product price not found")

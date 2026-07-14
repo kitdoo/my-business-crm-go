@@ -30,7 +30,7 @@ const collectionName = "inventory"
 
 const (
 	FieldID          = "_id"
-	FieldProductID   = "product_id"
+	FieldVariantID   = "variant_id"
 	FieldWarehouseID = "warehouse_id"
 	FieldQuantity    = "quantity"
 	FieldUpdatedAt   = "updated_at"
@@ -42,7 +42,7 @@ const defaultListLimit = datamongo.DefaultListLimit
 
 type model struct {
 	ID          string        `bson:"_id"`
-	ProductID   string        `bson:"product_id"`
+	VariantID   string        `bson:"variant_id"`
 	WarehouseID string        `bson:"warehouse_id"`
 	Quantity    int64         `bson:"quantity"`
 	UpdatedAt   time.Time     `bson:"updated_at"`
@@ -73,18 +73,18 @@ func New(db *datamongo.Mongo, c *cache.Cache) *Storage {
 	}
 }
 
-func cacheKey(productID, warehouseID string) string {
-	return fmt.Sprintf("inventory:%s:%s", productID, warehouseID)
+func cacheKey(variantID, warehouseID string) string {
+	return fmt.Sprintf("inventory:%s:%s", variantID, warehouseID)
 }
 
-func (s *Storage) Get(ctx context.Context, productID, warehouseID string) (*entities.Inventory, error) {
+func (s *Storage) Get(ctx context.Context, variantID, warehouseID string) (*entities.Inventory, error) {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
 
 	var m model
-	err := s.cache.GetWithFallback(ctx, cacheKey(productID, warehouseID), &m, func() (any, time.Duration, error) {
+	err := s.cache.GetWithFallback(ctx, cacheKey(variantID, warehouseID), &m, func() (any, time.Duration, error) {
 		var mm model
-		ferr := s.collection.FindOne(ctx, bson.M{FieldProductID: productID, FieldWarehouseID: warehouseID}).Decode(&mm)
+		ferr := s.collection.FindOne(ctx, bson.M{FieldVariantID: variantID, FieldWarehouseID: warehouseID}).Decode(&mm)
 		if errors.Is(ferr, mongo.ErrNoDocuments) {
 			return nil, 0, cache.ErrMissing
 		}
@@ -125,8 +125,8 @@ func (s *Storage) List(ctx context.Context, in *entities.InventoryList) (*entiti
 	}
 
 	filter := bson.M{}
-	if in.ProductID != nil {
-		filter[FieldProductID] = *in.ProductID
+	if in.VariantID != nil {
+		filter[FieldVariantID] = *in.VariantID
 	}
 	if in.WarehouseID != nil {
 		filter[FieldWarehouseID] = *in.WarehouseID
@@ -179,13 +179,13 @@ func (s *Storage) List(ctx context.Context, in *entities.InventoryList) (*entiti
 // the read-modify-write race the TD calls out as the reason Inventory
 // carries an etag at all. A decrement is additionally guarded by an $expr
 // filter so quantity can never go negative; upsert is disabled for
-// decrements so a never-seen (productID, warehouseID) pair reports
+// decrements so a never-seen (variantID, warehouseID) pair reports
 // errs.ErrInsufficientStock instead of materializing a negative row.
-func (s *Storage) ApplyMovement(ctx context.Context, productID, warehouseID string, delta int64) (*entities.Inventory, error) {
+func (s *Storage) ApplyMovement(ctx context.Context, variantID, warehouseID string, delta int64) (*entities.Inventory, error) {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
 
-	filter := bson.M{FieldProductID: productID, FieldWarehouseID: warehouseID}
+	filter := bson.M{FieldVariantID: variantID, FieldWarehouseID: warehouseID}
 	upsert := delta >= 0
 	if !upsert {
 		filter["$expr"] = bson.M{"$gte": bson.A{bson.M{"$add": bson.A{"$" + FieldQuantity, delta}}, 0}}
@@ -213,9 +213,9 @@ func (s *Storage) ApplyMovement(ctx context.Context, productID, warehouseID stri
 	// so a failed invalidation must not fail the whole movement — that
 	// would risk the caller retrying and double-applying delta. Worst case
 	// is a stale cached read until the entry's TTL expires.
-	if err := s.cache.Delete(ctx, cacheKey(productID, warehouseID)); err != nil {
+	if err := s.cache.Delete(ctx, cacheKey(variantID, warehouseID)); err != nil {
 		s.logger.WarnContext(ctx, "invalidate inventory cache failed",
-			slog.String("productId", productID), slog.String("warehouseId", warehouseID), slogx.Error(err))
+			slog.String("variantId", variantID), slog.String("warehouseId", warehouseID), slogx.Error(err))
 	}
 	return converter.Convert(&m, &entities.Inventory{}), nil
 }

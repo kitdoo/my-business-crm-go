@@ -26,7 +26,7 @@ message Sale {
 }
 
 message SaleItem {
-  string productId = 1;
+  string variantId = 1;
   int64 quantity = 2;
   int64 priceAmount = 3;
   // Always 0-100, never a fixed amount.

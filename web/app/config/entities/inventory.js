@@ -16,7 +16,7 @@ export default {
 
   list: {
     columns: [
-      { key: 'productId', label: 'fields.product', component: 'RelationLabel', relation: 'products' },
+      { key: 'variantId', label: 'fields.variant', component: 'RelationLabel', relation: 'productVariants' },
       { key: 'warehouseId', label: 'fields.warehouse', component: 'RelationLabel', relation: 'warehouses' },
       { key: 'quantity', label: 'fields.quantity' },
       { key: 'updatedAt', label: 'fields.updatedAt', component: 'DateLabel' },

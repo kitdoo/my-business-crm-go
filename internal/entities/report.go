@@ -29,9 +29,9 @@ type SalesByPartnerRow struct {
 	CommissionAmount int64
 }
 
-// PopularProductRow ranks a product by quantity sold over the period.
+// PopularProductRow ranks a variant by quantity sold over the period.
 type PopularProductRow struct {
-	ProductID    string
+	VariantID    string
 	QuantitySold int64
 	TotalAmount  int64
 }
@@ -45,7 +45,7 @@ type TurnoverRow struct {
 
 // StockLevelRow is a live Inventory row, optionally scoped to one warehouse.
 type StockLevelRow struct {
-	ProductID   string
+	VariantID   string
 	WarehouseID string
 	Quantity    int64
 }

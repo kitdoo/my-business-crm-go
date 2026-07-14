@@ -1,0 +1,35 @@
+syntax = "proto3";
+package crm.grpc.inventory.v1;
+
+import "common.proto";
+
+// Mirrors proto/services/grpc/inventory/v1/inventory_service.proto and
+// proto/types/inventory/inventory.proto on the backend. List is exempt
+// from auth (see internal/transports/grpc/interceptors/auth.New) so the
+// public catalog can check stock — but it returns exact per-warehouse
+// quantity, which server/utils/catalogClient.js must always reduce to an
+// inStock boolean before it reaches a site visitor.
+
+message Inventory {
+  string id = 1;
+  int64 updatedAt = 2;
+  string variantId = 3;
+  string warehouseId = 4;
+  int64 quantity = 5;
+  string etag = 101;
+}
+
+service InventoryService {
+  rpc List (InventoryListRequest) returns (InventoryListResponse) {}
+}
+
+message InventoryListRequest {
+  optional string variantId = 1;
+  optional string warehouseId = 2;
+  optional crm.types.common.Pagination pagination = 4;
+}
+
+message InventoryListResponse {
+  repeated Inventory items = 1;
+  optional string nextCursor = 2;
+}

@@ -6,7 +6,7 @@ useSeoMeta({
   description: t('seo.about.description'),
   ogTitle: t('seo.about.title'),
   ogDescription: t('seo.about.description'),
-  ogImage: '/images/showroom1.png',
+  ogImage: '/images/showroom/1.png',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 </script>

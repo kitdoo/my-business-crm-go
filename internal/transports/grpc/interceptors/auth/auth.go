@@ -22,11 +22,13 @@ import (
 	"github.com/altessa-s/go-atlas/transport/grpc/interceptors"
 
 	categorysvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/category/v1"
+	inventorysvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/inventory/v1"
 	notificationsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/notification/v1"
 	partnersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/partner/v1"
 	pricesvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/price/v1"
 	productsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product/v1"
 	productattributedefinitionsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product_attribute_definition/v1"
+	productvariantsvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/product_variant/v1"
 	usersvcpb "github.com/kitdoo/my-business-crm-go/proto/gen/go/services/grpc/user/v1"
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
@@ -46,10 +48,16 @@ func UserFromContext(ctx context.Context) (*entities.User, bool) {
 }
 
 // New builds the gRPC auth interceptor. Login is exempt (it is how a token
-// is obtained in the first place). ProductsService.List, PricesService.Get,
-// CategoriesService.List and ProductAttributeDefinitionsService.List are
-// also exempt — they back the public website's catalog (web-public/), which
-// has anonymous visitors and no login of its own; see web-public/README.md.
+// is obtained in the first place). ProductsService.List,
+// ProductVariantsService.List, PricesService.Get, CategoriesService.List,
+// InventoryService.List and ProductAttributeDefinitionsService.List are
+// also exempt — they back the public website's catalog (web-public/),
+// which has anonymous visitors and
+// no login of its own; see web-public/README.md. InventoryService.List
+// returns exact per-warehouse quantities, which the public catalog must
+// never forward as-is — web-public/server/utils/catalogClient.js is
+// responsible for reducing it to an inStock boolean before it reaches a
+// site visitor, same as it already does for statuses:[ACTIVE].
 // NotificationsService.Send is
 // exempt for the same reason (anonymous visitors submit web-public/'s
 // contact/dealer forms through it) but is not left open to anyone who can
@@ -98,9 +106,11 @@ func New(users usersvc.Service) interceptors.ServerInterceptor {
 		atlasauth.WithIgnoreMethods(
 			usersvcpb.UsersService_Login_FullMethodName,
 			productsvcpb.ProductsService_List_FullMethodName,
+			productvariantsvcpb.ProductVariantsService_List_FullMethodName,
 			pricesvcpb.PricesService_Get_FullMethodName,
 			categorysvcpb.CategoriesService_List_FullMethodName,
 			partnersvcpb.PartnersService_ListPublic_FullMethodName,
+			inventorysvcpb.InventoryService_List_FullMethodName,
 			notificationsvcpb.NotificationsService_Send_FullMethodName,
 			productattributedefinitionsvcpb.ProductAttributeDefinitionsService_List_FullMethodName,
 		),

@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        { rel: 'icon', type: 'image/png', href: '/images/main_logo.png' },
+        { rel: 'icon', type: 'image/png', href: '/images/logos/logo_blue.png' },
       ],
     },
   },
@@ -30,7 +30,6 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@nuxt/image',
-    '@pinia/nuxt',
     '@nuxtjs/i18n',
   ],
 

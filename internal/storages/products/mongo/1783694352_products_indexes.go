@@ -34,8 +34,12 @@ func init() {
 					SetName("idx_products_deleted_at_category_ids"),
 			},
 			{
-				// Partial unique index frees SKU on soft delete.
-				Keys: bson.D{{Key: FieldSKU, Value: 1}},
+				// Partial unique index frees SKU on soft delete. sku moved
+				// off Product onto ProductVariant afterwards — this index
+				// is dropped by the product_variants backfill migration;
+				// kept literal ("sku", not FieldSKU) since the field no
+				// longer exists on this collection's current model.
+				Keys: bson.D{{Key: "sku", Value: 1}},
 				Options: options.Index().
 					SetName("idx_products_sku_unique").
 					SetUnique(true).

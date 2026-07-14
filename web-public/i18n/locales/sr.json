@@ -59,7 +59,35 @@
     },
     "whyPhomi": {
       "title": "Zašto PHOMI?",
-      "cta": "Katalog materijala"
+      "cta": "Katalog materijala",
+      "infographic": {
+        "titleLine1": "ZAŠTO",
+        "titleLine2": "PHOMI?",
+        "items": {
+          "noWaterAbsorption": "NE UPIJA VODU",
+          "notPlastic": "NIJE PLASTIČAN",
+          "nonFlammable": "NE GORI",
+          "unbreakable": "NE LOMI SE",
+          "frostResistant": "NE PUCA PRI ZAMRZAVANJU",
+          "lightThinFlexible": "LAGANO, TANKO I FLEKSIBILNO",
+          "fadeResistant": "NE BLEDI"
+        }
+      }
+    },
+    "install": {
+      "infographic": {
+        "titleLine1": "KAKO SE UGRAĐUJE",
+        "titleLine2": "PHOMI?",
+        "items": {
+          "applyingAdhesive": "NANOŠENJE LEPKA",
+          "installingInsulation": "UGRADNJA IZOLACIJE",
+          "fixingInsulation": "PRIČVRŠĆIVANJE IZOLACIJE",
+          "phomiLayer": "PHOMI",
+          "reinforcementLayer": "ARMIRANI SLOJ 160g/m²",
+          "outdoorTileAdhesive": "LEPAK ZA SPOLJNE PLOČICE",
+          "grouting": "FUGOVANJE"
+        }
+      }
     },
     "dezenStats": {
       "title": "Posedujemo preko",
@@ -84,11 +112,16 @@
     "allCategories": "Sve kategorije",
     "available": "Dostupno",
     "unavailable": "Nije dostupno",
+    "filter": {
+      "inStock": "Na stanju",
+      "onOrder": "Po porudžbini"
+    },
     "empty": "Trenutno nema dostupnih proizvoda.",
     "loadError": "Katalog trenutno nije dostupan. Pokušajte ponovo malo kasnije.",
     "loadMore": "Učitaj još",
     "contactCta": "Kontaktirajte nas povodom ovog proizvoda",
     "contactPrefill": "Interesuje me: {sku} — {name}",
+    "otherVariants": "Druge opcije",
     "intro": "PHOMI nudi širok izbor materijala — dezene kamena, drveta, opeke i betona, kao i solarne i displej panele — objedinjene u jednom lakom i fleksibilnom sistemu. Podjednako su pogodni za fasade i enterijere, uz moderan izgled i brzu, jednostavnu ugradnju.",
     "sort": {
       "label": "Sortiranje",
@@ -163,7 +196,6 @@
   },
   "projects": {
     "usedMaterials": "Korišćeni materijali",
-    "recommendedMaterials": "Preporučeno / slično",
     "items": {
       "p1": "Moskva, Rusija",
       "p2": "Belorusija",

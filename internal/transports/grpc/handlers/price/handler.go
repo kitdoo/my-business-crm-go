@@ -60,7 +60,7 @@ func (h *Handler) Create(ctx context.Context, in *pricesvcpb.ProductPriceCreateR
 }
 
 func (h *Handler) Get(ctx context.Context, in *pricesvcpb.ProductPriceGetRequest) (*pricesvcpb.ProductPriceGetResponse, error) {
-	p, err := h.svc.Get(ctx, in.GetProductId())
+	p, err := h.svc.Get(ctx, in.GetVariantId())
 	if err != nil {
 		return nil, MapError(err)
 	}
@@ -94,7 +94,7 @@ func (h *Handler) Delete(ctx context.Context, in *pricesvcpb.ProductPriceDeleteR
 }
 
 func (h *Handler) GetHistory(ctx context.Context, in *pricesvcpb.ProductPriceGetHistoryRequest) (*pricesvcpb.ProductPriceGetHistoryResponse, error) {
-	historyIn := &entities.ProductPriceGetHistory{ProductID: in.GetProductId()}
+	historyIn := &entities.ProductPriceGetHistory{VariantID: in.GetVariantId()}
 	if pg := in.GetPagination(); pg != nil {
 		historyIn.Pagination = entities.ListPagination{Limit: pg.GetLimit(), Cursor: pg.GetCursor()}
 	}
@@ -128,8 +128,8 @@ func MapError(err error) error {
 		return nil
 	case errors.Is(err, errs.ErrProductPriceNotFound):
 		return status.Error(codes.NotFound, errs.ErrProductPriceNotFound.Error())
-	case errors.Is(err, errs.ErrProductNotFound):
-		return status.Error(codes.InvalidArgument, errs.ErrProductNotFound.Error())
+	case errors.Is(err, errs.ErrProductVariantNotFound):
+		return status.Error(codes.InvalidArgument, errs.ErrProductVariantNotFound.Error())
 	case errors.Is(err, errs.ErrProductPriceExists):
 		return status.Error(codes.AlreadyExists, errs.ErrProductPriceExists.Error())
 	case errors.Is(err, errs.ErrStaleEntity):

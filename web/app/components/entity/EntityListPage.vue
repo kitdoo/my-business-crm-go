@@ -10,6 +10,17 @@
 const props = defineProps({
   entity: { type: String, required: true },
   viewOverride: { type: Function, default: null }, // (item) => { entity, id }
+  // Scopes the table to a parent record (e.g. a Product's variants) —
+  // always merged into the list request's filter, regardless of the
+  // entity's own declared UI filters. See EntityDataTable's fixedFilter.
+  // Filter fields are usually plural (productIds: [id]), unlike the
+  // singular create-time field (productId: id) — see createDefaults.
+  fixedFilter: { type: Object, default: () => ({}) },
+  // Seeds the create step with the parent's id so it isn't re-picked:
+  // pre-fills the drawer form's initial values, or — when the entity uses
+  // a full create page (config.detailPage) — is passed as that page's
+  // query params instead, since there's no other way to hand it data.
+  createDefaults: { type: Object, default: () => ({}) },
 })
 
 const { t } = useI18n()
@@ -26,7 +37,7 @@ const activeId = ref(null)
 
 function openCreate() {
   if (config.detailPage) {
-    navigateTo(`${config.route}/new`)
+    navigateTo({ path: `${config.route}/new`, query: props.createDefaults })
     return
   }
   activeEntity.value = props.entity
@@ -84,7 +95,7 @@ function onDeleted() {
         {{ t('common.create') }}
       </UButton>
     </div>
-    <EntityDataTable ref="tableRef" :entity="entity" @view="openView" @edit="onEditClick" />
+    <EntityDataTable ref="tableRef" :entity="entity" :fixed-filter="fixedFilter" @view="openView" @edit="onEditClick" />
 
     <USlideover v-model:open="drawerOpen" side="right">
       <template #content>
@@ -109,6 +120,7 @@ function onDeleted() {
               :entity="activeEntity"
               :id="activeId"
               mode="drawer"
+              :initial-values="drawerMode === 'create' ? createDefaults : {}"
               @saved="onSaved"
               @cancel="drawerOpen = false"
               @deleted="onDeleted"

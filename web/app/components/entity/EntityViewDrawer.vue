@@ -9,12 +9,7 @@
 // `relatedSales`, when the entity config declares one (Client/Partner),
 // preloads that record's sales underneath — same `<EntityDataTable
 // entity="sales" :row-to="...">` the main /sales page already uses, just
-// scoped to this record via fixedFilter. `config.view.productSummary`
-// (Product only) is the same kind of opt-in extension: read-only latest
-// price + stock-by-warehouse, neither editable from here — Price has its
-// own tab and Inventory has no write permissions at all. Stock renders
-// below the Cancel/Edit buttons (price stays above) per stakeholder
-// request — it's the least important of the two at a glance.
+// scoped to this record via fixedFilter.
 import { columnComponent, columnProps } from '~/utils/entityColumns.js'
 
 const props = defineProps({
@@ -73,13 +68,9 @@ watch(() => [props.entity, props.id], load, { immediate: true })
       <EntityDataTable entity="sales" :fixed-filter="relatedSales(record)" :row-to="(item) => `/sales/${item.id}`" />
     </div>
 
-    <ProductPriceSummary v-if="config.view?.productSummary && record" :product-id="record.id" />
-
     <div class="flex justify-end gap-2">
       <UButton color="neutral" variant="soft" @click="emit('close')">{{ t('common.cancel') }}</UButton>
       <UButton v-if="canUpdate" @click="emit('edit')">{{ t('common.edit') }}</UButton>
     </div>
-
-    <ProductStockSummary v-if="config.view?.productSummary && record" :product-id="record.id" />
   </div>
 </template>

@@ -43,6 +43,11 @@
       "create": "Новый товар",
       "edit": "Редактирование товара"
     },
+    "productVariants": {
+      "label": "Варианты",
+      "create": "Новый вариант",
+      "edit": "Редактирование варианта"
+    },
     "inventory": {
       "label": "Остатки"
     },
@@ -93,6 +98,8 @@
     "priceAmount": "Цена",
     "discountAmount": "Скидка",
     "product": "Товар",
+    "variant": "Вариант",
+    "attributes": "Атрибуты",
     "warehouse": "Склад",
     "quantity": "Количество",
     "updatedAt": "Обновлён",
@@ -112,7 +119,8 @@
     "name": "По названию",
     "quantity": "По количеству",
     "label": "Сортировка",
-    "direction": "Направление сортировки"
+    "direction": "Направление сортировки",
+    "sku": "По артикулу"
   },
   "enums": {
     "status": {
@@ -139,6 +147,10 @@
       "PRODUCT_STATUS_ACTIVE": "Активен",
       "PRODUCT_STATUS_INACTIVE": "Неактивен",
       "PRODUCT_STATUS_UNSPECIFIED": "Не указано",
+      "PRODUCT_VARIANT_STATUS_DRAFT": "Черновик",
+      "PRODUCT_VARIANT_STATUS_ACTIVE": "Активен",
+      "PRODUCT_VARIANT_STATUS_INACTIVE": "Неактивен",
+      "PRODUCT_VARIANT_STATUS_UNSPECIFIED": "Не указано",
       "MOVEMENT_TYPE_RECEIPT": "Приход",
       "MOVEMENT_TYPE_SALE": "Продажа",
       "MOVEMENT_TYPE_WRITE_OFF": "Списание",

@@ -59,7 +59,35 @@
     },
     "whyPhomi": {
       "title": "Why PHOMI?",
-      "cta": "Materials catalog"
+      "cta": "Materials catalog",
+      "infographic": {
+        "titleLine1": "WHY",
+        "titleLine2": "PHOMI?",
+        "items": {
+          "noWaterAbsorption": "DOES NOT ABSORB WATER",
+          "notPlastic": "NOT PLASTIC",
+          "nonFlammable": "NON-FLAMMABLE",
+          "unbreakable": "UNBREAKABLE",
+          "frostResistant": "FROST RESISTANT",
+          "lightThinFlexible": "LIGHT, THIN & FLEXIBLE",
+          "fadeResistant": "FADE RESISTANT"
+        }
+      }
+    },
+    "install": {
+      "infographic": {
+        "titleLine1": "HOW IS PHOMI",
+        "titleLine2": "INSTALLED?",
+        "items": {
+          "applyingAdhesive": "APPLYING ADHESIVE",
+          "installingInsulation": "INSTALLING INSULATION",
+          "fixingInsulation": "FIXING THE INSULATION",
+          "phomiLayer": "PHOMI",
+          "reinforcementLayer": "REINFORCEMENT LAYER 160g/m²",
+          "outdoorTileAdhesive": "OUTDOOR TILE ADHESIVE",
+          "grouting": "GROUTING"
+        }
+      }
     },
     "dezenStats": {
       "title": "We offer over",
@@ -84,11 +112,16 @@
     "allCategories": "All categories",
     "available": "Available",
     "unavailable": "Unavailable",
+    "filter": {
+      "inStock": "In stock",
+      "onOrder": "On order"
+    },
     "empty": "No products available right now.",
     "loadError": "The catalog is temporarily unavailable. Please try again shortly.",
     "loadMore": "Load more",
     "contactCta": "Contact us about this product",
     "contactPrefill": "I'm interested in: {sku} — {name}",
+    "otherVariants": "Other options",
     "intro": "PHOMI offers a wide range of materials — stone, wood, brick and concrete looks, as well as solar and display panels — all in one lightweight, flexible system. Equally suited to facades and interiors, delivering a modern look with fast, easy installation.",
     "sort": {
       "label": "Sort by",
@@ -162,7 +195,6 @@
   },
   "projects": {
     "usedMaterials": "Materials used",
-    "recommendedMaterials": "Recommended / similar",
     "items": {
       "p1": "Moscow, Russia",
       "p2": "Belarus",

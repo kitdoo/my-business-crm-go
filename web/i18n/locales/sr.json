@@ -43,6 +43,11 @@
       "create": "Novi proizvod",
       "edit": "Izmena proizvoda"
     },
+    "productVariants": {
+      "label": "Varijante",
+      "create": "Nova varijanta",
+      "edit": "Izmena varijante"
+    },
     "inventory": {
       "label": "Zalihe"
     },
@@ -93,6 +98,8 @@
     "priceAmount": "Cena",
     "discountAmount": "Popust",
     "product": "Proizvod",
+    "variant": "Varijanta",
+    "attributes": "Atributi",
     "warehouse": "Magacin",
     "quantity": "Količina",
     "updatedAt": "Ažurirano",
@@ -112,7 +119,8 @@
     "name": "Po nazivu",
     "quantity": "Po količini",
     "label": "Sortiranje",
-    "direction": "Smer sortiranja"
+    "direction": "Smer sortiranja",
+    "sku": "Po šifri"
   },
   "enums": {
     "status": {
@@ -139,6 +147,10 @@
       "PRODUCT_STATUS_ACTIVE": "Aktivan",
       "PRODUCT_STATUS_INACTIVE": "Neaktivan",
       "PRODUCT_STATUS_UNSPECIFIED": "Nepoznato",
+      "PRODUCT_VARIANT_STATUS_DRAFT": "Nacrt",
+      "PRODUCT_VARIANT_STATUS_ACTIVE": "Aktivan",
+      "PRODUCT_VARIANT_STATUS_INACTIVE": "Neaktivan",
+      "PRODUCT_VARIANT_STATUS_UNSPECIFIED": "Nepoznato",
       "MOVEMENT_TYPE_RECEIPT": "Prijem",
       "MOVEMENT_TYPE_SALE": "Prodaja",
       "MOVEMENT_TYPE_WRITE_OFF": "Otpis",

@@ -13,7 +13,7 @@ import (
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
-	productsvc "github.com/kitdoo/my-business-crm-go/internal/services/product"
+	variantsvc "github.com/kitdoo/my-business-crm-go/internal/services/productvariant"
 
 	pricesvc "github.com/kitdoo/my-business-crm-go/internal/services/price"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
@@ -21,12 +21,13 @@ import (
 
 var _ pricesvc.Service = (*Service)(nil)
 
-// Service is the price.Service implementation. products is product.Service,
-// not products.Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A service
-// controls only its own storage" rule.
+// Service is the price.Service implementation. variants is
+// productvariant.Service, not productvariants.Storage — see
+// SERVICE_DEVELOPMENT_STANDARD.md's "A service controls only its own
+// storage" rule.
 type Service struct {
 	storage  prices.Storage
-	products productsvc.Service
+	variants variantsvc.Service
 	// currency is the system-wide ISO 4217 code from config, stamped onto
 	// every price created; see PROTO_DEVELOPMENT_STANDARD.md's currency
 	// note on crm.types.price.ProductPrice.
@@ -35,10 +36,10 @@ type Service struct {
 }
 
 // New builds a Service.
-func New(storage prices.Storage, products productsvc.Service, currency string) *Service {
+func New(storage prices.Storage, variants variantsvc.Service, currency string) *Service {
 	return &Service{
 		storage:  storage,
-		products: products,
+		variants: variants,
 		currency: currency,
 		logger:   slog.Default().With(slogx.Module("service:price")),
 	}
@@ -47,7 +48,7 @@ func New(storage prices.Storage, products productsvc.Service, currency string) *
 func (s *Service) Create(ctx context.Context, in *entities.ProductPriceCreate) (*entities.ProductPrice, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
-	if _, err := s.products.Get(ctx, in.ProductID); err != nil {
+	if _, err := s.variants.Get(ctx, in.VariantID); err != nil {
 		return nil, err
 	}
 	in.Currency = s.currency
@@ -56,16 +57,16 @@ func (s *Service) Create(ctx context.Context, in *entities.ProductPriceCreate) (
 	in.Merge(p)
 
 	if err := s.storage.Insert(ctx, p); err != nil {
-		s.logger.DebugContext(ctx, "insert product price failed", slog.String("productId", p.ProductID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert product price failed", slog.String("variantId", p.VariantID), slogx.Error(err))
 		return nil, err
 	}
 	return p, nil
 }
 
-func (s *Service) Get(ctx context.Context, productID string) (*entities.ProductPrice, error) {
-	p, err := s.storage.GetByProductID(ctx, productID)
+func (s *Service) Get(ctx context.Context, variantID string) (*entities.ProductPrice, error) {
+	p, err := s.storage.GetByVariantID(ctx, variantID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product price failed", slog.String("productId", productID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product price failed", slog.String("variantId", variantID), slogx.Error(err))
 		return nil, err
 	}
 	return p, nil
@@ -85,7 +86,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (
 
 	snapshot := &entities.ProductPrice{
 		ID:             uuid.NewString(),
-		ProductID:      p.ProductID,
+		VariantID:      p.VariantID,
 		PriceAmount:    p.PriceAmount,
 		Currency:       p.Currency,
 		DiscountAmount: p.DiscountAmount,

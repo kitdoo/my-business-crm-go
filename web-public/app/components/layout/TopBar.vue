@@ -38,12 +38,12 @@ function closeMobile() {
     :class="!isHome ? 'bg-black' : (scrolled ? 'bg-brand-500 shadow-sm' : 'bg-transparent')"
   >
     <div
-      class="mx-auto max-w-7xl 2xl:max-w-[1800px] px-4 lg:px-8 flex items-center justify-between transition-[height] duration-300"
-      :class="isCompact ? 'h-16 lg:h-20' : 'h-28 lg:h-32'"
+      class="mx-auto max-w-7xl 2xl:max-w-[1800px] px-4 lg:px-8 flex items-center justify-between transition-[min-height] duration-300"
+      :class="isCompact ? 'min-h-16 lg:min-h-20' : 'min-h-28 lg:min-h-32'"
     >
-      <NuxtLink :to="localePath('/')" class="flex flex-col items-center transition-all duration-300" :class="isCompact ? 'gap-0 pt-0' : 'gap-1 pt-3'">
+      <NuxtLink :to="localePath('/')" class="-ml-2 lg:-ml-4 flex flex-col items-center transition-all duration-300" :class="isCompact ? 'gap-0 pt-3' : 'gap-1 pt-9 lg:pt-11'">
         <img
-          src="/images/main_logo.png"
+          src="/images/logos/logo_white.png"
           alt="PHOMI SRBIJA"
           class="w-auto object-contain transition-[height] duration-300"
           :class="isCompact ? 'h-8 lg:h-10' : 'h-[72px] lg:h-[88px]'"
