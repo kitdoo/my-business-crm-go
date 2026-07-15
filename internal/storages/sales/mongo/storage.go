@@ -28,25 +28,25 @@ const collectionName = "sales"
 const countersCollectionName = "sale_counters"
 
 const (
-	FieldID           = "_id"
-	FieldNumber       = "number"
-	FieldClientID     = "client_id"
-	FieldWarehouseID  = "warehouse_id"
-	FieldPartnerID    = "partner_id"
-	FieldItemVariants = "items.variant_id"
-	FieldStatus       = "status"
-	FieldCreatedBy    = "created_by"
-	FieldCreatedAt    = "created_at"
-	FieldUpdatedAt    = "updated_at"
-	FieldDeletedAt    = "deleted_at"
-	FieldEtag         = "etag"
-	FieldCursorId     = "cursor_id"
+	FieldID          = "_id"
+	FieldNumber      = "number"
+	FieldClientID    = "client_id"
+	FieldWarehouseID = "warehouse_id"
+	FieldPartnerID   = "partner_id"
+	FieldItemSKUs    = "items.sku_id"
+	FieldStatus      = "status"
+	FieldCreatedBy   = "created_by"
+	FieldCreatedAt   = "created_at"
+	FieldUpdatedAt   = "updated_at"
+	FieldDeletedAt   = "deleted_at"
+	FieldEtag        = "etag"
+	FieldCursorId    = "cursor_id"
 )
 
 const defaultListLimit = datamongo.DefaultListLimit
 
 type itemModel struct {
-	VariantID          string `bson:"variant_id"`
+	SKUID              string `bson:"sku_id"`
 	Quantity           int64  `bson:"quantity"`
 	PriceAmount        int64  `bson:"price_amount"`
 	DiscountPercentage int32  `bson:"discount_percentage"`
@@ -196,8 +196,8 @@ func (s *Storage) List(ctx context.Context, in *entities.SalesList) (*entities.L
 	if len(in.CreatedBy) > 0 {
 		filter[FieldCreatedBy] = bson.M{"$in": in.CreatedBy}
 	}
-	if len(in.VariantIDs) > 0 {
-		filter[FieldItemVariants] = bson.M{"$in": in.VariantIDs}
+	if len(in.SKUIDs) > 0 {
+		filter[FieldItemSKUs] = bson.M{"$in": in.SKUIDs}
 	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)

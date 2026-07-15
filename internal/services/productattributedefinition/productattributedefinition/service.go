@@ -32,7 +32,7 @@ func New(storage productattributedefinitions.Storage) *Service {
 func (s *Service) Get(ctx context.Context, id string) (*entities.ProductAttributeDefinition, error) {
 	d, err := s.storage.Get(ctx, id)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product attribute definition failed", slog.String("id", id), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product attribute definition failed", slog.String("id", id), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return d, nil
@@ -41,7 +41,7 @@ func (s *Service) Get(ctx context.Context, id string) (*entities.ProductAttribut
 func (s *Service) List(ctx context.Context, in *entities.ProductAttributeDefinitionsList) (*entities.List[entities.ProductAttributeDefinition], error) {
 	list, err := s.storage.List(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "list product attribute definitions failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list product attribute definitions failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil

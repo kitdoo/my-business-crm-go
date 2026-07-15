@@ -36,7 +36,6 @@ message ProductVariantsListRequest {
   message Sort {
     enum Field {
       FIELD_CREATED_AT = 0;
-      FIELD_SKU = 1;
     }
     Field field = 1 [(buf.validate.field).enum.defined_only = true];
     crm.types.common.SortDirection direction = 2;
@@ -46,7 +45,8 @@ message ProductVariantsListRequest {
   message Filter {
     repeated crm.types.product_variant.ProductVariantStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
     repeated string productIds = 2 [(buf.validate.field).repeated.items.string.uuid = true];
-    repeated string skus = 3;
+    reserved 3;
+    reserved "skus";
     optional crm.types.common.PeriodFilter createdAt = 4;
   }
   optional Filter filter = 4;
@@ -68,8 +68,11 @@ message ProductVariantCreateRequest {
     optional google.protobuf.FieldMask readMask = 1;
   }
   string productId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
-  string sku = 2 [(buf.validate.field).required = true, (buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 64];
+  reserved 2;
+  reserved "sku";
   map<string, crm.types.common.LocalizedString> attributes = 3;
+  // Display order, first is main.
+  repeated string imageIds = 4 [(buf.validate.field).repeated.items.string.min_len = 1];
   optional Options options = 99;
 }
 
@@ -77,7 +80,6 @@ message ProductVariantCreateResponse {
   crm.types.product_variant.ProductVariant variant = 1;
 }
 
-// sku is immutable and does not appear here.
 message ProductVariantUpdateRequest {
   message Options {
     optional google.protobuf.FieldMask updateMask = 1;

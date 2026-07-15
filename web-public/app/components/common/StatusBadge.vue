@@ -1,17 +1,21 @@
 <script setup>
 // Public, binary version of the admin StatusBadge (TZ §8.3) — visitors only
-// ever see "Dostupno" / "Nije dostupno", never Draft/Archived internals.
-import { tokens, CATALOG_STATUS_MAP } from '~/design/tokens.js'
+// ever see "Dostupno" / "Nije dostupno". Driven by stock (available =
+// in-stock), not the admin Draft/Active/Archived status — every product and
+// variant reaching web-public is already forced ACTIVE server-side (see
+// catalogClient.js), so an admin-status-based badge would never vary; stock
+// is the only thing a visitor actually needs signaled here.
+import { tokens } from '~/design/tokens.js'
 
 const props = defineProps({
-  status: { type: String, required: true },
+  available: { type: Boolean, required: true },
 })
 
-const family = computed(() => CATALOG_STATUS_MAP[props.status] || 'inactive')
+const family = computed(() => (props.available ? 'active' : 'inactive'))
 const colors = computed(() => tokens.color.status[family.value])
 
 const { t } = useI18n()
-const label = computed(() => (family.value === 'active' ? t('catalog.available') : t('catalog.unavailable')))
+const label = computed(() => (props.available ? t('catalog.available') : t('catalog.unavailable')))
 </script>
 
 <template>

@@ -28,6 +28,8 @@ import (
 	productservice "github.com/kitdoo/my-business-crm-go/internal/services/product/product"
 	productattributedefinitionsvc "github.com/kitdoo/my-business-crm-go/internal/services/productattributedefinition"
 	productattributedefinitionservice "github.com/kitdoo/my-business-crm-go/internal/services/productattributedefinition/productattributedefinition"
+	productskusvc "github.com/kitdoo/my-business-crm-go/internal/services/productsku"
+	productskuservice "github.com/kitdoo/my-business-crm-go/internal/services/productsku/productsku"
 	productvariantsvc "github.com/kitdoo/my-business-crm-go/internal/services/productvariant"
 	productvariantservice "github.com/kitdoo/my-business-crm-go/internal/services/productvariant/productvariant"
 	reportsvc "github.com/kitdoo/my-business-crm-go/internal/services/report"
@@ -52,10 +54,12 @@ import (
 	partnersmongo "github.com/kitdoo/my-business-crm-go/internal/storages/partners/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
 	pricesmongo "github.com/kitdoo/my-business-crm-go/internal/storages/prices/mongo"
-	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
-	productsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/products/mongo"
 	productattributedefinitions "github.com/kitdoo/my-business-crm-go/internal/storages/productattributedefinitions"
 	productattributedefinitionsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/productattributedefinitions/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/products"
+	productsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/products/mongo"
+	"github.com/kitdoo/my-business-crm-go/internal/storages/productskus"
+	productskusmongo "github.com/kitdoo/my-business-crm-go/internal/storages/productskus/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/productvariants"
 	productvariantsmongo "github.com/kitdoo/my-business-crm-go/internal/storages/productvariants/mongo"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/reports"
@@ -76,6 +80,7 @@ import (
 	pricehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/price"
 	producthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/product"
 	productattributedefinitionhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/productattributedefinition"
+	productskuhandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/productsku"
 	productvarianthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/productvariant"
 	reporthandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/report"
 	salehandler "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/handlers/sale"
@@ -130,8 +135,12 @@ func ServicesModule() fx.Option {
 		fx.Provide(AsGRPCHandler(productattributedefinitionhandler.New)),
 
 		fx.Provide(fx.Annotate(productvariantsmongo.New, fx.As(new(productvariants.Storage)))),
-		fx.Provide(fx.Annotate(productvariantservice.New, fx.As(new(productvariantsvc.Service)))),
+		fx.Provide(fx.Annotate(newProductVariantService, fx.As(new(productvariantsvc.Service)))),
 		fx.Provide(AsGRPCHandler(productvarianthandler.New)),
+
+		fx.Provide(fx.Annotate(productskusmongo.New, fx.As(new(productskus.Storage)))),
+		fx.Provide(fx.Annotate(productskuservice.New, fx.As(new(productskusvc.Service)))),
+		fx.Provide(AsGRPCHandler(productskuhandler.New)),
 
 		fx.Provide(fx.Annotate(pricesmongo.New, fx.As(new(prices.Storage)))),
 		fx.Provide(fx.Annotate(newPriceService, fx.As(new(price.Service)))),
@@ -203,12 +212,20 @@ const defaultCurrency = "RSD"
 // newPriceService resolves the system-wide currency from cfg.CRM.Currency,
 // falling back to defaultCurrency when the optional crm config section (or
 // just its currency field) is absent.
-func newPriceService(storage prices.Storage, variantsSvc productvariantsvc.Service, cfg *appconfig.Config) *priceservice.Service {
+func newPriceService(storage prices.Storage, skusSvc productskusvc.Service, cfg *appconfig.Config) *priceservice.Service {
 	currency := defaultCurrency
 	if cfg.CRM != nil && cfg.CRM.Currency != "" {
 		currency = cfg.CRM.Currency
 	}
-	return priceservice.New(storage, variantsSvc, currency)
+	return priceservice.New(storage, skusSvc, currency)
+}
+
+// newProductVariantService wires productvariant.Service with
+// productskus.Storage as its SKUsExistenceChecker (Delete guard) — see
+// productvariantsvc.SKUsExistenceChecker's doc for why this stays
+// Storage-shaped rather than depending on productsku.Service.
+func newProductVariantService(storage productvariants.Storage, products product.Service, skusStorage productskus.Storage) *productvariantservice.Service {
+	return productvariantservice.New(storage, products, skusStorage)
 }
 
 // newWarehouseService wires warehouse.Service with inventory.Service as

@@ -54,7 +54,7 @@ func (s *Service) Create(ctx context.Context, in *entities.WarehouseCreate) (*en
 	in.Merge(w)
 
 	if err := s.storage.Insert(ctx, w); err != nil {
-		s.logger.DebugContext(ctx, "insert warehouse failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert warehouse failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return w, nil
@@ -63,7 +63,7 @@ func (s *Service) Create(ctx context.Context, in *entities.WarehouseCreate) (*en
 func (s *Service) Get(ctx context.Context, id string) (*entities.Warehouse, error) {
 	w, err := s.storage.Get(ctx, id)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", id), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", id), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return w, nil
@@ -72,7 +72,7 @@ func (s *Service) Get(ctx context.Context, id string) (*entities.Warehouse, erro
 func (s *Service) List(ctx context.Context, in *entities.WarehousesList) (*entities.List[entities.Warehouse], error) {
 	list, err := s.storage.List(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "list warehouses failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list warehouses failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil
@@ -87,7 +87,7 @@ func (s *Service) Update(ctx context.Context, in *entities.WarehouseUpdate) (*en
 
 	w, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != w.Etag {
@@ -97,7 +97,7 @@ func (s *Service) Update(ctx context.Context, in *entities.WarehouseUpdate) (*en
 	in.Merge(w)
 	w.BeforeUpdate()
 	if err := s.storage.Update(ctx, w, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "update warehouse failed", slog.String("id", w.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "update warehouse failed", slog.String("id", w.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return w, nil
@@ -108,7 +108,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.WarehouseDelete) erro
 
 	w, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != w.Etag {
@@ -129,7 +129,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.WarehouseDelete) erro
 		NewUpdatedAt: *w.DeletedAt,
 		NewEtag:      w.Etag,
 	}); err != nil {
-		s.logger.DebugContext(ctx, "soft delete warehouse failed", slog.String("id", w.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "soft delete warehouse failed", slog.String("id", w.ID), slog.String("error", err.Error()))
 		return err
 	}
 	return nil
@@ -140,7 +140,7 @@ func (s *Service) Deactivate(ctx context.Context, in *entities.WarehouseDeactiva
 
 	w, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get warehouse failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != w.Etag {
@@ -155,7 +155,7 @@ func (s *Service) Deactivate(ctx context.Context, in *entities.WarehouseDeactiva
 	w.Status = entities.WarehouseStatusInactive
 	w.BeforeUpdate()
 	if err := s.storage.Update(ctx, w, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "deactivate warehouse failed", slog.String("id", w.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "deactivate warehouse failed", slog.String("id", w.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return w, nil

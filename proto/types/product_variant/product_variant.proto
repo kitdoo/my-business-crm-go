@@ -5,20 +5,24 @@ import "types/common/common_localized_string.proto";
 
 option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/product_variant;productvariantpb";
 
-// ProductVariant is the purchasable unit of a Product — one sku, one set
-// of images, one set of differentiating characteristics (color, size,
-// ...). Price lives in ProductPrice and stock in Inventory, both keyed by
-// variantId (not productId).
+// ProductVariant is the visual identity of a Product — one set of images,
+// one set of characteristics that change appearance (color, texture,
+// pattern, ...). It carries no sku and no price/stock: those live on
+// ProductSKU (crm.types.product_sku.ProductSKU), one or more of which
+// belong to each ProductVariant.
 message ProductVariant {
   string id = 1;
   int64 createdAt = 2;
   int64 updatedAt = 3;
   optional int64 deletedAt = 4;
   string productId = 5;
-  string sku = 6;
-  // Characteristic name -> localized value, differentiating this variant
-  // from its siblings (color, size, ...). Product.details holds
-  // characteristics shared by every variant instead.
+  reserved 6;
+  reserved "sku";
+  // Characteristic name -> localized value, differentiating this variant's
+  // appearance from its siblings (color, texture, pattern, ...).
+  // Product.details holds characteristics shared by every variant
+  // instead; ProductSKU.attributes holds characteristics that affect
+  // price/availability instead (size, thickness, packaging, ...).
   map<string, crm.types.common.LocalizedString> attributes = 7;
   // Display order; first is main.
   repeated string imageIds = 8;

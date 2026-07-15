@@ -11,14 +11,11 @@ import (
 // Storage persists product variants. All reads filter out soft-deleted
 // rows.
 type Storage interface {
-	// Insert returns errs.ErrProductVariantSKUConflict when sku collides
-	// with another active variant.
 	Insert(ctx context.Context, v *entities.ProductVariant) error
 	Get(ctx context.Context, id string) (*entities.ProductVariant, error)
 	List(ctx context.Context, in *entities.ProductVariantsList) (*entities.List[entities.ProductVariant], error)
 	// Update writes v, guarding on oldEtag when non-empty. Returns
-	// errs.ErrStaleEntity if the guard fails to match, or
-	// errs.ErrProductVariantSKUConflict on a SKU collision.
+	// errs.ErrStaleEntity if the guard fails to match.
 	Update(ctx context.Context, v *entities.ProductVariant, oldEtag string) error
 	// SoftDelete hides a variant by stamping deleted_at. The caller
 	// supplies the new timestamp and etag via in, so this method generates

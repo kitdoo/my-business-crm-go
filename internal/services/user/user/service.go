@@ -84,7 +84,7 @@ func (s *Service) Create(ctx context.Context, in *entities.UserCreate) (*entitie
 	in.Merge(u)
 
 	if err := s.storage.Insert(ctx, u); err != nil {
-		s.logger.DebugContext(ctx, "insert user failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert user failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return u, nil
@@ -93,7 +93,7 @@ func (s *Service) Create(ctx context.Context, in *entities.UserCreate) (*entitie
 func (s *Service) Get(ctx context.Context, id string) (*entities.User, error) {
 	u, err := s.storage.Get(ctx, id)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get user failed", slog.String("id", id), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get user failed", slog.String("id", id), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return u, nil
@@ -102,7 +102,7 @@ func (s *Service) Get(ctx context.Context, id string) (*entities.User, error) {
 func (s *Service) List(ctx context.Context, in *entities.UsersList) (*entities.List[entities.User], error) {
 	list, err := s.storage.List(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "list users failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list users failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil
@@ -117,7 +117,7 @@ func (s *Service) Update(ctx context.Context, in *entities.UserUpdate) (*entitie
 
 	u, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get user failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get user failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != u.Etag {
@@ -127,7 +127,7 @@ func (s *Service) Update(ctx context.Context, in *entities.UserUpdate) (*entitie
 	in.Merge(u)
 	u.BeforeUpdate()
 	if err := s.storage.Update(ctx, u, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "update user failed", slog.String("id", u.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "update user failed", slog.String("id", u.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return u, nil
@@ -138,7 +138,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.UserDelete) error {
 
 	u, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get user failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get user failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != u.Etag {
@@ -155,7 +155,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.UserDelete) error {
 		NewUpdatedAt: *u.DeletedAt,
 		NewEtag:      u.Etag,
 	}); err != nil {
-		s.logger.DebugContext(ctx, "soft delete user failed", slog.String("id", u.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "soft delete user failed", slog.String("id", u.ID), slog.String("error", err.Error()))
 		return err
 	}
 	return nil
@@ -169,7 +169,7 @@ func (s *Service) Login(ctx context.Context, in *entities.UserLogin) (string, *e
 		if errors.Is(err, errs.ErrUserNotFound) {
 			return "", nil, errs.ErrUserInvalidCredentials
 		}
-		s.logger.DebugContext(ctx, "get user by login failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "get user by login failed", slog.String("error", err.Error()))
 		return "", nil, err
 	}
 	if u.Status != entities.UserStatusActive {
@@ -202,7 +202,7 @@ func (s *Service) Authenticate(ctx context.Context, token string) (*entities.Use
 		if errors.Is(err, errs.ErrUserNotFound) {
 			return nil, errs.ErrUnauthenticated
 		}
-		s.logger.DebugContext(ctx, "get user for authenticate failed", slog.String("id", userID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get user for authenticate failed", slog.String("id", userID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if u.Status != entities.UserStatusActive {
@@ -216,7 +216,7 @@ func (s *Service) ChangePassword(ctx context.Context, in *entities.UserChangePas
 
 	u, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get user for change password failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get user for change password failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(in.CurrentPassword)); err != nil {
@@ -232,7 +232,7 @@ func (s *Service) ChangePassword(ctx context.Context, in *entities.UserChangePas
 	u.PasswordHash = hash
 	u.BeforeUpdate()
 	if err := s.storage.Update(ctx, u, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "change password failed", slog.String("id", u.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "change password failed", slog.String("id", u.ID), slog.String("error", err.Error()))
 		return err
 	}
 	return nil

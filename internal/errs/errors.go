@@ -83,13 +83,24 @@ var (
 	// active row.
 	ErrProductVariantNotFound = errors.New("product variant not found")
 
-	// ErrProductVariantSKUConflict is returned when a variant's SKU
-	// collides with another active variant's SKU.
-	ErrProductVariantSKUConflict = errors.New("product variant sku conflict")
-
 	// ErrProductVariantProductNotFound is returned when a variant's
 	// productId does not reference an existing product.
 	ErrProductVariantProductNotFound = errors.New("product variant product not found")
+
+	// ErrProductVariantHasSkus is returned when a variant's Delete is
+	// attempted while it still has active SKUs.
+	ErrProductVariantHasSkus = errors.New("product variant has skus")
+
+	// ErrProductSkuNotFound is returned when a SKU lookup finds no active row.
+	ErrProductSkuNotFound = errors.New("product sku not found")
+
+	// ErrProductSkuSKUConflict is returned when a SKU's sku string collides
+	// with another active SKU's.
+	ErrProductSkuSKUConflict = errors.New("product sku conflict")
+
+	// ErrProductSkuVariantNotFound is returned when a SKU's variantId does
+	// not reference an existing variant.
+	ErrProductSkuVariantNotFound = errors.New("product sku variant not found")
 
 	// ErrProductPriceNotFound is returned when a price lookup finds no
 	// active row.

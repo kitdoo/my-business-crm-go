@@ -10,12 +10,12 @@ import (
 
 // Service orchestrates product-price business rules on top of storages.Storage.
 type Service interface {
-	// Create returns errs.ErrProductVariantNotFound if variantId does not
-	// resolve to an existing variant, or errs.ErrProductPriceExists if the
-	// variant already has an active price.
+	// Create returns errs.ErrProductSkuNotFound if skuId does not resolve
+	// to an existing SKU, or errs.ErrProductPriceExists if the SKU already
+	// has an active price.
 	Create(ctx context.Context, in *entities.ProductPriceCreate) (*entities.ProductPrice, error)
-	// Get looks up the current price for a variant.
-	Get(ctx context.Context, variantID string) (*entities.ProductPrice, error)
+	// Get looks up the current price for a SKU.
+	Get(ctx context.Context, skuID string) (*entities.ProductPrice, error)
 	// Update snapshots the pre-change values into the price history log
 	// before applying in.
 	Update(ctx context.Context, in *entities.ProductPriceUpdate) (*entities.ProductPrice, error)

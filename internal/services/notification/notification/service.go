@@ -47,7 +47,7 @@ func (s *Service) Send(ctx context.Context, in *entities.NotificationMessage) er
 		ReplyTo: in.ReplyTo,
 	})
 	if err != nil {
-		s.logger.ErrorContext(ctx, "send notification email", slogx.Error(err))
+		s.logger.ErrorContext(ctx, "send notification email", slog.String("error", err.Error()))
 		return err
 	}
 	return nil

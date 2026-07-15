@@ -21,17 +21,18 @@ const (
 	ProductVariantStatusInactive
 )
 
-// ProductVariant is the purchasable unit of a Product — one sku, one set
-// of images, one set of differentiating characteristics (color, size,
-// …). Price lives in ProductPrice and stock in Inventory, both keyed by
-// VariantID (not ProductID).
+// ProductVariant is the visual identity of a Product — one set of images,
+// one set of characteristics that change appearance (color, texture,
+// pattern, …). It carries no SKU and no price/stock: those live on
+// ProductSKU, one or more of which belong to each ProductVariant.
 type ProductVariant struct {
 	ID        string
 	ProductID string
-	SKU       string // unique among active rows
 	// Attributes is characteristic name -> localized value, differentiating
-	// this variant from its siblings (color, size, …). Product.Details
-	// holds characteristics shared by every variant instead.
+	// this variant's appearance from its siblings (color, texture,
+	// pattern, …). Product.Details holds characteristics shared by every
+	// variant instead; ProductSKU.Attributes holds characteristics that
+	// affect price/availability instead (size, thickness, packaging, …).
 	Attributes map[string]LocalizedString
 	// ImageIDs are display order, first is main; populated via Update only.
 	ImageIDs  []string
@@ -73,8 +74,9 @@ func (v *ProductVariant) BeforeUpdate() {
 // freshly constructed ProductVariant via the converter.
 type ProductVariantCreate struct {
 	ProductID  string `normalize:"trim"`
-	SKU        string `normalize:"trim"`
 	Attributes map[string]LocalizedString
+	// ImageIDs are display order, first is main.
+	ImageIDs []string
 }
 
 func (c *ProductVariantCreate) Merge(dst *ProductVariant) *ProductVariant {
@@ -85,20 +87,17 @@ func (c *ProductVariantCreate) Merge(dst *ProductVariant) *ProductVariant {
 	return dst
 }
 
-// Validate requires ProductID and SKU; Attributes is optional and never
-// checked, same as Product.Details.
+// Validate requires ProductID; Attributes is optional and never checked,
+// same as Product.Details.
 func (c *ProductVariantCreate) Validate() error {
 	if c.ProductID == "" {
 		return fmt.Errorf("productId: required")
-	}
-	if c.SKU == "" {
-		return fmt.Errorf("sku: required")
 	}
 	return nil
 }
 
 // ProductVariantUpdate is the Update input. Nil fields mean "leave
-// unchanged". ProductID/SKU are immutable and have no field here.
+// unchanged". ProductID is immutable and has no field here.
 // ImageIDs is a full replacement applied only when present in the
 // request's update mask (a repeated field has no wire-level presence), so
 // the handler only sets it when requested.
@@ -130,7 +129,6 @@ type ProductVariantsListSortField int32
 
 const (
 	ProductVariantsListSortFieldCreatedAt ProductVariantsListSortField = iota
-	ProductVariantsListSortFieldSKU
 )
 
 type ProductVariantsListSort struct {
@@ -144,7 +142,6 @@ type ProductVariantsList struct {
 	ProductID         *string `normalize:"trim,nil_on_empty"`
 	Statuses          []ProductVariantStatus
 	ProductIDs        []string
-	SKUs              []string
 	CreatedAt         *PeriodFilter
 	Sort              ProductVariantsListSort
 	Pagination        ListPagination

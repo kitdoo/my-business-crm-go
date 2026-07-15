@@ -47,11 +47,3 @@ export const tokens = {
   radius: { sm: '4px', md: '8px', lg: '12px' },
   spacing: { unit: '4px' },
 }
-
-/** Public, binary status mapping for catalog cards — TZ §8.3. */
-export const CATALOG_STATUS_MAP = {
-  PRODUCT_STATUS_ACTIVE: 'active',
-  PRODUCT_STATUS_DRAFT: 'inactive',
-  PRODUCT_STATUS_INACTIVE: 'inactive',
-  PRODUCT_STATUS_UNSPECIFIED: 'inactive',
-}

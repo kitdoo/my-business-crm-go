@@ -13,7 +13,7 @@ import (
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
-	variantsvc "github.com/kitdoo/my-business-crm-go/internal/services/productvariant"
+	skusvc "github.com/kitdoo/my-business-crm-go/internal/services/productsku"
 
 	pricesvc "github.com/kitdoo/my-business-crm-go/internal/services/price"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/prices"
@@ -21,13 +21,12 @@ import (
 
 var _ pricesvc.Service = (*Service)(nil)
 
-// Service is the price.Service implementation. variants is
-// productvariant.Service, not productvariants.Storage — see
-// SERVICE_DEVELOPMENT_STANDARD.md's "A service controls only its own
-// storage" rule.
+// Service is the price.Service implementation. skus is productsku.Service,
+// not productskus.Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A
+// service controls only its own storage" rule.
 type Service struct {
-	storage  prices.Storage
-	variants variantsvc.Service
+	storage prices.Storage
+	skus    skusvc.Service
 	// currency is the system-wide ISO 4217 code from config, stamped onto
 	// every price created; see PROTO_DEVELOPMENT_STANDARD.md's currency
 	// note on crm.types.price.ProductPrice.
@@ -36,10 +35,10 @@ type Service struct {
 }
 
 // New builds a Service.
-func New(storage prices.Storage, variants variantsvc.Service, currency string) *Service {
+func New(storage prices.Storage, skus skusvc.Service, currency string) *Service {
 	return &Service{
 		storage:  storage,
-		variants: variants,
+		skus:     skus,
 		currency: currency,
 		logger:   slog.Default().With(slogx.Module("service:price")),
 	}
@@ -48,7 +47,7 @@ func New(storage prices.Storage, variants variantsvc.Service, currency string) *
 func (s *Service) Create(ctx context.Context, in *entities.ProductPriceCreate) (*entities.ProductPrice, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
-	if _, err := s.variants.Get(ctx, in.VariantID); err != nil {
+	if _, err := s.skus.Get(ctx, in.SKUID); err != nil {
 		return nil, err
 	}
 	in.Currency = s.currency
@@ -57,16 +56,16 @@ func (s *Service) Create(ctx context.Context, in *entities.ProductPriceCreate) (
 	in.Merge(p)
 
 	if err := s.storage.Insert(ctx, p); err != nil {
-		s.logger.DebugContext(ctx, "insert product price failed", slog.String("variantId", p.VariantID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert product price failed", slog.String("skuId", p.SKUID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
 }
 
-func (s *Service) Get(ctx context.Context, variantID string) (*entities.ProductPrice, error) {
-	p, err := s.storage.GetByVariantID(ctx, variantID)
+func (s *Service) Get(ctx context.Context, skuID string) (*entities.ProductPrice, error) {
+	p, err := s.storage.GetBySkuID(ctx, skuID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product price failed", slog.String("variantId", variantID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product price failed", slog.String("skuId", skuID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -77,7 +76,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product price failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product price failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -86,14 +85,14 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (
 
 	snapshot := &entities.ProductPrice{
 		ID:             uuid.NewString(),
-		VariantID:      p.VariantID,
+		SKUID:          p.SKUID,
 		PriceAmount:    p.PriceAmount,
 		Currency:       p.Currency,
 		DiscountAmount: p.DiscountAmount,
 		CreatedAt:      p.CreatedAt,
 	}
 	if err := s.storage.AppendHistory(ctx, snapshot); err != nil {
-		s.logger.DebugContext(ctx, "append product price history failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "append product price history failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 
@@ -101,7 +100,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (
 	in.Merge(p)
 	p.BeforeUpdate()
 	if err := s.storage.Update(ctx, p, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "update product price failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "update product price failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -112,7 +111,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductPriceDelete) e
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product price failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product price failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -129,7 +128,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductPriceDelete) e
 		NewUpdatedAt: *p.DeletedAt,
 		NewEtag:      p.Etag,
 	}); err != nil {
-		s.logger.DebugContext(ctx, "soft delete product price failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "soft delete product price failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return err
 	}
 	return nil
@@ -138,7 +137,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductPriceDelete) e
 func (s *Service) GetHistory(ctx context.Context, in *entities.ProductPriceGetHistory) (*entities.List[entities.ProductPrice], error) {
 	list, err := s.storage.GetHistory(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product price history failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product price history failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil

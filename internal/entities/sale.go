@@ -22,9 +22,9 @@ const (
 
 // SaleItem is immutable once the Sale is created — see Sale.
 type SaleItem struct {
-	VariantID string
-	Quantity  int64
-	// PriceAmount is captured from the variant's current ProductPrice at
+	SKUID    string
+	Quantity int64
+	// PriceAmount is captured from the sku's current ProductPrice at
 	// creation time (basis points), so later price changes never affect an
 	// existing sale.
 	PriceAmount int64
@@ -85,9 +85,9 @@ func (s *Sale) BeforeUpdate() {
 }
 
 // SaleCreateItem is one requested line; PriceAmount is not part of it — the
-// service looks up the variant's current price.
+// service looks up the sku's current price.
 type SaleCreateItem struct {
-	VariantID          string `normalize:"trim"`
+	SKUID              string `normalize:"trim"`
 	Quantity           int64
 	DiscountPercentage int32
 }
@@ -146,7 +146,7 @@ type SalesList struct {
 	PartnerID         *string `normalize:"trim,nil_on_empty"`
 	Statuses          []SaleStatus
 	CreatedBy         []string
-	VariantIDs        []string
+	SKUIDs            []string
 	CreatedAt         *PeriodFilter
 	Sort              SalesListSort
 	Pagination        ListPagination

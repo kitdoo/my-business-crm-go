@@ -28,7 +28,7 @@ const (
 	fieldPartnerID           = "partner_id"
 	fieldTotalAmount         = "total_amount"
 	fieldItems               = "items"
-	fieldItemVariantID       = "items.variant_id"
+	fieldItemSkuID           = "items.sku_id"
 	fieldItemQuantity        = "items.quantity"
 	fieldItemPriceAmount     = "items.price_amount"
 	fieldItemDiscountPercent = "items.discount_percentage"
@@ -198,7 +198,7 @@ func (s *Storage) GetPopularProducts(ctx context.Context, period *entities.Perio
 		periodMatch(period),
 		{{Key: "$unwind", Value: "$" + fieldItems}},
 		{{Key: "$group", Value: bson.M{
-			"_id":          "$" + fieldItemVariantID,
+			"_id":          "$" + fieldItemSkuID,
 			"quantitySold": bson.M{"$sum": "$" + fieldItemQuantity},
 			// $divide always returns a double in MongoDB's aggregation
 			// pipeline, even when both operands are integers — decoding
@@ -225,7 +225,7 @@ func (s *Storage) GetPopularProducts(ctx context.Context, period *entities.Perio
 	}
 
 	var out []struct {
-		VariantID    string `bson:"_id"`
+		SKUID        string `bson:"_id"`
 		QuantitySold int64  `bson:"quantitySold"`
 		TotalAmount  int64  `bson:"totalAmount"`
 	}
@@ -235,7 +235,7 @@ func (s *Storage) GetPopularProducts(ctx context.Context, period *entities.Perio
 
 	rows := make([]entities.PopularProductRow, 0, len(out))
 	for _, r := range out {
-		rows = append(rows, entities.PopularProductRow{VariantID: r.VariantID, QuantitySold: r.QuantitySold, TotalAmount: r.TotalAmount})
+		rows = append(rows, entities.PopularProductRow{SKUID: r.SKUID, QuantitySold: r.QuantitySold, TotalAmount: r.TotalAmount})
 	}
 	return rows, nil
 }

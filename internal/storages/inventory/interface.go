@@ -15,12 +15,12 @@ import (
 // touches.
 type Storage interface {
 	// Get returns errs.ErrInventoryNotFound if no row exists yet for the pair.
-	Get(ctx context.Context, variantID, warehouseID string) (*entities.Inventory, error)
+	Get(ctx context.Context, skuID, warehouseID string) (*entities.Inventory, error)
 	List(ctx context.Context, in *entities.InventoryList) (*entities.List[entities.Inventory], error)
 	// ApplyMovement atomically adjusts quantity by delta (positive or
 	// negative), creating the row on first touch. Returns
 	// errs.ErrInsufficientStock if delta would drive quantity below zero.
-	ApplyMovement(ctx context.Context, variantID, warehouseID string, delta int64) (*entities.Inventory, error)
+	ApplyMovement(ctx context.Context, skuID, warehouseID string, delta int64) (*entities.Inventory, error)
 	// HasStock reports whether warehouseID carries any non-zero quantity;
 	// backs warehouse.InventoryChecker.
 	HasStock(ctx context.Context, warehouseID string) (bool, error)

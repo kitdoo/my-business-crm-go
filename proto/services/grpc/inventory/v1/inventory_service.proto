@@ -15,7 +15,7 @@ service InventoryService {
 }
 
 message InventoryGetRequest {
-  string variantId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
 }
 
@@ -24,7 +24,7 @@ message InventoryGetResponse {
 }
 
 message InventoryListRequest {
-  optional string variantId = 1 [(buf.validate.field).string.uuid = true];
+  optional string skuId = 1 [(buf.validate.field).string.uuid = true];
   optional string warehouseId = 2 [(buf.validate.field).string.uuid = true];
   message Filter {
     optional int64 minQuantity = 1 [(buf.validate.field).int64.gte = 0];

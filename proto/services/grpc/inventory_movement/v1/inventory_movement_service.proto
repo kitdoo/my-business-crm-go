@@ -16,7 +16,7 @@ service InventoryMovementsService {
 }
 
 message InventoryMovementCreateRequest {
-  string variantId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   crm.types.inventory_movement.MovementType type = 3 [(buf.validate.field).required = true, (buf.validate.field).enum.defined_only = true];
   // Signed — positive for Receipt, negative for Sale/WriteOff.
@@ -36,7 +36,7 @@ message InventoryMovementsListRequest {
   optional string warehouseId = 1 [(buf.validate.field).string.uuid = true];
   message Filter {
     repeated crm.types.inventory_movement.MovementType types = 1 [(buf.validate.field).repeated.unique = true];
-    repeated string variantIds = 2 [(buf.validate.field).repeated.items.string.uuid = true];
+    repeated string skuIds = 2 [(buf.validate.field).repeated.items.string.uuid = true];
     repeated string createdBy = 3 [(buf.validate.field).repeated.items.string.uuid = true];
     optional crm.types.common.PeriodFilter createdAt = 4;
   }
@@ -50,7 +50,7 @@ message InventoryMovementsListResponse {
 }
 
 message InventoryMovementGetHistoryRequest {
-  string variantId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   message Filter {
     repeated crm.types.inventory_movement.MovementType types = 1 [(buf.validate.field).repeated.unique = true];

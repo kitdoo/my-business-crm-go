@@ -25,6 +25,13 @@ export default {
     delete: 'products:delete',
   },
 
+  // Read-only variants/SKUs/stock underneath the drawer's own fields (see
+  // EntityViewDrawer.vue / ProductVariantsReadOnly.vue) — editing any of it
+  // still only happens on the full /products/:id page.
+  view: {
+    variantsSummary: true,
+  },
+
   list: {
     columns: [
       { key: 'name', label: 'fields.name', component: 'LocalizedText' },

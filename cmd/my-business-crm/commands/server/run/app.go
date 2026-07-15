@@ -21,7 +21,6 @@ import (
 	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
 
 	coreerrs "github.com/altessa-s/go-atlas/core/errors"
-	slogx "github.com/altessa-s/go-atlas/observability/slog"
 	loggerfactory "github.com/altessa-s/go-atlas/observability/slog/factory"
 	fxmodules "github.com/kitdoo/my-business-crm-go/internal/fx"
 )
@@ -163,7 +162,7 @@ func (srv *App) gracefulShutdown(ctx context.Context, di *fx.App) error {
 	slog.Default().Info("initiating graceful shutdown...")
 
 	if err := di.Stop(shutdownCtx); err != nil {
-		slog.Default().Error("error during graceful shutdown", slogx.Error(err))
+		slog.Default().Error("error during graceful shutdown", slog.String("error", err.Error()))
 		return coreerrs.WrapOperation(err, "graceful shutdown")
 	}
 

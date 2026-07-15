@@ -96,7 +96,7 @@ func (s *Service) Create(ctx context.Context, in *entities.ProductCreate) (*enti
 	in.Merge(p)
 
 	if err := s.storage.Insert(ctx, p); err != nil {
-		s.logger.DebugContext(ctx, "insert product failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert product failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -105,7 +105,7 @@ func (s *Service) Create(ctx context.Context, in *entities.ProductCreate) (*enti
 func (s *Service) Get(ctx context.Context, id string) (*entities.Product, error) {
 	p, err := s.storage.Get(ctx, id)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product failed", slog.String("id", id), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product failed", slog.String("id", id), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -114,7 +114,7 @@ func (s *Service) Get(ctx context.Context, id string) (*entities.Product, error)
 func (s *Service) List(ctx context.Context, in *entities.ProductsList) (*entities.List[entities.Product], error) {
 	list, err := s.storage.List(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "list products failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list products failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil
@@ -129,7 +129,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductUpdate) (*enti
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -150,7 +150,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductUpdate) (*enti
 	in.Merge(p)
 	p.BeforeUpdate()
 	if err := s.storage.Update(ctx, p, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "update product failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "update product failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -161,7 +161,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductDelete) error 
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get product failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get product failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -171,7 +171,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductDelete) error 
 	if s.variants != nil {
 		hasVariants, err := s.variants.ExistsForProduct(ctx, p.ID)
 		if err != nil {
-			s.logger.DebugContext(ctx, "check product variants existence failed", slog.String("id", p.ID), slogx.Error(err))
+			s.logger.DebugContext(ctx, "check product variants existence failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 			return err
 		}
 		if hasVariants {
@@ -189,7 +189,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductDelete) error 
 		NewUpdatedAt: *p.DeletedAt,
 		NewEtag:      p.Etag,
 	}); err != nil {
-		s.logger.DebugContext(ctx, "soft delete product failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "soft delete product failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return err
 	}
 	return nil

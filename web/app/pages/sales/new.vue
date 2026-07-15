@@ -55,28 +55,41 @@ const clientValid = computed(() => {
 })
 
 let nextItemId = 0
-const items = ref([{ id: nextItemId++, variantId: null, quantity: 1, discountPercentage: 0, priceAmount: null, currency: null }])
+function blankItem() {
+  return { id: nextItemId++, variantId: null, skuId: null, quantity: 1, discountPercentage: 0, priceAmount: null, currency: null }
+}
+const items = ref([blankItem()])
 
-const itemsValid = computed(() => items.value.length > 0 && items.value.every((item) => item.variantId && item.quantity > 0))
+// variantId is UI-only here — it just scopes the second (SKU) select's
+// options; skuId is what actually gets sent to Create.
+const itemsValid = computed(() => items.value.length > 0 && items.value.every((item) => item.skuId && item.quantity > 0))
 const formValid = computed(() => clientValid.value && !!warehouseId.value && itemsValid.value)
 
 function addItem() {
-  items.value = [...items.value, { id: nextItemId++, variantId: null, quantity: 1, discountPercentage: 0, priceAmount: null, currency: null }]
+  items.value = [...items.value, blankItem()]
 }
 function removeItem(id) {
   items.value = items.value.filter((item) => item.id !== id)
 }
 
-async function onProductSelected(item) {
+function onVariantSelected(item, variantId) {
+  item.variantId = variantId
+  item.skuId = null
   item.priceAmount = null
   item.currency = null
-  if (!item.variantId) return
+}
+
+async function onSkuSelected(item, skuId) {
+  item.skuId = skuId
+  item.priceAmount = null
+  item.currency = null
+  if (!item.skuId) return
   try {
-    const price = await priceApi.get(item.variantId)
+    const price = await priceApi.get(item.skuId)
     item.priceAmount = price.priceAmount
     item.currency = price.currency
   } catch {
-    // No price set for this product yet — preview just stays blank;
+    // No price set for this SKU yet — preview just stays blank;
     // Create will still fail server-side if it truly requires one.
   }
 }
@@ -110,7 +123,7 @@ async function onSubmit() {
       warehouseId: warehouseId.value,
       partnerId: partnerId.value,
       items: items.value.map((item) => ({
-        variantId: item.variantId,
+        skuId: item.skuId,
         quantity: item.quantity,
         discountPercentage: item.discountPercentage,
       })),
@@ -175,12 +188,17 @@ async function onSubmit() {
             :label="t('fields.variant')"
             required
             class="flex-1"
-            @update:model-value="
-              (v) => {
-                item.variantId = v
-                onProductSelected(item)
-              }
-            "
+            @update:model-value="(v) => onVariantSelected(item, v)"
+          />
+          <RelationSelect
+            :model-value="item.skuId"
+            relation="productSkus"
+            :label="t('fields.sku')"
+            :filter="{ variantIds: [item.variantId] }"
+            :disabled="!item.variantId"
+            required
+            class="flex-1"
+            @update:model-value="(v) => onSkuSelected(item, v)"
           />
           <UButton icon="i-lucide-x" color="error" variant="ghost" class="mt-6" @click="removeItem(item.id)" />
         </div>

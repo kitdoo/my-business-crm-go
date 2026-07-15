@@ -49,7 +49,7 @@ message SalesListRequest {
     repeated crm.types.sale.SaleStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
     optional crm.types.common.PeriodFilter createdAt = 2;
     repeated string createdBy = 3 [(buf.validate.field).repeated.items.string.uuid = true];
-    repeated string variantIds = 4 [(buf.validate.field).repeated.items.string.uuid = true];
+    repeated string skuIds = 4 [(buf.validate.field).repeated.items.string.uuid = true];
   }
   optional Filter filter = 6;
   message Options {
@@ -67,7 +67,7 @@ message SalesListResponse {
 
 message SaleCreateRequest {
   message Item {
-    string variantId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+    string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
     int64 quantity = 2 [(buf.validate.field).required = true, (buf.validate.field).int64.gt = 0];
     int32 discountPercentage = 3 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   }

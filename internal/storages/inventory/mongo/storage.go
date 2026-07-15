@@ -30,7 +30,7 @@ const collectionName = "inventory"
 
 const (
 	FieldID          = "_id"
-	FieldVariantID   = "variant_id"
+	FieldSKUID       = "sku_id"
 	FieldWarehouseID = "warehouse_id"
 	FieldQuantity    = "quantity"
 	FieldUpdatedAt   = "updated_at"
@@ -42,7 +42,7 @@ const defaultListLimit = datamongo.DefaultListLimit
 
 type model struct {
 	ID          string        `bson:"_id"`
-	VariantID   string        `bson:"variant_id"`
+	SKUID       string        `bson:"sku_id"`
 	WarehouseID string        `bson:"warehouse_id"`
 	Quantity    int64         `bson:"quantity"`
 	UpdatedAt   time.Time     `bson:"updated_at"`
@@ -73,18 +73,18 @@ func New(db *datamongo.Mongo, c *cache.Cache) *Storage {
 	}
 }
 
-func cacheKey(variantID, warehouseID string) string {
-	return fmt.Sprintf("inventory:%s:%s", variantID, warehouseID)
+func cacheKey(skuID, warehouseID string) string {
+	return fmt.Sprintf("inventory:%s:%s", skuID, warehouseID)
 }
 
-func (s *Storage) Get(ctx context.Context, variantID, warehouseID string) (*entities.Inventory, error) {
+func (s *Storage) Get(ctx context.Context, skuID, warehouseID string) (*entities.Inventory, error) {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
 
 	var m model
-	err := s.cache.GetWithFallback(ctx, cacheKey(variantID, warehouseID), &m, func() (any, time.Duration, error) {
+	err := s.cache.GetWithFallback(ctx, cacheKey(skuID, warehouseID), &m, func() (any, time.Duration, error) {
 		var mm model
-		ferr := s.collection.FindOne(ctx, bson.M{FieldVariantID: variantID, FieldWarehouseID: warehouseID}).Decode(&mm)
+		ferr := s.collection.FindOne(ctx, bson.M{FieldSKUID: skuID, FieldWarehouseID: warehouseID}).Decode(&mm)
 		if errors.Is(ferr, mongo.ErrNoDocuments) {
 			return nil, 0, cache.ErrMissing
 		}
@@ -125,8 +125,8 @@ func (s *Storage) List(ctx context.Context, in *entities.InventoryList) (*entiti
 	}
 
 	filter := bson.M{}
-	if in.VariantID != nil {
-		filter[FieldVariantID] = *in.VariantID
+	if in.SKUID != nil {
+		filter[FieldSKUID] = *in.SKUID
 	}
 	if in.WarehouseID != nil {
 		filter[FieldWarehouseID] = *in.WarehouseID
@@ -179,13 +179,13 @@ func (s *Storage) List(ctx context.Context, in *entities.InventoryList) (*entiti
 // the read-modify-write race the TD calls out as the reason Inventory
 // carries an etag at all. A decrement is additionally guarded by an $expr
 // filter so quantity can never go negative; upsert is disabled for
-// decrements so a never-seen (variantID, warehouseID) pair reports
+// decrements so a never-seen (skuID, warehouseID) pair reports
 // errs.ErrInsufficientStock instead of materializing a negative row.
-func (s *Storage) ApplyMovement(ctx context.Context, variantID, warehouseID string, delta int64) (*entities.Inventory, error) {
+func (s *Storage) ApplyMovement(ctx context.Context, skuID, warehouseID string, delta int64) (*entities.Inventory, error) {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
 
-	filter := bson.M{FieldVariantID: variantID, FieldWarehouseID: warehouseID}
+	filter := bson.M{FieldSKUID: skuID, FieldWarehouseID: warehouseID}
 	upsert := delta >= 0
 	if !upsert {
 		filter["$expr"] = bson.M{"$gte": bson.A{bson.M{"$add": bson.A{"$" + FieldQuantity, delta}}, 0}}
@@ -213,9 +213,9 @@ func (s *Storage) ApplyMovement(ctx context.Context, variantID, warehouseID stri
 	// so a failed invalidation must not fail the whole movement — that
 	// would risk the caller retrying and double-applying delta. Worst case
 	// is a stale cached read until the entry's TTL expires.
-	if err := s.cache.Delete(ctx, cacheKey(variantID, warehouseID)); err != nil {
+	if err := s.cache.Delete(ctx, cacheKey(skuID, warehouseID)); err != nil {
 		s.logger.WarnContext(ctx, "invalidate inventory cache failed",
-			slog.String("variantId", variantID), slog.String("warehouseId", warehouseID), slogx.Error(err))
+			slog.String("skuId", skuID), slog.String("warehouseId", warehouseID), slog.String("error", err.Error()))
 	}
 	return converter.Convert(&m, &entities.Inventory{}), nil
 }

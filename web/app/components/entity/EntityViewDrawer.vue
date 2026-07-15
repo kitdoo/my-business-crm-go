@@ -9,7 +9,9 @@
 // `relatedSales`, when the entity config declares one (Client/Partner),
 // preloads that record's sales underneath — same `<EntityDataTable
 // entity="sales" :row-to="...">` the main /sales page already uses, just
-// scoped to this record via fixedFilter.
+// scoped to this record via fixedFilter. `config.view.variantsSummary`
+// (Product only) does the same for a read-only variants/SKUs/stock
+// summary — see ProductVariantsReadOnly.vue.
 import { columnComponent, columnProps } from '~/utils/entityColumns.js'
 
 const props = defineProps({
@@ -67,6 +69,8 @@ watch(() => [props.entity, props.id], load, { immediate: true })
       <h3 class="text-sm font-medium text-neutral-500">{{ t('entities.sales.label') }}</h3>
       <EntityDataTable entity="sales" :fixed-filter="relatedSales(record)" :row-to="(item) => `/sales/${item.id}`" />
     </div>
+
+    <ProductVariantsReadOnly v-if="config.view?.variantsSummary && record" :product-id="record.id" />
 
     <div class="flex justify-end gap-2">
       <UButton color="neutral" variant="soft" @click="emit('close')">{{ t('common.cancel') }}</UButton>

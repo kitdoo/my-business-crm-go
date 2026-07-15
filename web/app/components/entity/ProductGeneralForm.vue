@@ -2,15 +2,19 @@
 // Bespoke replacement for generic <EntityForm entity="products"> (TD
 // §12.1/§12.6) — Product needs a grouped block layout (brand/categories,
 // name/description, characteristics) that the generic field-by-field
-// <FormGrid> loop can't express. sku/price/images live on ProductVariant
-// (see ProductVariantGeneralForm.vue) — this form only ever handles the
-// Product's own shared fields; variants are added afterwards from the
-// Variants tab (multiple, one at a time — see ProductVariantsTab.vue).
+// <FormGrid> loop can't express. sku/price/stock live on ProductSKU and
+// images on ProductVariant (see ProductVariantGeneralForm.vue /
+// ProductSkuGeneralForm.vue) — this form only ever handles the
+// Product's own shared fields; variants are added afterwards inline on
+// this same page (multiple, one at a time — see ProductVariantsPanel.vue).
 //
 // Existing products default to a locked (read-only) view with a pencil
-// button to unlock editing — the fields are shown via a native <fieldset
-// disabled>, which cascades to every input inside without each field
-// component needing its own `disabled` prop. A brand-new product (no id
+// button to unlock editing — fields sit inside a native <fieldset
+// disabled>, which reliably cascades to plain <input>/<button> elements,
+// but custom dropdown components (RelationSelect, RelationMultiSelect,
+// USelect) render their trigger as something the browser's native
+// fieldset-disabling doesn't reach, so every one of those still needs its
+// own explicit `:disabled="locked"` below. A brand-new product (no id
 // yet) is never locked: there's nothing to look at until it's saved.
 import { getEnumOptions } from '~/config/enums.js'
 
@@ -108,6 +112,7 @@ async function onDelete() {
             relation="brands"
             :label="t('fields.brand')"
             :error="fieldErrors.brandId"
+            :disabled="locked"
             required
           />
           <RelationMultiSelect
@@ -115,6 +120,7 @@ async function onDelete() {
             relation="categories"
             :label="t('fields.categories')"
             :error="fieldErrors.categoryIds"
+            :disabled="locked"
           />
         </div>
 
@@ -142,6 +148,7 @@ async function onDelete() {
           <USelect
             v-model="form.status"
             :items="getEnumOptions('ProductStatus').map((v) => ({ label: t(`enums.status.${v}`), value: v }))"
+            :disabled="locked"
             class="w-full"
           />
         </UFormField>

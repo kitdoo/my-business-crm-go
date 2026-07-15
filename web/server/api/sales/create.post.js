@@ -2,7 +2,7 @@ import { getServiceClient, grpcCall } from '~~/server/utils/grpcClient'
 import { mapGrpcError } from '~~/server/utils/mapGrpcError'
 import { requireSession } from '~~/server/utils/session'
 
-// { clientId, warehouseId, partnerId?, items: [{variantId, quantity, discountPercentage}] } -> Sale
+// { clientId, warehouseId, partnerId?, items: [{skuId, quantity, discountPercentage}] } -> Sale
 // clientId is mutually exclusive with:
 // { newClient: {name, phone, email, address}, warehouseId, ... } -> Sale
 // (find-or-create by email server-side — TD §12.3, no separate "create a

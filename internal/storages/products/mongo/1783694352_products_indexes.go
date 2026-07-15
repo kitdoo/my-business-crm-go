@@ -36,9 +36,9 @@ func init() {
 			{
 				// Partial unique index frees SKU on soft delete. sku moved
 				// off Product onto ProductVariant afterwards — this index
-				// is dropped by the product_variants backfill migration;
-				// kept literal ("sku", not FieldSKU) since the field no
-				// longer exists on this collection's current model.
+				// is dropped by 1783980300_drop_legacy_sku_index.go; kept
+				// literal ("sku", not FieldSKU) since the field no longer
+				// exists on this collection's current model.
 				Keys: bson.D{{Key: "sku", Value: 1}},
 				Options: options.Index().
 					SetName("idx_products_sku_unique").

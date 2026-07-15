@@ -38,7 +38,7 @@ func (s *Service) Create(ctx context.Context, in *entities.PartnerCreate) (*enti
 	in.Merge(p)
 
 	if err := s.storage.Insert(ctx, p); err != nil {
-		s.logger.DebugContext(ctx, "insert partner failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert partner failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -47,7 +47,7 @@ func (s *Service) Create(ctx context.Context, in *entities.PartnerCreate) (*enti
 func (s *Service) Get(ctx context.Context, id string) (*entities.Partner, error) {
 	p, err := s.storage.Get(ctx, id)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get partner failed", slog.String("id", id), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get partner failed", slog.String("id", id), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -56,7 +56,7 @@ func (s *Service) Get(ctx context.Context, id string) (*entities.Partner, error)
 func (s *Service) List(ctx context.Context, in *entities.PartnersList) (*entities.List[entities.Partner], error) {
 	list, err := s.storage.List(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "list partners failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list partners failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil
@@ -67,7 +67,7 @@ func (s *Service) Update(ctx context.Context, in *entities.PartnerUpdate) (*enti
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get partner failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get partner failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -77,7 +77,7 @@ func (s *Service) Update(ctx context.Context, in *entities.PartnerUpdate) (*enti
 	in.Merge(p)
 	p.BeforeUpdate()
 	if err := s.storage.Update(ctx, p, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "update partner failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "update partner failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return p, nil
@@ -88,7 +88,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.PartnerDelete) error 
 
 	p, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get partner failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get partner failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != p.Etag {
@@ -105,7 +105,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.PartnerDelete) error 
 		NewUpdatedAt: *p.DeletedAt,
 		NewEtag:      p.Etag,
 	}); err != nil {
-		s.logger.DebugContext(ctx, "soft delete partner failed", slog.String("id", p.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "soft delete partner failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 		return err
 	}
 	return nil

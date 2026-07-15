@@ -1,7 +1,10 @@
 <script setup>
+import { localizedText } from '~/utils/localizedText.js'
+
 const { t, locale } = useI18n()
 const localeHead = useLocaleHead()
 const route = useRoute()
+const router = useRouter()
 const localePath = useLocalePath()
 const { getProduct } = useCatalogApi()
 const { addItem, setQty, getQty, removeItem } = useCart()
@@ -11,27 +14,70 @@ if (error.value) {
   throw createError({ statusCode: 404, statusMessage: 'Not found' })
 }
 
-const qtyInCart = computed(() => getQty(product.value?.sku))
+// Two-tier picker: first the visual Variant (color/texture — cubes), then,
+// within it, the purchasable SKU (size/thickness — pills), auto-selected
+// when there's only one. Both start on whichever pair matches the sku the
+// page loaded with; switching either tier swaps price/availability/photo
+// in place (each variant/SKU carries its own, see products/[sku].get.js)
+// and updates the URL to the newly selected SKU without a refetch.
+function findInitialIndices() {
+  const variants = product.value?.variants || []
+  for (let vi = 0; vi < variants.length; vi++) {
+    const si = variants[vi].skus.findIndex((s) => s.sku === product.value.sku)
+    if (si !== -1) return [vi, si]
+  }
+  return [0, 0]
+}
+const [initialVariantIndex, initialSkuIndex] = findInitialIndices()
+const selectedVariantIndex = ref(initialVariantIndex)
+const selectedSkuIndex = ref(initialSkuIndex)
+const activeVariant = computed(() => product.value?.variants?.[selectedVariantIndex.value])
+const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.value])
 
+function selectVariant(index) {
+  selectedVariantIndex.value = index
+  selectedSkuIndex.value = 0
+  activeImage.value = 0
+}
+function selectSku(index) {
+  selectedSkuIndex.value = index
+}
+function skuLabel(sku) {
+  return Object.values(sku.attributes || {}).map((v) => localizedText(v, locale.value)).filter(Boolean).join(' / ') || sku.sku
+}
+watch(activeSku, (sku) => {
+  if (sku && sku.sku !== route.params.sku) {
+    router.replace(localePath(`/katalog/${sku.sku}`))
+  }
+})
+
+const qtyInCart = computed(() => getQty(activeSku.value.sku))
+
+function cartItem() {
+  return { ...product.value, sku: activeSku.value.sku, price: activeSku.value.price }
+}
 function increment() {
-  if (qtyInCart.value) setQty(product.value.sku, qtyInCart.value + 1)
-  else addItem(product.value)
+  if (qtyInCart.value) setQty(activeSku.value.sku, qtyInCart.value + 1)
+  else addItem(cartItem())
 }
 function decrement() {
-  if (qtyInCart.value <= 1) removeItem(product.value.sku)
-  else setQty(product.value.sku, qtyInCart.value - 1)
+  if (qtyInCart.value <= 1) removeItem(activeSku.value.sku)
+  else setQty(activeSku.value.sku, qtyInCart.value - 1)
 }
 
 const activeImage = ref(0)
-const imageUrls = computed(() => (product.value?.imageIds?.length
-  ? product.value.imageIds.map((id) => `/api/images/${id}`)
+const imageUrls = computed(() => (activeVariant.value?.imageIds?.length
+  ? activeVariant.value.imageIds.map((id) => `/api/images/${id}`)
   : ['/images/product-placeholder.svg']))
+function prevImage() {
+  activeImage.value = (activeImage.value - 1 + imageUrls.value.length) % imageUrls.value.length
+}
+function nextImage() {
+  activeImage.value = (activeImage.value + 1) % imageUrls.value.length
+}
 
 const detailsEntries = computed(() => Object.entries(product.value?.details || {}))
 
-// Sibling variants (other colors/sizes of the same product) to switch
-// between — excludes the one currently shown.
-const otherVariants = computed(() => (product.value?.variants || []).filter((v) => v.sku !== product.value?.sku))
 function variantImageUrl(variant) {
   return variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}` : '/images/product-placeholder.svg'
 }
@@ -48,17 +94,41 @@ useSeoMeta({
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 
-const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeURIComponent(t('catalog.contactPrefill', { sku: product.value?.sku, name: productName.value }))}`)
+const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeURIComponent(t('catalog.contactPrefill', { sku: activeSku.value?.sku, name: productName.value }))}`)
 </script>
 
 <template>
   <div v-if="product" class="mx-auto max-w-5xl px-4 lg:px-8 py-12 lg:py-16">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
       <div>
-        <div class="aspect-square rounded-lg overflow-hidden bg-gray-50 mb-3">
+        <div class="relative aspect-square rounded-lg overflow-hidden bg-gray-50 mb-3 group">
           <NuxtImg :src="imageUrls[activeImage]" alt="" class="w-full h-full object-cover" />
+          <template v-if="imageUrls.length > 1">
+            <button
+              class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity"
+              :aria-label="t('catalog.prevPage')"
+              @click="prevImage"
+            >
+              <UIcon name="i-lucide-chevron-left" class="w-5 h-5" />
+            </button>
+            <button
+              class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity"
+              :aria-label="t('catalog.nextPage')"
+              @click="nextImage"
+            >
+              <UIcon name="i-lucide-chevron-right" class="w-5 h-5" />
+            </button>
+            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+              <span
+                v-for="(url, i) in imageUrls"
+                :key="url"
+                class="w-2 h-2 rounded-full"
+                :class="i === activeImage ? 'bg-white' : 'bg-white/50'"
+              />
+            </div>
+          </template>
         </div>
-        <div v-if="imageUrls.length > 1" class="flex gap-2">
+        <div v-if="imageUrls.length > 1" class="flex gap-2 mb-3">
           <button
             v-for="(url, i) in imageUrls"
             :key="url"
@@ -69,15 +139,47 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
             <img :src="url" alt="" class="w-full h-full object-cover" />
           </button>
         </div>
+
+        <div v-if="product.variants.length > 1">
+          <p class="text-sm text-black/50 mb-2">{{ t('catalog.otherVariants') }}</p>
+          <div class="flex gap-3 flex-wrap">
+            <button
+              v-for="(variant, i) in product.variants"
+              :key="i"
+              type="button"
+              class="w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors"
+              :class="i === selectedVariantIndex ? 'border-brand-500' : 'border-black/10 hover:border-brand-500'"
+              @click="selectVariant(i)"
+            >
+              <img :src="variantImageUrl(variant)" alt="" class="w-full h-full object-cover" />
+            </button>
+          </div>
+        </div>
       </div>
 
       <div>
-        <p class="text-sm text-black/40 mb-1">{{ product.sku }}</p>
+        <p class="text-sm text-black/40 mb-1">{{ activeSku.sku }}</p>
         <h1 class="text-2xl font-bold mb-3"><LocalizedText :value="product.name" /></h1>
-        <MoneyLabel v-if="product.price" :amount="product.price.amount" :currency="product.price.currency" class="text-xl font-semibold text-brand-700 block mb-3" />
-        <StatusBadge :status="product.status" class="mb-6 inline-block" />
+        <MoneyLabel v-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="text-xl font-semibold text-brand-700 block mb-3" />
+        <StatusBadge :available="activeSku.inStock" class="mb-6 inline-block" />
 
         <p class="text-black/70 leading-relaxed mb-6"><LocalizedText :value="product.description" /></p>
+
+        <div v-if="activeVariant.skus.length > 1" class="mb-6">
+          <p class="text-sm text-black/50 mb-2">{{ t('catalog.skuOptions') }}</p>
+          <div class="flex gap-2 flex-wrap">
+            <button
+              v-for="(sku, i) in activeVariant.skus"
+              :key="sku.sku"
+              type="button"
+              class="px-3 h-9 rounded-md border text-sm"
+              :class="i === selectedSkuIndex ? 'border-brand-500 text-brand-700' : 'border-black/15 text-black/60 hover:border-black/30'"
+              @click="selectSku(i)"
+            >
+              {{ skuLabel(sku) }}
+            </button>
+          </div>
+        </div>
 
         <dl v-if="detailsEntries.length" class="space-y-2 mb-6 text-sm">
           <div v-for="[key, value] in detailsEntries" :key="key" class="flex justify-between border-b border-black/10 pb-2">
@@ -85,20 +187,6 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
             <dd><LocalizedText :value="value" /></dd>
           </div>
         </dl>
-
-        <div v-if="otherVariants.length" class="mb-8">
-          <p class="text-sm text-black/50 mb-2">{{ t('catalog.otherVariants') }}</p>
-          <div class="flex gap-2 flex-wrap">
-            <NuxtLink
-              v-for="variant in otherVariants"
-              :key="variant.sku"
-              :to="localePath(`/katalog/${variant.sku}`)"
-              class="w-14 h-14 rounded overflow-hidden border-2 border-transparent hover:border-brand-500"
-            >
-              <img :src="variantImageUrl(variant)" alt="" class="w-full h-full object-cover" />
-            </NuxtLink>
-          </div>
-        </div>
 
         <div class="flex flex-col sm:flex-row gap-3">
           <div v-if="qtyInCart" class="flex items-center justify-center gap-4 border border-brand-500 rounded-md py-4 flex-1">
@@ -110,7 +198,7 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
               <UIcon name="i-lucide-plus" class="w-4 h-4" />
             </button>
           </div>
-          <UButton v-else variant="cta-outline" size="xl" class="py-4 text-base flex-1" @click="addItem(product)">
+          <UButton v-else variant="cta-outline" size="xl" class="py-4 text-base flex-1" @click="addItem(cartItem())">
             {{ t('cart.addToCart') }}
           </UButton>
           <UButton :to="contactHref" variant="cta-outline" size="xl" class="py-4 text-base flex-1">

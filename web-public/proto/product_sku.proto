@@ -1,0 +1,122 @@
+syntax = "proto3";
+package crm.grpc.product_sku.v1;
+
+import "google/protobuf/field_mask.proto";
+import "common.proto";
+
+// Mirrors proto/services/grpc/product_sku/v1/product_sku_service.proto
+// and proto/types/product_sku/product_sku.proto on the backend.
+// ProductSKU is the purchasable unit of a ProductVariant — one sku, its
+// own price (ProductPrice) and stock (Inventory), both keyed by skuId.
+
+message ProductSKU {
+  string id = 1;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
+  optional int64 deletedAt = 4;
+  string variantId = 5;
+  string sku = 6;
+  // Characteristic name -> localized value, affecting price/availability
+  // (size, thickness, packaging, ...).
+  map<string, crm.types.common.LocalizedString> attributes = 7;
+  ProductSkuStatus status = 8;
+  string etag = 101;
+}
+
+enum ProductSkuStatus {
+  PRODUCT_SKU_STATUS_UNSPECIFIED = 0;
+  PRODUCT_SKU_STATUS_DRAFT = 1;
+  PRODUCT_SKU_STATUS_ACTIVE = 2;
+  PRODUCT_SKU_STATUS_INACTIVE = 3;
+}
+
+service ProductSKUsService {
+  rpc Create (ProductSKUCreateRequest) returns (ProductSKUCreateResponse) {}
+  rpc Get (ProductSKUGetRequest) returns (ProductSKUGetResponse) {}
+  rpc List (ProductSKUsListRequest) returns (ProductSKUsListResponse) {}
+  rpc Update (ProductSKUUpdateRequest) returns (ProductSKUUpdateResponse) {}
+  rpc Delete (ProductSKUDeleteRequest) returns (ProductSKUDeleteResponse) {}
+}
+
+message ProductSKUGetRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string id = 1;
+  optional Options options = 99;
+}
+
+message ProductSKUGetResponse {
+  ProductSKU sku = 1;
+}
+
+message ProductSKUsListRequest {
+  optional string variantId = 1;
+  message Sort {
+    enum Field {
+      FIELD_CREATED_AT = 0;
+      FIELD_SKU = 1;
+    }
+    Field field = 1;
+    crm.types.common.SortDirection direction = 2;
+  }
+  optional Sort sort = 2;
+  optional crm.types.common.Pagination pagination = 3;
+  message Filter {
+    repeated ProductSkuStatus statuses = 1;
+    repeated string variantIds = 2;
+    repeated string skus = 3;
+    optional crm.types.common.PeriodFilter createdAt = 4;
+  }
+  optional Filter filter = 4;
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+    bool includeTotalCount = 2;
+  }
+  optional Options options = 99;
+}
+
+message ProductSKUsListResponse {
+  repeated ProductSKU items = 1;
+  optional int64 total = 2;
+  optional string nextCursor = 3;
+}
+
+message ProductSKUCreateRequest {
+  message Options {
+    optional google.protobuf.FieldMask readMask = 1;
+  }
+  string variantId = 1;
+  string sku = 2;
+  map<string, crm.types.common.LocalizedString> attributes = 3;
+  optional Options options = 99;
+}
+
+message ProductSKUCreateResponse {
+  ProductSKU sku = 1;
+}
+
+message ProductSKUUpdateRequest {
+  message Options {
+    optional google.protobuf.FieldMask updateMask = 1;
+    optional string etag = 2;
+  }
+  string id = 1;
+  map<string, crm.types.common.LocalizedString> attributes = 2;
+  optional ProductSkuStatus status = 3;
+  optional Options options = 99;
+}
+
+message ProductSKUUpdateResponse {
+  ProductSKU sku = 1;
+}
+
+message ProductSKUDeleteRequest {
+  message Options {
+    optional string etag = 1;
+  }
+  string id = 1;
+  optional Options options = 99;
+}
+
+message ProductSKUDeleteResponse {}

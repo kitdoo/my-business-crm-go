@@ -9,6 +9,7 @@ const props = defineProps({
   modelValue: { type: Array, default: () => [] },
   label: { type: String, default: '' },
   error: { type: String, default: '' },
+  disabled: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -40,6 +41,7 @@ onMounted(load)
       :model-value="modelValue"
       :items="items"
       :loading="loading"
+      :disabled="disabled"
       multiple
       value-key="value"
       class="w-full"

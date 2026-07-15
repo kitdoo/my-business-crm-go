@@ -1,8 +1,9 @@
 <script setup>
-// Product form followed by its variants, stacked on one page rather than
-// split across tabs. Price/Movements moved off Product onto ProductVariant's
-// own detail page (/product-variants/:id) — a product carries no sku/price/
-// stock of its own, only variants do.
+// The entire product creation/editing workflow lives on this one page:
+// Product -> Variants -> SKUs -> Price/Stock, all stacked inline, no tabs
+// and no navigating away to a separate page for any of it (see
+// ProductVariantsPanel.vue / ProductSkusPanel.vue). A product carries no
+// sku/price/stock of its own, only variants (and their SKUs) do.
 const route = useRoute()
 const { t } = useI18n()
 </script>
@@ -16,7 +17,7 @@ const { t } = useI18n()
 
     <div class="space-y-4">
       <h2 class="text-lg font-semibold">{{ t('entities.productVariants.label') }}</h2>
-      <ProductVariantsTab :product-id="route.params.id" />
+      <ProductVariantsPanel :product-id="route.params.id" />
     </div>
   </div>
 </template>

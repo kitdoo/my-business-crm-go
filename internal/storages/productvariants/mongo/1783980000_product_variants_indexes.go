@@ -23,14 +23,6 @@ func init() {
 				Options: options.Index().
 					SetName("idx_product_variants_deleted_at_product_id"),
 			},
-			{
-				// Partial unique index frees SKU on soft delete.
-				Keys: bson.D{{Key: FieldSKU, Value: 1}},
-				Options: options.Index().
-					SetName("idx_product_variants_sku_unique").
-					SetUnique(true).
-					SetPartialFilterExpression(bson.M{FieldDeletedAt: nil}),
-			},
 		})
 		return err
 	}, func(ctx context.Context, db *mongo.Database) error {
@@ -38,9 +30,6 @@ func init() {
 		if err := coll.Indexes().DropOne(ctx, "idx_product_variants_deleted_at_created_at"); err != nil {
 			return err
 		}
-		if err := coll.Indexes().DropOne(ctx, "idx_product_variants_deleted_at_product_id"); err != nil {
-			return err
-		}
-		return coll.Indexes().DropOne(ctx, "idx_product_variants_sku_unique")
+		return coll.Indexes().DropOne(ctx, "idx_product_variants_deleted_at_product_id")
 	})
 }

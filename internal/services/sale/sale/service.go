@@ -17,7 +17,7 @@ import (
 	invmovementsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
 	partnersvc "github.com/kitdoo/my-business-crm-go/internal/services/partner"
 	pricesvc "github.com/kitdoo/my-business-crm-go/internal/services/price"
-	variantsvc "github.com/kitdoo/my-business-crm-go/internal/services/productvariant"
+	skusvc "github.com/kitdoo/my-business-crm-go/internal/services/productsku"
 	salesvc "github.com/kitdoo/my-business-crm-go/internal/services/sale"
 	warehousesvc "github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/sales"
@@ -26,7 +26,7 @@ import (
 var _ salesvc.Service = (*Service)(nil)
 
 // Service is the sale.Service implementation. clients/warehouses/partners/
-// variants/prices/inventory are the respective entities' Service, not
+// skus/prices/inventory are the respective entities' Service, not
 // their Storage — see SERVICE_DEVELOPMENT_STANDARD.md's "A service
 // controls only its own storage" rule.
 type Service struct {
@@ -34,7 +34,7 @@ type Service struct {
 	clients    clientsvc.Service
 	warehouses warehousesvc.Service
 	partners   partnersvc.Service
-	variants   variantsvc.Service
+	skus       skusvc.Service
 	prices     pricesvc.Service
 	inventory  inventorysvc.Service
 	movements  invmovementsvc.Service
@@ -47,7 +47,7 @@ func New(
 	clients clientsvc.Service,
 	warehouses warehousesvc.Service,
 	partners partnersvc.Service,
-	variants variantsvc.Service,
+	skus skusvc.Service,
 	prices pricesvc.Service,
 	inventory inventorysvc.Service,
 	movements invmovementsvc.Service,
@@ -57,7 +57,7 @@ func New(
 		clients:    clients,
 		warehouses: warehouses,
 		partners:   partners,
-		variants:   variants,
+		skus:       skus,
 		prices:     prices,
 		inventory:  inventory,
 		movements:  movements,
@@ -110,7 +110,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	})
 
 	if err := s.storage.Insert(ctx, sale); err != nil {
-		s.logger.DebugContext(ctx, "insert sale failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert sale failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 
@@ -120,7 +120,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	// used here, consistent with InventoryMovement.Create.
 	for _, item := range sale.Items {
 		if _, err := s.movements.Create(ctx, &entities.InventoryMovementCreate{
-			VariantID:   item.VariantID,
+			SKUID:       item.SKUID,
 			WarehouseID: sale.WarehouseID,
 			Type:        entities.MovementTypeSale,
 			Quantity:    -item.Quantity,
@@ -129,7 +129,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 			CreatedBy:   sale.CreatedBy,
 		}); err != nil {
 			s.logger.ErrorContext(ctx, "record sale movement failed; sale and prior items' stock already committed",
-				slog.String("saleId", sale.ID), slog.String("variantId", item.VariantID), slogx.Error(err))
+				slog.String("saleId", sale.ID), slog.String("skuId", item.SKUID), slog.String("error", err.Error()))
 			return nil, err
 		}
 	}
@@ -137,7 +137,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	return sale, nil
 }
 
-// buildItems validates each variant's existence and stock availability at
+// buildItems validates each SKU's existence and stock availability at
 // warehouseID, captures its current price, and computes per-line and total
 // amounts (basis points).
 func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entities.SaleCreateItem) ([]entities.SaleItem, int64, error) {
@@ -145,16 +145,16 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 	var total int64
 
 	for _, req := range in {
-		if _, err := s.variants.Get(ctx, req.VariantID); err != nil {
+		if _, err := s.skus.Get(ctx, req.SKUID); err != nil {
 			return nil, 0, err
 		}
 
-		price, err := s.prices.Get(ctx, req.VariantID)
+		price, err := s.prices.Get(ctx, req.SKUID)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		stock, err := s.inventory.Get(ctx, req.VariantID, warehouseID)
+		stock, err := s.inventory.Get(ctx, req.SKUID, warehouseID)
 		if err != nil {
 			if errors.Is(err, errs.ErrInventoryNotFound) {
 				return nil, 0, errs.ErrInsufficientStock
@@ -169,7 +169,7 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 		total += line
 
 		items = append(items, entities.SaleItem{
-			VariantID:          req.VariantID,
+			SKUID:              req.SKUID,
 			Quantity:           req.Quantity,
 			PriceAmount:        price.PriceAmount,
 			DiscountPercentage: req.DiscountPercentage,
@@ -182,7 +182,7 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 func (s *Service) Get(ctx context.Context, id string) (*entities.Sale, error) {
 	sl, err := s.storage.Get(ctx, id)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", id), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", id), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return sl, nil
@@ -191,7 +191,7 @@ func (s *Service) Get(ctx context.Context, id string) (*entities.Sale, error) {
 func (s *Service) List(ctx context.Context, in *entities.SalesList) (*entities.List[entities.Sale], error) {
 	list, err := s.storage.List(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "list sales failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list sales failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil
@@ -206,7 +206,7 @@ func (s *Service) UpdateStatus(ctx context.Context, in *entities.SaleUpdateStatu
 
 	sl, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != sl.Etag {
@@ -220,7 +220,7 @@ func (s *Service) UpdateStatus(ctx context.Context, in *entities.SaleUpdateStatu
 	sl.Status = in.Status
 	sl.BeforeUpdate()
 	if err := s.storage.Update(ctx, sl, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "update sale status failed", slog.String("id", sl.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "update sale status failed", slog.String("id", sl.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return sl, nil
@@ -231,7 +231,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 
 	sl, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get sale failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != sl.Etag {
@@ -249,7 +249,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 	// Best-effort restock: see Create for why this isn't transactional.
 	for _, item := range sl.Items {
 		if _, err := s.movements.Create(ctx, &entities.InventoryMovementCreate{
-			VariantID:   item.VariantID,
+			SKUID:       item.SKUID,
 			WarehouseID: sl.WarehouseID,
 			Type:        entities.MovementTypeAdjustment,
 			Quantity:    item.Quantity,
@@ -258,7 +258,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 			CreatedBy:   in.CreatedBy,
 		}); err != nil {
 			s.logger.ErrorContext(ctx, "restock movement on sale cancel failed",
-				slog.String("saleId", sl.ID), slog.String("variantId", item.VariantID), slogx.Error(err))
+				slog.String("saleId", sl.ID), slog.String("skuId", item.SKUID), slog.String("error", err.Error()))
 			return nil, err
 		}
 	}
@@ -267,7 +267,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 	sl.Status = entities.SaleStatusCancelled
 	sl.BeforeUpdate()
 	if err := s.storage.Update(ctx, sl, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "cancel sale failed", slog.String("id", sl.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "cancel sale failed", slog.String("id", sl.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return sl, nil

@@ -126,7 +126,7 @@ func (h *Handler) List(ctx context.Context, in *salesvcpb.SalesListRequest) (*sa
 			return entities.SaleStatus(st)
 		})
 		listIn.CreatedBy = f.GetCreatedBy()
-		listIn.VariantIDs = f.GetVariantIds()
+		listIn.SKUIDs = f.GetSkuIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withProtoCodecs)
 		}
@@ -198,8 +198,8 @@ func MapError(err error) error {
 		return status.Error(codes.InvalidArgument, errs.ErrWarehouseNotFound.Error())
 	case errors.Is(err, errs.ErrPartnerNotFound):
 		return status.Error(codes.InvalidArgument, errs.ErrPartnerNotFound.Error())
-	case errors.Is(err, errs.ErrProductNotFound):
-		return status.Error(codes.InvalidArgument, errs.ErrProductNotFound.Error())
+	case errors.Is(err, errs.ErrProductSkuNotFound):
+		return status.Error(codes.InvalidArgument, errs.ErrProductSkuNotFound.Error())
 	case errors.Is(err, errs.ErrProductPriceNotFound):
 		return status.Error(codes.FailedPrecondition, errs.ErrProductPriceNotFound.Error())
 	case errors.Is(err, errs.ErrSaleWarehouseInactive):

@@ -26,7 +26,7 @@ message SalesByPartnerRow {
 }
 
 message PopularProductRow {
-  string variantId = 1;
+  string skuId = 1;
   int64 quantitySold = 2;
   int64 totalAmount = 3;
 }
@@ -38,7 +38,7 @@ message TurnoverRow {
 }
 
 message StockLevelRow {
-  string variantId = 1;
+  string skuId = 1;
   string warehouseId = 2;
   int64 quantity = 3;
 }

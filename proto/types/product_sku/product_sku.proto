@@ -1,0 +1,32 @@
+syntax = "proto3";
+package crm.types.product_sku;
+
+import "types/common/common_localized_string.proto";
+
+option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/product_sku;productskupb";
+
+// ProductSKU is the purchasable unit of a ProductVariant — one sku, one
+// set of characteristics that affect price or availability (size,
+// thickness, packaging, ...). Price lives in ProductPrice and stock in
+// Inventory, both keyed by skuId (not variantId).
+message ProductSKU {
+  string id = 1;
+  int64 createdAt = 2;
+  int64 updatedAt = 3;
+  optional int64 deletedAt = 4;
+  string variantId = 5;
+  string sku = 6;
+  // Characteristic name -> localized value, affecting price/availability
+  // (size, thickness, packaging, ...). ProductVariant.attributes holds
+  // characteristics that change appearance instead.
+  map<string, crm.types.common.LocalizedString> attributes = 7;
+  ProductSkuStatus status = 8;
+  string etag = 101;
+}
+
+enum ProductSkuStatus {
+  PRODUCT_SKU_STATUS_UNSPECIFIED = 0;
+  PRODUCT_SKU_STATUS_DRAFT = 1;
+  PRODUCT_SKU_STATUS_ACTIVE = 2;
+  PRODUCT_SKU_STATUS_INACTIVE = 3;
+}

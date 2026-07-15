@@ -23,7 +23,7 @@ const collectionName = "inventory_movements"
 
 const (
 	FieldID          = "_id"
-	FieldVariantID   = "variant_id"
+	FieldSKUID       = "sku_id"
 	FieldWarehouseID = "warehouse_id"
 	FieldType        = "type"
 	FieldCreatedBy   = "created_by"
@@ -35,7 +35,7 @@ const defaultListLimit = datamongo.DefaultListLimit
 
 type model struct {
 	ID          string                `bson:"_id"`
-	VariantID   string                `bson:"variant_id"`
+	SKUID       string                `bson:"sku_id"`
 	WarehouseID string                `bson:"warehouse_id"`
 	Type        entities.MovementType `bson:"type"`
 	Quantity    int64                 `bson:"quantity"`
@@ -85,8 +85,8 @@ func (s *Storage) List(ctx context.Context, in *entities.InventoryMovementsList)
 	if len(in.Types) > 0 {
 		filter[FieldType] = bson.M{"$in": in.Types}
 	}
-	if len(in.VariantIDs) > 0 {
-		filter[FieldVariantID] = bson.M{"$in": in.VariantIDs}
+	if len(in.SKUIDs) > 0 {
+		filter[FieldSKUID] = bson.M{"$in": in.SKUIDs}
 	}
 	if len(in.CreatedBy) > 0 {
 		filter[FieldCreatedBy] = bson.M{"$in": in.CreatedBy}
@@ -102,7 +102,7 @@ func (s *Storage) GetHistory(ctx context.Context, in *entities.InventoryMovement
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
 
-	filter := bson.M{FieldVariantID: in.VariantID, FieldWarehouseID: in.WarehouseID}
+	filter := bson.M{FieldSKUID: in.SKUID, FieldWarehouseID: in.WarehouseID}
 	if len(in.Types) > 0 {
 		filter[FieldType] = bson.M{"$in": in.Types}
 	}

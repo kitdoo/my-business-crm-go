@@ -38,7 +38,7 @@ func (s *Service) Create(ctx context.Context, in *entities.ClientCreate) (*entit
 	in.Merge(c)
 
 	if err := s.storage.Insert(ctx, c); err != nil {
-		s.logger.DebugContext(ctx, "insert client failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "insert client failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return c, nil
@@ -47,7 +47,7 @@ func (s *Service) Create(ctx context.Context, in *entities.ClientCreate) (*entit
 func (s *Service) Get(ctx context.Context, id string) (*entities.Client, error) {
 	c, err := s.storage.Get(ctx, id)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get client failed", slog.String("id", id), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get client failed", slog.String("id", id), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return c, nil
@@ -61,7 +61,7 @@ func (s *Service) FindOrCreateByEmail(ctx context.Context, in *entities.ClientCr
 		Pagination: entities.ListPagination{Limit: 1},
 	})
 	if err != nil {
-		s.logger.DebugContext(ctx, "list clients by email failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list clients by email failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	if len(existing.Items) > 0 {
@@ -74,7 +74,7 @@ func (s *Service) FindOrCreateByEmail(ctx context.Context, in *entities.ClientCr
 func (s *Service) List(ctx context.Context, in *entities.ClientsList) (*entities.List[entities.Client], error) {
 	list, err := s.storage.List(ctx, in)
 	if err != nil {
-		s.logger.DebugContext(ctx, "list clients failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "list clients failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return list, nil
@@ -85,7 +85,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ClientUpdate) (*entit
 
 	c, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get client failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get client failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	if in.Etag != nil && *in.Etag != c.Etag {
@@ -95,7 +95,7 @@ func (s *Service) Update(ctx context.Context, in *entities.ClientUpdate) (*entit
 	in.Merge(c)
 	c.BeforeUpdate()
 	if err := s.storage.Update(ctx, c, oldEtag); err != nil {
-		s.logger.DebugContext(ctx, "update client failed", slog.String("id", c.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "update client failed", slog.String("id", c.ID), slog.String("error", err.Error()))
 		return nil, err
 	}
 	return c, nil
@@ -106,7 +106,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ClientDelete) error {
 
 	c, err := s.storage.Get(ctx, in.ID)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get client failed", slog.String("id", in.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "get client failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
 	if in.Etag != nil && *in.Etag != c.Etag {
@@ -123,7 +123,7 @@ func (s *Service) Delete(ctx context.Context, in *entities.ClientDelete) error {
 		NewUpdatedAt: *c.DeletedAt,
 		NewEtag:      c.Etag,
 	}); err != nil {
-		s.logger.DebugContext(ctx, "soft delete client failed", slog.String("id", c.ID), slogx.Error(err))
+		s.logger.DebugContext(ctx, "soft delete client failed", slog.String("id", c.ID), slog.String("error", err.Error()))
 		return err
 	}
 	return nil

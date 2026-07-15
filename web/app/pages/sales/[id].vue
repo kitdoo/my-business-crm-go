@@ -122,7 +122,7 @@ onMounted(load)
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-neutral-200 text-left">
-              <th class="py-2 px-3 font-medium text-neutral-600">{{ t('fields.variant') }}</th>
+              <th class="py-2 px-3 font-medium text-neutral-600">{{ t('fields.sku') }}</th>
               <th class="py-2 px-3 font-medium text-neutral-600">{{ t('fields.quantity') }}</th>
               <th class="py-2 px-3 font-medium text-neutral-600">{{ t('fields.priceAmount') }}</th>
               <th class="py-2 px-3 font-medium text-neutral-600">{{ t('fields.discountPercentage') }}</th>
@@ -130,7 +130,7 @@ onMounted(load)
           </thead>
           <tbody>
             <tr v-for="(item, index) in sale.items" :key="index" class="border-b border-neutral-100">
-              <td class="py-2 px-3"><RelationLabel :value="item.variantId" relation="productVariants" /></td>
+              <td class="py-2 px-3"><RelationLabel :value="item.skuId" relation="productSkus" /></td>
               <td class="py-2 px-3">{{ item.quantity }}</td>
               <td class="py-2 px-3"><MoneyAmountLabel :value="item.priceAmount" /></td>
               <td class="py-2 px-3">{{ item.discountPercentage }}%</td>

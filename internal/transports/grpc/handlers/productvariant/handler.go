@@ -141,7 +141,6 @@ func (h *Handler) List(ctx context.Context, in *variantsvcpb.ProductVariantsList
 			return entities.ProductVariantStatus(s)
 		})
 		listIn.ProductIDs = f.GetProductIds()
-		listIn.SKUs = f.GetSkus()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withPeriodCodec)
 		}
@@ -203,10 +202,10 @@ func MapError(err error) error {
 		return nil
 	case errors.Is(err, errs.ErrProductVariantNotFound):
 		return status.Error(codes.NotFound, errs.ErrProductVariantNotFound.Error())
-	case errors.Is(err, errs.ErrProductVariantSKUConflict):
-		return status.Error(codes.AlreadyExists, errs.ErrProductVariantSKUConflict.Error())
 	case errors.Is(err, errs.ErrProductVariantProductNotFound):
 		return status.Error(codes.InvalidArgument, errs.ErrProductVariantProductNotFound.Error())
+	case errors.Is(err, errs.ErrProductVariantHasSkus):
+		return status.Error(codes.FailedPrecondition, errs.ErrProductVariantHasSkus.Error())
 	case errors.Is(err, errs.ErrStaleEntity):
 		return status.Error(codes.Aborted, errs.ErrStaleEntity.Error())
 	case errors.Is(err, errs.ErrInvalidListCursor):

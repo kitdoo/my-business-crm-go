@@ -124,7 +124,7 @@ func (h *Handler) upload(rw writer.ReadWriter) {
 
 	id := uuid.NewString()
 	if err := os.WriteFile(filepath.Join(h.dir, id), data, 0o640); err != nil {
-		h.logger.ErrorContext(ctx, "write uploaded image failed", slog.String("id", id), slogx.Error(err))
+		h.logger.ErrorContext(ctx, "write uploaded image failed", slog.String("id", id), slog.String("error", err.Error()))
 		_ = rw.WriteError(errors.New("internal error"), http.StatusInternalServerError)
 		return
 	}
@@ -139,7 +139,7 @@ func (h *Handler) upload(rw writer.ReadWriter) {
 		SizeBytes:   int64(len(data)),
 		CreatedAt:   time.Now().UTC(),
 	}); err != nil {
-		h.logger.ErrorContext(ctx, "insert image metadata failed", slog.String("id", id), slogx.Error(err))
+		h.logger.ErrorContext(ctx, "insert image metadata failed", slog.String("id", id), slog.String("error", err.Error()))
 	}
 
 	_ = rw.Write(map[string]string{"id": id})

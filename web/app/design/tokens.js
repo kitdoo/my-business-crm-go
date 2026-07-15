@@ -84,6 +84,12 @@ export const STATUS_COLOR_MAP = {
     PRODUCT_VARIANT_STATUS_INACTIVE: 'inactive',
     PRODUCT_VARIANT_STATUS_UNSPECIFIED: 'inactive',
   },
+  productSku: {
+    PRODUCT_SKU_STATUS_DRAFT: 'warning',
+    PRODUCT_SKU_STATUS_ACTIVE: 'active',
+    PRODUCT_SKU_STATUS_INACTIVE: 'inactive',
+    PRODUCT_SKU_STATUS_UNSPECIFIED: 'inactive',
+  },
   sale: {
     SALE_STATUS_DRAFT: 'inactive',
     SALE_STATUS_PAID: 'info',

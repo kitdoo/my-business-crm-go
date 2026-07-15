@@ -18,7 +18,7 @@ service PricesService {
 }
 
 message ProductPriceGetRequest {
-  string variantId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
 }
 
 message ProductPriceGetResponse {
@@ -26,7 +26,7 @@ message ProductPriceGetResponse {
 }
 
 message ProductPriceCreateRequest {
-  string variantId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   int64 priceAmount = 2 [(buf.validate.field).required = true, (buf.validate.field).int64.gte = 0];
   optional int64 discountAmount = 3 [(buf.validate.field).int64.gte = 0];
 }
@@ -61,7 +61,7 @@ message ProductPriceDeleteRequest {
 message ProductPriceDeleteResponse {}
 
 message ProductPriceGetHistoryRequest {
-  string variantId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   message Filter {
     optional crm.types.common.PeriodFilter createdAt = 1;
   }

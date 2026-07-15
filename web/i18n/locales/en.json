@@ -48,6 +48,11 @@
       "create": "New variant",
       "edit": "Edit variant"
     },
+    "productSkus": {
+      "label": "SKUs",
+      "create": "New SKU",
+      "edit": "Edit SKU"
+    },
     "inventory": {
       "label": "Inventory"
     },
@@ -151,6 +156,10 @@
       "PRODUCT_VARIANT_STATUS_ACTIVE": "Active",
       "PRODUCT_VARIANT_STATUS_INACTIVE": "Inactive",
       "PRODUCT_VARIANT_STATUS_UNSPECIFIED": "Unspecified",
+      "PRODUCT_SKU_STATUS_DRAFT": "Draft",
+      "PRODUCT_SKU_STATUS_ACTIVE": "Active",
+      "PRODUCT_SKU_STATUS_INACTIVE": "Inactive",
+      "PRODUCT_SKU_STATUS_UNSPECIFIED": "Unspecified",
       "MOVEMENT_TYPE_RECEIPT": "Receipt",
       "MOVEMENT_TYPE_SALE": "Sale",
       "MOVEMENT_TYPE_WRITE_OFF": "Write-off",
@@ -247,6 +256,11 @@
             "icon": "i-lucide-box",
             "title": "Fill in the catalog",
             "description": "Add brands, categories and products in the Brands, categories, products section."
+          },
+          {
+            "icon": "i-lucide-layers",
+            "title": "Add product colors and sizes",
+            "description": "A product is a card like \"U Stone\". For each color create a Variant with a \"color\" attribute, and inside each variant create a SKU per size, where price and stock are set. Example: U Stone → variant \"black\" → SKUs \"S\", \"M\", \"L\"; variant \"white\" → SKUs \"S\", \"M\", \"L\"."
           },
           {
             "icon": "i-lucide-warehouse",

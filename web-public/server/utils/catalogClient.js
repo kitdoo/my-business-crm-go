@@ -1,8 +1,8 @@
 import { getServiceClient, grpcCall } from './grpcClient.js'
 
 // Server-only catalog reads (TZ §2/§8.2). ProductsService.List,
-// ProductVariantsService.List, PricesService.Get and
-// CategoriesService.List are anonymous on the backend (see
+// ProductVariantsService.List, ProductSKUsService.List, PricesService.Get
+// and CategoriesService.List are anonymous on the backend (see
 // internal/transports/grpc/interceptors/auth.New) — public site visitors
 // are genuinely unauthenticated, there is no service/guest account
 // involved. Safe only because the gRPC port is never reachable from
@@ -11,14 +11,17 @@ import { getServiceClient, grpcCall } from './grpcClient.js'
 // one place responsible for always forcing statuses:[ACTIVE].
 //
 // Product is a catalog card grouping one or more ProductVariant — the
-// purchasable unit with its own sku, images, price (ProductPrice) and
-// stock (Inventory), all keyed by variantId. The catalog listing shows a
-// "representative" variant per product (first active one, by creation
-// order); the product page (/katalog/:sku) resolves by variant sku and
-// lets the visitor switch between sibling variants.
+// visual identity (color/texture/pattern, images), no price or stock of
+// its own. Each Variant groups one or more ProductSKU — the purchasable
+// unit with its own sku, price (ProductPrice) and stock (Inventory), all
+// keyed by skuId. The catalog listing shows a "representative" variant
+// per product and its "representative" SKU (first active one of each, by
+// creation order); the product page (/katalog/:sku) resolves by SKU sku
+// and lets the visitor switch between sibling variants and sibling SKUs.
 
 const PRODUCT_ACTIVE_STATUS = 'PRODUCT_STATUS_ACTIVE'
 const VARIANT_ACTIVE_STATUS = 'PRODUCT_VARIANT_STATUS_ACTIVE'
+const SKU_ACTIVE_STATUS = 'PRODUCT_SKU_STATUS_ACTIVE'
 
 async function call(protoFile, servicePath, methodName, request) {
   const client = getServiceClient(protoFile, servicePath)
@@ -61,19 +64,45 @@ export async function listActiveVariantsForProduct(productId) {
   return response.items || []
 }
 
+// Resolves a variant by id (no `ids` filter exists on the List RPC, so this
+// is the only way to look one up directly) — used to walk a ProductSKU's
+// variantId back to its owning Variant on the product page. Unlike List,
+// Get applies no status filter of its own, so the ACTIVE check happens
+// here — never trust its result otherwise.
+/** @param {string} id */
+export async function getActiveVariantById(id) {
+  try {
+    const response = await call('product_variant.proto', 'crm.grpc.product_variant.v1.ProductVariantsService', 'Get', { id })
+    const variant = response.variant
+    return variant && variant.status === VARIANT_ACTIVE_STATUS ? variant : null
+  } catch (err) {
+    if (err?.code === 5 /* NOT_FOUND */) return null
+    throw err
+  }
+}
+
+/** @param {string} variantId */
+export async function listActiveSkusForVariant(variantId) {
+  const response = await call('product_sku.proto', 'crm.grpc.product_sku.v1.ProductSKUsService', 'List', {
+    filter: { statuses: [SKU_ACTIVE_STATUS], variantIds: [variantId] },
+    pagination: { limit: 100 },
+  })
+  return response.items || []
+}
+
 /** @param {string} sku */
-export async function getActiveVariantBySku(sku) {
-  const response = await call('product_variant.proto', 'crm.grpc.product_variant.v1.ProductVariantsService', 'List', {
-    filter: { statuses: [VARIANT_ACTIVE_STATUS], skus: [sku] },
+export async function getActiveSkuBySku(sku) {
+  const response = await call('product_sku.proto', 'crm.grpc.product_sku.v1.ProductSKUsService', 'List', {
+    filter: { statuses: [SKU_ACTIVE_STATUS], skus: [sku] },
     pagination: { limit: 1 },
   })
   return response.items?.[0] || null
 }
 
-/** @param {string} variantId */
-export async function getVariantPrice(variantId) {
+/** @param {string} skuId */
+export async function getSkuPrice(skuId) {
   try {
-    const response = await call('price.proto', 'crm.grpc.price.v1.PricesService', 'Get', { variantId })
+    const response = await call('price.proto', 'crm.grpc.price.v1.PricesService', 'Get', { skuId })
     return response.price || null
   } catch (err) {
     if (err?.code === 5 /* NOT_FOUND */) return null
@@ -81,13 +110,13 @@ export async function getVariantPrice(variantId) {
   }
 }
 
-// Sums Inventory.quantity across every warehouse for a variant and reduces
-// it to a boolean — the exact per-warehouse quantity must never reach a
-// site visitor, see the exemption comment on InventoryService.List in
+// Sums Inventory.quantity across every warehouse for a SKU and reduces it
+// to a boolean — the exact per-warehouse quantity must never reach a site
+// visitor, see the exemption comment on InventoryService.List in
 // internal/transports/grpc/interceptors/auth.New.
-export async function isVariantInStock(variantId) {
+export async function isSkuInStock(skuId) {
   const response = await call('inventory.proto', 'crm.grpc.inventory.v1.InventoryService', 'List', {
-    variantId,
+    skuId,
     pagination: { limit: 200 },
   })
   return (response.items || []).some((inv) => Number(inv.quantity) > 0)
@@ -103,8 +132,8 @@ export async function listActiveCategories() {
 
 // Characteristics catalog, filtered to isPublic: true here — never trust
 // the caller, same as PRODUCT_ACTIVE_STATUS above. Used to strip private
-// keys out of Product.details/ProductVariant.attributes before it reaches
-// a site visitor.
+// keys out of Product.details/ProductVariant.attributes/ProductSKU.attributes
+// before it reaches a site visitor.
 export async function listPublicAttributeDefinitions() {
   const response = await call(
     'product_attribute_definition.proto',

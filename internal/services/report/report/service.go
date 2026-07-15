@@ -37,7 +37,7 @@ func New(storage reports.Storage, inv inventorysvc.Service) *Service {
 func (s *Service) GetSalesReport(ctx context.Context, period *entities.PeriodFilter) ([]entities.SalesReportRow, error) {
 	rows, err := s.storage.GetSalesReport(ctx, period)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get sales report failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "get sales report failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return rows, nil
@@ -46,7 +46,7 @@ func (s *Service) GetSalesReport(ctx context.Context, period *entities.PeriodFil
 func (s *Service) GetSalesByStaff(ctx context.Context, period *entities.PeriodFilter) ([]entities.SalesByStaffRow, error) {
 	rows, err := s.storage.GetSalesByStaff(ctx, period)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get sales by staff report failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "get sales by staff report failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return rows, nil
@@ -55,7 +55,7 @@ func (s *Service) GetSalesByStaff(ctx context.Context, period *entities.PeriodFi
 func (s *Service) GetSalesByPartner(ctx context.Context, period *entities.PeriodFilter) ([]entities.SalesByPartnerRow, error) {
 	rows, err := s.storage.GetSalesByPartner(ctx, period)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get sales by partner report failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "get sales by partner report failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return rows, nil
@@ -64,7 +64,7 @@ func (s *Service) GetSalesByPartner(ctx context.Context, period *entities.Period
 func (s *Service) GetPopularProducts(ctx context.Context, period *entities.PeriodFilter, limit int32) ([]entities.PopularProductRow, error) {
 	rows, err := s.storage.GetPopularProducts(ctx, period, limit)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get popular products report failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "get popular products report failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return rows, nil
@@ -73,7 +73,7 @@ func (s *Service) GetPopularProducts(ctx context.Context, period *entities.Perio
 func (s *Service) GetTurnover(ctx context.Context, period *entities.PeriodFilter) ([]entities.TurnoverRow, error) {
 	rows, err := s.storage.GetTurnover(ctx, period)
 	if err != nil {
-		s.logger.DebugContext(ctx, "get turnover report failed", slogx.Error(err))
+		s.logger.DebugContext(ctx, "get turnover report failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return rows, nil
@@ -91,12 +91,12 @@ func (s *Service) GetStockLevels(ctx context.Context, warehouseID *string) ([]en
 			Pagination:  entities.ListPagination{Cursor: cursor},
 		})
 		if err != nil {
-			s.logger.DebugContext(ctx, "get stock levels failed", slogx.Error(err))
+			s.logger.DebugContext(ctx, "get stock levels failed", slog.String("error", err.Error()))
 			return nil, err
 		}
 		for _, item := range result.Items {
 			rows = append(rows, entities.StockLevelRow{
-				VariantID:   item.VariantID,
+				SKUID:       item.SKUID,
 				WarehouseID: item.WarehouseID,
 				Quantity:    item.Quantity,
 			})

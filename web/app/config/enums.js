@@ -30,6 +30,10 @@ export const ENUMS = {
     values: ['PRODUCT_VARIANT_STATUS_DRAFT', 'PRODUCT_VARIANT_STATUS_ACTIVE', 'PRODUCT_VARIANT_STATUS_INACTIVE'],
     labelKey: (value) => `enums.productVariantStatus.${value}`,
   },
+  ProductSkuStatus: {
+    values: ['PRODUCT_SKU_STATUS_DRAFT', 'PRODUCT_SKU_STATUS_ACTIVE', 'PRODUCT_SKU_STATUS_INACTIVE'],
+    labelKey: (value) => `enums.productSkuStatus.${value}`,
+  },
   WarehouseStatus: {
     values: ['WAREHOUSE_STATUS_ACTIVE', 'WAREHOUSE_STATUS_INACTIVE'],
     labelKey: (value) => `enums.warehouseStatus.${value}`,

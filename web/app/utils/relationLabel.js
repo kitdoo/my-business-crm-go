@@ -5,12 +5,20 @@ import { localizedText } from '~/utils/localizedText.js'
 // one place instead of three copies. Most entities have a `name`
 // (localized or plain); Sale doesn't (TD §12.3, no name field at all) —
 // falls back to its human-readable Number instead of a raw UUID.
-// ProductVariant has neither — sku is its human-readable identifier.
+// ProductSKU has neither — sku is its human-readable identifier.
+// ProductVariant has none of the above — it's purely visual, identified by
+// its attributes (color, texture, …), so those are joined as a fallback.
 export function relationLabel(item, locale) {
   if (item.name) {
     return typeof item.name === 'object' ? localizedText(item.name, locale) : item.name
   }
   if (item.number != null) return `#${item.number}`
   if (item.sku) return item.sku
+  if (item.attributes && Object.keys(item.attributes).length) {
+    return Object.values(item.attributes)
+      .map((value) => localizedText(value, locale))
+      .filter(Boolean)
+      .join(', ')
+  }
   return item.id
 }

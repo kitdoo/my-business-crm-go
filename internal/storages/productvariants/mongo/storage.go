@@ -24,7 +24,6 @@ const collectionName = "product_variants"
 
 const (
 	FieldID        = "_id"
-	FieldSKU       = "sku"
 	FieldProductID = "product_id"
 	FieldStatus    = "status"
 	FieldCreatedAt = "created_at"
@@ -39,7 +38,6 @@ const defaultListLimit = datamongo.DefaultListLimit
 type model struct {
 	ID         string                              `bson:"_id"`
 	ProductID  string                              `bson:"product_id,omitonupdate"`
-	SKU        string                              `bson:"sku,omitonupdate"`
 	Attributes map[string]entities.LocalizedString `bson:"attributes"`
 	ImageIDs   []string                            `bson:"image_ids"`
 	Status     entities.ProductVariantStatus       `bson:"status"`
@@ -71,19 +69,6 @@ func activeOnly(filter bson.M) bson.M {
 	return filter
 }
 
-// classifyDuplicate maps a Mongo duplicate-key error to a domain sentinel by
-// the conflicting field, never by string matching.
-func classifyDuplicate(err error) error {
-	isDup, fields := datamongo.IsErrorDuplicate(err)
-	if !isDup || fields == nil {
-		return nil
-	}
-	if fields.Contains(FieldSKU) {
-		return errs.ErrProductVariantSKUConflict
-	}
-	return nil
-}
-
 func (s *Storage) Insert(ctx context.Context, v *entities.ProductVariant) error {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
@@ -95,9 +80,6 @@ func (s *Storage) Insert(ctx context.Context, v *entities.ProductVariant) error 
 		return coreerrs.WrapOperation(err, "convert product variant document")
 	}
 	if _, err := s.collection.InsertOne(ctx, doc); err != nil {
-		if dupErr := classifyDuplicate(err); dupErr != nil {
-			return dupErr
-		}
 		return coreerrs.WrapOperation(err, "insert product variant")
 	}
 	return nil
@@ -131,9 +113,6 @@ func (s *Storage) Update(ctx context.Context, v *entities.ProductVariant, oldEta
 	}
 	res, err := s.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		if dupErr := classifyDuplicate(err); dupErr != nil {
-			return dupErr
-		}
 		return coreerrs.WrapOperation(err, "update product variant")
 	}
 	if res.MatchedCount == 0 {
@@ -189,9 +168,6 @@ func (s *Storage) List(ctx context.Context, in *entities.ProductVariantsList) (*
 	if len(in.ProductIDs) > 0 {
 		filter[FieldProductID] = bson.M{"$in": in.ProductIDs}
 	}
-	if len(in.SKUs) > 0 {
-		filter[FieldSKU] = bson.M{"$in": in.SKUs}
-	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)
 	}
@@ -242,9 +218,6 @@ func (s *Storage) ExistsForProduct(ctx context.Context, productID string) (bool,
 // listSortField picks the sort key for the requested field.
 func listSortField(sort entities.ProductVariantsListSort) string {
 	field := FieldCreatedAt
-	if sort.Field == entities.ProductVariantsListSortFieldSKU {
-		field = FieldSKU
-	}
 	if sort.Direction == entities.SortDirectionDesc {
 		return "-" + field
 	}

@@ -26,7 +26,7 @@ const (
 
 const (
 	FieldID        = "_id"
-	FieldVariantID = "variant_id"
+	FieldSKUID     = "sku_id"
 	FieldCreatedAt = "created_at"
 	FieldUpdatedAt = "updated_at"
 	FieldDeletedAt = "deleted_at"
@@ -38,7 +38,7 @@ const defaultListLimit = datamongo.DefaultListLimit
 
 type model struct {
 	ID             string        `bson:"_id"`
-	VariantID      string        `bson:"variant_id"`
+	SKUID          string        `bson:"sku_id"`
 	PriceAmount    int64         `bson:"price_amount"`
 	Currency       string        `bson:"currency,omitonupdate"`
 	DiscountAmount *int64        `bson:"discount_amount"`
@@ -53,7 +53,7 @@ type model struct {
 // snapshots, never updated or soft-deleted themselves.
 type historyModel struct {
 	ID             string        `bson:"_id"`
-	VariantID      string        `bson:"variant_id"`
+	SKUID          string        `bson:"sku_id"`
 	PriceAmount    int64         `bson:"price_amount"`
 	Currency       string        `bson:"currency"`
 	DiscountAmount *int64        `bson:"discount_amount"`
@@ -90,7 +90,7 @@ func classifyDuplicate(err error) error {
 	if !isDup || fields == nil {
 		return nil
 	}
-	if fields.Contains(FieldVariantID) {
+	if fields.Contains(FieldSKUID) {
 		return errs.ErrProductPriceExists
 	}
 	return nil
@@ -129,16 +129,16 @@ func (s *Storage) Get(ctx context.Context, id string) (*entities.ProductPrice, e
 	return converter.Convert(&m, &entities.ProductPrice{}), nil
 }
 
-func (s *Storage) GetByVariantID(ctx context.Context, variantID string) (*entities.ProductPrice, error) {
+func (s *Storage) GetBySkuID(ctx context.Context, skuID string) (*entities.ProductPrice, error) {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
 
 	var m model
-	if err := s.collection.FindOne(ctx, activeOnly(bson.M{FieldVariantID: variantID})).Decode(&m); err != nil {
+	if err := s.collection.FindOne(ctx, activeOnly(bson.M{FieldSKUID: skuID})).Decode(&m); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errs.ErrProductPriceNotFound
 		}
-		return nil, coreerrs.WrapOperation(err, "get product price by variant")
+		return nil, coreerrs.WrapOperation(err, "get product price by sku")
 	}
 	return converter.Convert(&m, &entities.ProductPrice{}), nil
 }
@@ -214,7 +214,7 @@ func (s *Storage) GetHistory(ctx context.Context, in *entities.ProductPriceGetHi
 		limit = defaultListLimit
 	}
 
-	filter := bson.M{FieldVariantID: in.VariantID}
+	filter := bson.M{FieldSKUID: in.SKUID}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)
 	}

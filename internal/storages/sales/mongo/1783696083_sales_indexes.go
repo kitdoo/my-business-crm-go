@@ -11,11 +11,6 @@ import (
 )
 
 func init() {
-	// Historically accurate as first applied — "items.product_id" (literal,
-	// not FieldItemVariants) is renamed to items.variant_id afterwards by
-	// the 1783980100_backfill_variants migration, which also drops and
-	// recreates this index on the new field/name. This migration's effect,
-	// once applied to a database, must never change.
 	migrate.MustRegister(func(ctx context.Context, db *mongo.Database) error {
 		_, err := db.Collection(collectionName).Indexes().CreateMany(ctx, []mongo.IndexModel{
 			{
@@ -39,9 +34,9 @@ func init() {
 					SetName("idx_sales_partner_id"),
 			},
 			{
-				Keys: bson.D{{Key: "items.product_id", Value: 1}},
+				Keys: bson.D{{Key: "items.sku_id", Value: 1}},
 				Options: options.Index().
-					SetName("idx_sales_item_products"),
+					SetName("idx_sales_item_skus"),
 			},
 		})
 		return err
@@ -52,7 +47,7 @@ func init() {
 			"idx_sales_client_id",
 			"idx_sales_warehouse_id",
 			"idx_sales_partner_id",
-			"idx_sales_item_products",
+			"idx_sales_item_skus",
 		} {
 			if err := coll.Indexes().DropOne(ctx, name); err != nil {
 				return err

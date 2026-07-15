@@ -17,7 +17,7 @@ export default {
 
   list: {
     columns: [
-      { key: 'variantId', label: 'fields.variant', component: 'RelationLabel', relation: 'productVariants' },
+      { key: 'skuId', label: 'fields.sku', component: 'RelationLabel', relation: 'productSkus' },
       { key: 'warehouseId', label: 'fields.warehouse', component: 'RelationLabel', relation: 'warehouses' },
       { key: 'type', label: 'fields.movementType', component: 'EnumLabel' },
       { key: 'quantity', label: 'fields.quantity' },
@@ -36,7 +36,7 @@ export default {
 
   form: {
     fields: [
-      { key: 'variantId', type: 'relation', relation: 'productVariants', label: 'fields.variant', required: true },
+      { key: 'skuId', type: 'relation', relation: 'productSkus', label: 'fields.sku', required: true },
       { key: 'warehouseId', type: 'relation', relation: 'warehouses', label: 'fields.warehouse', required: true },
       { key: 'type', type: 'enum', enum: 'MovementType', label: 'fields.movementType', required: true },
       { key: 'quantity', type: 'number', label: 'fields.quantity', required: true },

@@ -54,11 +54,30 @@ function openView(item) {
   drawerOpen.value = true
 }
 
-function openEditFor(entityKey, id) {
+// productVariants/productSkus have no detail page or generic edit form of
+// their own anymore — both are only ever edited inline on their product's
+// own page (see ProductVariantsPanel.vue/ProductSkusPanel.vue), which is
+// how Inventory/InventoryMovements' viewOverride reaches them (TD §12.4).
+// "Edit" here means "go to that product", not open a drawer with nothing
+// editable in it.
+async function openEditFor(entityKey, id) {
   const targetConfig = getEntityConfig(entityKey)
   if (targetConfig.detailPage) {
     drawerOpen.value = false
     navigateTo(`${targetConfig.route}/${id}`)
+    return
+  }
+  if (entityKey === 'productVariants') {
+    const variant = await useEntityApi('productVariants').get(id)
+    drawerOpen.value = false
+    navigateTo(`/products/${variant.productId}`)
+    return
+  }
+  if (entityKey === 'productSkus') {
+    const sku = await useEntityApi('productSkus').get(id)
+    const variant = await useEntityApi('productVariants').get(sku.variantId)
+    drawerOpen.value = false
+    navigateTo(`/products/${variant.productId}`)
     return
   }
   activeEntity.value = entityKey
@@ -101,7 +120,12 @@ function onDeleted() {
       <template #content>
         <div
           class="p-6 space-y-4 w-full"
-          :class="drawerMode === 'view' && getEntityConfig(activeEntity).view?.relatedSales ? 'max-w-2xl' : 'max-w-md'"
+          :class="
+            drawerMode === 'view' &&
+            (getEntityConfig(activeEntity).view?.relatedSales || getEntityConfig(activeEntity).view?.variantsSummary)
+              ? 'max-w-2xl'
+              : 'max-w-md'
+          "
         >
           <EntityViewDrawer
             v-if="drawerMode === 'view'"

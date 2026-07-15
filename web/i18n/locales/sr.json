@@ -48,6 +48,11 @@
       "create": "Nova varijanta",
       "edit": "Izmena varijante"
     },
+    "productSkus": {
+      "label": "SKU",
+      "create": "Novi SKU",
+      "edit": "Izmena SKU-a"
+    },
     "inventory": {
       "label": "Zalihe"
     },
@@ -151,6 +156,10 @@
       "PRODUCT_VARIANT_STATUS_ACTIVE": "Aktivan",
       "PRODUCT_VARIANT_STATUS_INACTIVE": "Neaktivan",
       "PRODUCT_VARIANT_STATUS_UNSPECIFIED": "Nepoznato",
+      "PRODUCT_SKU_STATUS_DRAFT": "Nacrt",
+      "PRODUCT_SKU_STATUS_ACTIVE": "Aktivan",
+      "PRODUCT_SKU_STATUS_INACTIVE": "Neaktivan",
+      "PRODUCT_SKU_STATUS_UNSPECIFIED": "Nepoznato",
       "MOVEMENT_TYPE_RECEIPT": "Prijem",
       "MOVEMENT_TYPE_SALE": "Prodaja",
       "MOVEMENT_TYPE_WRITE_OFF": "Otpis",
@@ -247,6 +256,11 @@
             "icon": "i-lucide-box",
             "title": "Popunite katalog",
             "description": "Dodajte brendove, kategorije i proizvode u odeljku sa katalogom."
+          },
+          {
+            "icon": "i-lucide-layers",
+            "title": "Dodajte boje i veličine proizvoda",
+            "description": "Proizvod je kartica tipa „U Stone“. Za svaku boju kreirajte varijantu (Variant) sa atributom „boja“, a unutar varijante SKU za svaku veličinu, gde se podešavaju cena i zalihe. Primer: U Stone → varijanta „crna“ → SKU „S“, „M“, „L“; varijanta „bela“ → SKU „S“, „M“, „L“."
           },
           {
             "icon": "i-lucide-warehouse",

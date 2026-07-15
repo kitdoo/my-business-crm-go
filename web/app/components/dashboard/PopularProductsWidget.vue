@@ -28,8 +28,8 @@ watch(() => props.period, load, { immediate: true })
     <div v-if="rows.length === 0" class="text-sm text-neutral-500">{{ t('common.empty') }}</div>
     <table v-else class="w-full text-sm">
       <tbody>
-        <tr v-for="row in rows" :key="row.variantId" class="border-b border-neutral-100 last:border-0">
-          <td class="py-1 pr-2"><RelationLabel :value="row.variantId" relation="productVariants" /></td>
+        <tr v-for="row in rows" :key="row.skuId" class="border-b border-neutral-100 last:border-0">
+          <td class="py-1 pr-2"><RelationLabel :value="row.skuId" relation="productSkus" /></td>
           <td class="py-1 pr-2 text-right text-neutral-500">{{ row.quantitySold }}</td>
           <td class="py-1 text-right font-medium"><MoneyAmountLabel :value="row.totalAmount" /></td>
         </tr>
