@@ -220,8 +220,6 @@ func MapError(err error) error {
 		return nil
 	case errors.Is(err, errs.ErrProductNotFound):
 		return status.Error(codes.NotFound, errs.ErrProductNotFound.Error())
-	case errors.Is(err, errs.ErrProductHasVariants):
-		return status.Error(codes.FailedPrecondition, errs.ErrProductHasVariants.Error())
 	case errors.Is(err, errs.ErrProductBrandNotFound):
 		return status.Error(codes.InvalidArgument, errs.ErrProductBrandNotFound.Error())
 	case errors.Is(err, errs.ErrProductCategoryNotFound):

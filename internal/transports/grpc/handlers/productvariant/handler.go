@@ -204,8 +204,6 @@ func MapError(err error) error {
 		return status.Error(codes.NotFound, errs.ErrProductVariantNotFound.Error())
 	case errors.Is(err, errs.ErrProductVariantProductNotFound):
 		return status.Error(codes.InvalidArgument, errs.ErrProductVariantProductNotFound.Error())
-	case errors.Is(err, errs.ErrProductVariantHasSkus):
-		return status.Error(codes.FailedPrecondition, errs.ErrProductVariantHasSkus.Error())
 	case errors.Is(err, errs.ErrStaleEntity):
 		return status.Error(codes.Aborted, errs.ErrStaleEntity.Error())
 	case errors.Is(err, errs.ErrInvalidListCursor):

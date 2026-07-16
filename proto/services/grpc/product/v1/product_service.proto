@@ -38,6 +38,10 @@ message ProductsListRequest {
     enum Field {
       FIELD_CREATED_AT = 0;
       FIELD_NAME = 1;
+      // Products with any in-stock active SKU sort first; derived from
+      // Inventory, recomputed whenever a movement changes a SKU's stock
+      // (see ProductsService.List doc), not client-settable.
+      FIELD_IN_STOCK = 2;
     }
     Field field = 1 [(buf.validate.field).enum.defined_only = true];
     crm.types.common.SortDirection direction = 2;

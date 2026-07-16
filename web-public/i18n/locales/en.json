@@ -111,7 +111,7 @@
   "catalog": {
     "allCategories": "All categories",
     "available": "Available",
-    "unavailable": "Unavailable",
+    "unavailable": "On order",
     "filter": {
       "inStock": "In stock",
       "onOrder": "On order"
@@ -126,6 +126,7 @@
     "intro": "PHOMI offers a wide range of materials — stone, wood, brick and concrete looks, as well as solar and display panels — all in one lightweight, flexible system. Equally suited to facades and interiors, delivering a modern look with fast, easy installation.",
     "sort": {
       "label": "Sort by",
+      "inStock": "In stock first",
       "newest": "Newest",
       "nameAsc": "Name A-Z",
       "nameDesc": "Name Z-A"

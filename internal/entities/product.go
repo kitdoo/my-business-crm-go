@@ -35,6 +35,14 @@ type Product struct {
 	// characteristics (color, size, …) live on ProductVariant.Attributes.
 	Details   map[string]LocalizedString
 	Status    ProductStatus
+	// HasStock is true when any active ProductVariant of this product has
+	// an active ProductSKU with positive Inventory quantity in any
+	// warehouse. It is system-maintained — recomputed by
+	// inventory.Service.ApplyMovement whenever a movement changes the
+	// owning SKU's stock (see that method's doc) — never client-settable,
+	// so it carries no proto field of its own; it exists solely to back
+	// ProductsListSortFieldInStock.
+	HasStock  bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time // nil = active
@@ -143,6 +151,7 @@ type ProductsListSortField int32
 const (
 	ProductsListSortFieldCreatedAt ProductsListSortField = iota
 	ProductsListSortFieldName
+	ProductsListSortFieldInStock
 )
 
 type ProductsListSort struct {

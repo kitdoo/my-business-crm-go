@@ -1,6 +1,7 @@
 package fx
 
 import (
+	"context"
 	"time"
 
 	"go.uber.org/fx"
@@ -234,14 +235,43 @@ func newWarehouseService(storage warehouses.Storage, inventorySvc invsvc.Service
 	return warehouseservice.New(storage, inventorySvc, resolveDefaultLocale(cfg))
 }
 
+// variantsCascadeAdapter satisfies product.VariantsExistenceChecker. Its
+// DeactivateForProduct deactivates a product's variants via
+// productvariants.Storage and then, since that storage only reaches its
+// own collection, cascades into their SKUs via productskus.Storage
+// directly — both Storage-shaped rather than their Services for the same
+// circular-dependency reason as newProductVariantService's
+// SKUsExistenceChecker wiring.
+type variantsCascadeAdapter struct {
+	variants productvariants.Storage
+	skus     productskus.Storage
+}
+
+func (a *variantsCascadeAdapter) ExistsForProduct(ctx context.Context, productID string) (bool, error) {
+	return a.variants.ExistsForProduct(ctx, productID)
+}
+
+func (a *variantsCascadeAdapter) DeactivateForProduct(ctx context.Context, productID string) error {
+	variantIDs, err := a.variants.DeactivateForProduct(ctx, productID)
+	if err != nil {
+		return err
+	}
+	for _, id := range variantIDs {
+		if err := a.skus.DeactivateForVariant(ctx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // newProductService wires product.Service with brand.Service/
-// category.Service for FK validation (Create/Update) and
-// productvariants.Storage as its VariantsExistenceChecker (Delete guard) —
-// see newBrandService for why this stays Storage-shaped rather than
+// category.Service for FK validation (Create/Update) and a
+// variantsCascadeAdapter as its VariantsExistenceChecker (Delete cascade)
+// — see newBrandService for why this stays Storage-shaped rather than
 // depending on productvariant.Service. Resolves the required
 // LocalizedString locale from cfg.CRM.DefaultLocale.
-func newProductService(storage products.Storage, brandSvc brand.Service, categorySvc category.Service, variantsStorage productvariants.Storage, cfg *appconfig.Config) *productservice.Service {
-	return productservice.New(storage, brandSvc, categorySvc, variantsStorage, resolveDefaultLocale(cfg))
+func newProductService(storage products.Storage, brandSvc brand.Service, categorySvc category.Service, variantsStorage productvariants.Storage, skusStorage productskus.Storage, cfg *appconfig.Config) *productservice.Service {
+	return productservice.New(storage, brandSvc, categorySvc, &variantsCascadeAdapter{variants: variantsStorage, skus: skusStorage}, resolveDefaultLocale(cfg))
 }
 
 // newMailerService resolves the SMTP connection/auth data from

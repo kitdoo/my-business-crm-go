@@ -128,13 +128,9 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductVariantDelete)
 	}
 
 	if s.skus != nil {
-		hasSkus, err := s.skus.ExistsForVariant(ctx, v.ID)
-		if err != nil {
-			s.logger.DebugContext(ctx, "check product sku existence failed", slog.String("id", v.ID), slog.String("error", err.Error()))
+		if err := s.skus.DeactivateForVariant(ctx, v.ID); err != nil {
+			s.logger.DebugContext(ctx, "deactivate product skus failed", slog.String("id", v.ID), slog.String("error", err.Error()))
 			return err
-		}
-		if hasSkus {
-			return errs.ErrProductVariantHasSkus
 		}
 	}
 

@@ -11,9 +11,14 @@ function filterPublic(details, publicKeys) {
   return Object.fromEntries(Object.entries(details || {}).filter(([key]) => publicKeys.has(key)))
 }
 
-// name_asc/name_desc/newest — the only sort options exposed to the public
-// site; anything else falls back to newest-first.
+// in_stock/name_asc/name_desc/newest — the only sort options exposed to
+// the public site; anything else falls back to in_stock-first. in_stock
+// sorts on Product.HasStock, a field ProductsService maintains itself
+// (see internal/services/inventory/inventory/service.go's
+// recomputeProductHasStock) — not derived here like the old inStock
+// filter's page-scan.
 const SORT_OPTIONS = {
+  in_stock: { sortField: 'FIELD_IN_STOCK', sortDirection: 'SORT_DIRECTION_DESC' },
   name_asc: { sortField: 'FIELD_NAME', sortDirection: 'SORT_DIRECTION_ASC' },
   name_desc: { sortField: 'FIELD_NAME', sortDirection: 'SORT_DIRECTION_DESC' },
   newest: { sortField: 'FIELD_CREATED_AT', sortDirection: 'SORT_DIRECTION_DESC' },
@@ -113,10 +118,10 @@ async function loadFilteredPage({ categoryId, cursor, limit, sortField, sortDire
 // count meaningless, so it's dropped.
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
-  const sort = SORT_OPTIONS[query.sort?.toString()] || SORT_OPTIONS.newest
+  const sort = SORT_OPTIONS[query.sort?.toString()] || SORT_OPTIONS.in_stock
   const categoryId = query.categoryId?.toString()
   const cursor = query.cursor?.toString()
-  const limit = query.limit ? Number(query.limit) : 12
+  const limit = query.limit ? Number(query.limit) : 50
   const inStockParam = query.inStock?.toString()
 
   const publicKeys = new Set((await listPublicAttributeDefinitions()).map((d) => d.key))

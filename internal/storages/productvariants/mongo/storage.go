@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -213,6 +214,47 @@ func (s *Storage) ExistsForProduct(ctx context.Context, productID string) (bool,
 		return false, coreerrs.WrapOperation(err, "check product variant existence for product")
 	}
 	return count > 0, nil
+}
+
+func (s *Storage) DeactivateForProduct(ctx context.Context, productID string) ([]string, error) {
+	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
+	defer cancel()
+
+	filter := activeOnly(bson.M{FieldProductID: productID})
+
+	cursor, err := s.collection.Find(ctx, filter, options.Find().SetProjection(bson.M{FieldID: 1}))
+	if err != nil {
+		return nil, coreerrs.WrapOperation(err, "list product variants for deactivation")
+	}
+	var ids []string
+	for cursor.Next(ctx) {
+		var doc struct {
+			ID string `bson:"_id"`
+		}
+		if err := cursor.Decode(&doc); err != nil {
+			_ = cursor.Close(ctx)
+			return nil, coreerrs.WrapOperation(err, "decode product variant id")
+		}
+		ids = append(ids, doc.ID)
+	}
+	if err := cursor.Err(); err != nil {
+		_ = cursor.Close(ctx)
+		return nil, coreerrs.WrapOperation(err, "iterate product variants for deactivation")
+	}
+	_ = cursor.Close(ctx)
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	update := bson.M{"$set": bson.M{
+		FieldStatus:    entities.ProductVariantStatusInactive,
+		FieldUpdatedAt: time.Now().UTC(),
+		FieldEtag:      uuid.NewString(),
+	}}
+	if _, err := s.collection.UpdateMany(ctx, filter, update); err != nil {
+		return nil, coreerrs.WrapOperation(err, "deactivate product variants for product")
+	}
+	return ids, nil
 }
 
 // listSortField picks the sort key for the requested field.

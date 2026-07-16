@@ -31,6 +31,7 @@ const (
 	FieldBrandID    = "brand_id"
 	FieldCategoryID = "category_ids"
 	FieldStatus     = "status"
+	FieldHasStock   = "has_stock"
 	FieldCreatedAt  = "created_at"
 	FieldUpdatedAt  = "updated_at"
 	FieldDeletedAt  = "deleted_at"
@@ -48,6 +49,7 @@ type model struct {
 	CategoryIDs []string                            `bson:"category_ids"`
 	Details     map[string]entities.LocalizedString `bson:"details"`
 	Status      entities.ProductStatus              `bson:"status"`
+	HasStock    bool                                `bson:"has_stock"`
 	CreatedAt   time.Time                           `bson:"created_at,omitonupdate"`
 	UpdatedAt   time.Time                           `bson:"updated_at"`
 	DeletedAt   *time.Time                          `bson:"deleted_at,omitonupdate"`
@@ -220,6 +222,23 @@ func (s *Storage) List(ctx context.Context, in *entities.ProductsList) (*entitie
 	return out, nil
 }
 
+// SetHasStock is a targeted $set — bypasses ConvertToUpdateDocument since
+// this derived cache field must not roll etag/updated_at like a real user
+// edit would (see entities.Product.HasStock).
+func (s *Storage) SetHasStock(ctx context.Context, id string, hasStock bool) error {
+	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
+	defer cancel()
+
+	res, err := s.collection.UpdateOne(ctx, activeOnly(bson.M{FieldID: id}), bson.M{"$set": bson.M{FieldHasStock: hasStock}})
+	if err != nil {
+		return coreerrs.WrapOperation(err, "set product has_stock")
+	}
+	if res.MatchedCount == 0 {
+		return errs.ErrProductNotFound
+	}
+	return nil
+}
+
 func (s *Storage) ExistsForBrand(ctx context.Context, brandID string) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()
@@ -246,8 +265,11 @@ func (s *Storage) ExistsForCategory(ctx context.Context, categoryID string) (boo
 // FieldNameSr since Name itself is a multi-locale map.
 func listSortField(sort entities.ProductsListSort) string {
 	field := FieldCreatedAt
-	if sort.Field == entities.ProductsListSortFieldName {
+	switch sort.Field {
+	case entities.ProductsListSortFieldName:
 		field = FieldNameSr
+	case entities.ProductsListSortFieldInStock:
+		field = FieldHasStock
 	}
 	if sort.Direction == entities.SortDirectionDesc {
 		return "-" + field

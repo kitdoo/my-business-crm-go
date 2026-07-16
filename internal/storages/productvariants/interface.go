@@ -22,7 +22,11 @@ type Storage interface {
 	// nothing.
 	SoftDelete(ctx context.Context, in *entities.SoftDelete) error
 	// ExistsForProduct reports whether any active variant still
-	// references productID — used to block Product.Delete while variants
-	// remain.
+	// references productID.
 	ExistsForProduct(ctx context.Context, productID string) (bool, error)
+	// DeactivateForProduct sets Status=Inactive on every active variant
+	// referencing productID — used to cascade Product.Delete instead of
+	// blocking while variants remain. Returns the deactivated variant IDs
+	// so the caller can cascade further (e.g. into their SKUs).
+	DeactivateForProduct(ctx context.Context, productID string) ([]string, error)
 }

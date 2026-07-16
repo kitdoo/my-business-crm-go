@@ -20,11 +20,11 @@ services:
       - .env
     volumes:
       - mongo_data:/data/db
-    # No published port: only the backend needs to reach mongo, over the
-    # compose-internal network (service name "mongo"). Publishing 27017
-    # to the host exposes it to the internet on a cloud VM unless a
-    # firewall blocks it — a well-known mass-scan target. Use
-    # `docker compose exec mongo mongosh` for ad-hoc access instead.
+    # Temporary: published to localhost only for Compass access via SSH
+    # tunnel. Remove this once done — see comment history for why it's
+    # normally left unpublished (mass-scan exposure risk on a cloud VM).
+    ports:
+      - "127.0.0.1:27017:27017"
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
       interval: 10s

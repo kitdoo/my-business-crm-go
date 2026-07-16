@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -236,6 +237,22 @@ func (s *Storage) ExistsForVariant(ctx context.Context, variantID string) (bool,
 		return false, coreerrs.WrapOperation(err, "check product sku existence for variant")
 	}
 	return count > 0, nil
+}
+
+func (s *Storage) DeactivateForVariant(ctx context.Context, variantID string) error {
+	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
+	defer cancel()
+
+	filter := activeOnly(bson.M{FieldVariantID: variantID})
+	update := bson.M{"$set": bson.M{
+		FieldStatus:    entities.ProductSkuStatusInactive,
+		FieldUpdatedAt: time.Now().UTC(),
+		FieldEtag:      uuid.NewString(),
+	}}
+	if _, err := s.collection.UpdateMany(ctx, filter, update); err != nil {
+		return coreerrs.WrapOperation(err, "deactivate product skus for variant")
+	}
+	return nil
 }
 
 // listSortField picks the sort key for the requested field.

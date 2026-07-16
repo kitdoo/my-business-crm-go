@@ -111,7 +111,7 @@
   "catalog": {
     "allCategories": "Sve kategorije",
     "available": "Dostupno",
-    "unavailable": "Nije dostupno",
+    "unavailable": "Po porudžbini",
     "filter": {
       "inStock": "Na stanju",
       "onOrder": "Po porudžbini"
@@ -126,6 +126,7 @@
     "intro": "PHOMI nudi širok izbor materijala — dezene kamena, drveta, opeke i betona, kao i solarne i displej panele — objedinjene u jednom lakom i fleksibilnom sistemu. Podjednako su pogodni za fasade i enterijere, uz moderan izgled i brzu, jednostavnu ugradnju.",
     "sort": {
       "label": "Sortiranje",
+      "inStock": "Prvo na stanju",
       "newest": "Najnovije",
       "nameAsc": "Naziv A-Š",
       "nameDesc": "Naziv Š-A"

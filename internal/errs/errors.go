@@ -75,10 +75,6 @@ var (
 	// categoryIds does not reference an existing category.
 	ErrProductCategoryNotFound = errors.New("product category not found")
 
-	// ErrProductHasVariants is returned when a product's Delete is
-	// attempted while it still has active variants.
-	ErrProductHasVariants = errors.New("product has variants")
-
 	// ErrProductVariantNotFound is returned when a variant lookup finds no
 	// active row.
 	ErrProductVariantNotFound = errors.New("product variant not found")
@@ -86,10 +82,6 @@ var (
 	// ErrProductVariantProductNotFound is returned when a variant's
 	// productId does not reference an existing product.
 	ErrProductVariantProductNotFound = errors.New("product variant product not found")
-
-	// ErrProductVariantHasSkus is returned when a variant's Delete is
-	// attempted while it still has active SKUs.
-	ErrProductVariantHasSkus = errors.New("product variant has skus")
 
 	// ErrProductSkuNotFound is returned when a SKU lookup finds no active row.
 	ErrProductSkuNotFound = errors.New("product sku not found")

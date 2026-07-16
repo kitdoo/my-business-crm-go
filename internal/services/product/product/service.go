@@ -156,6 +156,14 @@ func (s *Service) Update(ctx context.Context, in *entities.ProductUpdate) (*enti
 	return p, nil
 }
 
+func (s *Service) SetHasStock(ctx context.Context, id string, hasStock bool) error {
+	if err := s.storage.SetHasStock(ctx, id, hasStock); err != nil {
+		s.logger.DebugContext(ctx, "set product has_stock failed", slog.String("id", id), slog.String("error", err.Error()))
+		return err
+	}
+	return nil
+}
+
 func (s *Service) Delete(ctx context.Context, in *entities.ProductDelete) error {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
@@ -169,13 +177,9 @@ func (s *Service) Delete(ctx context.Context, in *entities.ProductDelete) error 
 	}
 
 	if s.variants != nil {
-		hasVariants, err := s.variants.ExistsForProduct(ctx, p.ID)
-		if err != nil {
-			s.logger.DebugContext(ctx, "check product variants existence failed", slog.String("id", p.ID), slog.String("error", err.Error()))
+		if err := s.variants.DeactivateForProduct(ctx, p.ID); err != nil {
+			s.logger.DebugContext(ctx, "deactivate product variants failed", slog.String("id", p.ID), slog.String("error", err.Error()))
 			return err
-		}
-		if hasVariants {
-			return errs.ErrProductHasVariants
 		}
 	}
 

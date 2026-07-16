@@ -7,7 +7,7 @@ const { listProducts, listCategories } = useCatalogApi()
 const route = useRoute()
 const router = useRouter()
 
-const PAGE_SIZE = 12
+const PAGE_SIZE = 50
 
 // Reka UI's SelectItem rejects an empty-string value outright (it's the
 // sentinel Radix/Reka reserves for "no selection"), which was silently
@@ -17,7 +17,7 @@ const PAGE_SIZE = 12
 const ALL_CATEGORIES = '__all__'
 
 const activeCategoryId = ref(route.query.category?.toString() || ALL_CATEGORIES)
-const activeSort = ref(route.query.sort?.toString() || 'newest')
+const activeSort = ref(route.query.sort?.toString() || 'in_stock')
 // undefined = no stock filter, true = "Na stanju", false = "Po porudžbini".
 const activeInStock = ref(route.query.inStock === 'true' ? true : route.query.inStock === 'false' ? false : undefined)
 
@@ -33,6 +33,7 @@ const categoryOptions = computed(() => [
 ])
 
 const sortOptions = computed(() => [
+  { label: t('catalog.sort.inStock'), value: 'in_stock' },
   { label: t('catalog.sort.newest'), value: 'newest' },
   { label: t('catalog.sort.nameAsc'), value: 'name_asc' },
   { label: t('catalog.sort.nameDesc'), value: 'name_desc' },
@@ -98,7 +99,7 @@ watch([activeCategoryId, activeSort, activeInStock], () => {
     query: {
       ...route.query,
       category: activeCategoryId.value === ALL_CATEGORIES ? undefined : activeCategoryId.value,
-      sort: activeSort.value !== 'newest' ? activeSort.value : undefined,
+      sort: activeSort.value !== 'in_stock' ? activeSort.value : undefined,
       inStock: activeInStock.value === undefined ? undefined : String(activeInStock.value),
     },
   })

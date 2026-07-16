@@ -35,7 +35,7 @@ export async function listActiveProducts(opts = {}) {
       statuses: [PRODUCT_ACTIVE_STATUS], // always forced here, never trust the caller — TZ §1.1
       categoryIds: opts.categoryId ? [opts.categoryId] : [],
     },
-    pagination: { limit: opts.limit || 24, cursor: opts.cursor },
+    pagination: { limit: opts.limit || 50, cursor: opts.cursor },
     sort: {
       field: opts.sortField || 'FIELD_CREATED_AT',
       direction: opts.sortDirection || 'SORT_DIRECTION_DESC',

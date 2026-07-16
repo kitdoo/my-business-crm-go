@@ -23,6 +23,10 @@ type Storage interface {
 	// the new timestamp and etag via in, so this method generates nothing.
 	SoftDelete(ctx context.Context, in *entities.SoftDelete) error
 	// ExistsForVariant reports whether any active SKU still references
-	// variantID — used to block ProductVariant.Delete while SKUs remain.
+	// variantID.
 	ExistsForVariant(ctx context.Context, variantID string) (bool, error)
+	// DeactivateForVariant sets Status=Inactive on every active SKU
+	// referencing variantID — used to cascade ProductVariant.Delete
+	// instead of blocking while SKUs remain.
+	DeactivateForVariant(ctx context.Context, variantID string) error
 }

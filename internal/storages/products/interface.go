@@ -32,4 +32,9 @@ type Storage interface {
 	ExistsForBrand(ctx context.Context, brandID string) (bool, error)
 	// ExistsForCategory reports whether any active product still references categoryID.
 	ExistsForCategory(ctx context.Context, categoryID string) (bool, error)
+	// SetHasStock writes the system-maintained HasStock flag (see
+	// entities.Product.HasStock) without touching etag/updated_at — this
+	// is a derived cache field, not a user-visible mutation. Returns
+	// errs.ErrProductNotFound if id has no active row.
+	SetHasStock(ctx context.Context, id string, hasStock bool) error
 }
