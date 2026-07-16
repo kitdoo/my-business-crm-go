@@ -22,8 +22,10 @@ import (
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
+	"github.com/kitdoo/my-business-crm-go/internal/rbac"
 	usersvc "github.com/kitdoo/my-business-crm-go/internal/services/user"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/images"
+	grpcrbac "github.com/kitdoo/my-business-crm-go/internal/transports/grpc/interceptors/rbac"
 )
 
 // DefaultMaxSizeBytes is used when the configured maxSizeBytes is unset.
@@ -41,12 +43,16 @@ var allowedContentTypes = map[string]bool{
 }
 
 // Handler implements httpserver.Handler for the image upload/serve routes.
-// Upload is admin-only (see requireAdmin); serving is unauthenticated, same
-// as any other catalog-image asset.
+// Upload requires the caller's role to hold grpcrbac.ImagesUploadPermission
+// (see requirePermission) — checked the same way as any gRPC method, just
+// inline instead of via the RBAC interceptor, since this is a plain-HTTP
+// endpoint; serving is unauthenticated, same as any other catalog-image
+// asset.
 type Handler struct {
 	dir     string
 	maxSize int64
 	users   usersvc.Service
+	rbac    rbac.Table
 	images  images.Storage
 	logger  *slog.Logger
 }
@@ -55,7 +61,7 @@ var _ httpserver.Handler = (*Handler)(nil)
 
 // New builds a Handler, creating dir if it does not exist. maxSize <= 0
 // falls back to DefaultMaxSizeBytes.
-func New(dir string, maxSize int64, users usersvc.Service, imagesStorage images.Storage) (*Handler, error) {
+func New(dir string, maxSize int64, users usersvc.Service, table rbac.Table, imagesStorage images.Storage) (*Handler, error) {
 	if maxSize <= 0 {
 		maxSize = DefaultMaxSizeBytes
 	}
@@ -66,6 +72,7 @@ func New(dir string, maxSize int64, users usersvc.Service, imagesStorage images.
 		dir:     dir,
 		maxSize: maxSize,
 		users:   users,
+		rbac:    table,
 		images:  imagesStorage,
 		logger:  slog.Default().With(slogx.Module("http:image")),
 	}, nil
@@ -80,7 +87,7 @@ func (h *Handler) Register(r httpserver.RouteRegistrar, _ <-chan struct{}) {
 func (h *Handler) upload(rw writer.ReadWriter) {
 	ctx := rw.Request().Context()
 
-	if err := h.requireAdmin(ctx, rw.Request()); err != nil {
+	if err := h.requirePermission(ctx, rw.Request()); err != nil {
 		writeAuthError(rw, err)
 		return
 	}
@@ -180,9 +187,12 @@ func (h *Handler) serve(rw writer.ReadWriter) {
 	_, _ = w.Write(data)
 }
 
-// requireAdmin extracts the bearer token and confirms the caller is an
-// active admin.
-func (h *Handler) requireAdmin(ctx context.Context, r *http.Request) error {
+// requirePermission extracts the bearer token and confirms the caller's
+// role holds grpcrbac.ImagesUploadPermission — the same RBAC table the gRPC
+// interceptor checks (internal/transports/grpc/interceptors/rbac), just
+// enforced inline since this is a plain-HTTP endpoint the interceptor never
+// sees.
+func (h *Handler) requirePermission(ctx context.Context, r *http.Request) error {
 	token := bearerToken(r)
 	if token == "" {
 		return errs.ErrUnauthenticated
@@ -191,7 +201,7 @@ func (h *Handler) requireAdmin(ctx context.Context, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	if u.Role != entities.UserRoleAdmin {
+	if !h.rbac.Allowed(u.Role.String(), grpcrbac.ImagesUploadPermission) {
 		return errs.ErrForbidden
 	}
 	return nil

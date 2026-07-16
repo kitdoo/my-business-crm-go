@@ -150,6 +150,14 @@ var permissions = map[string]string{
 	serviceinfopb.ServiceInfoService_Get_FullMethodName: permissionAuthenticatedOnly,
 }
 
+// ImagesUploadPermission gates POST /images (internal/transports/http/
+// handlers/image), the plain-HTTP product-image upload endpoint. It has no
+// gRPC method and so no entry in `permissions` above — this interceptor
+// never checks it — but it must still be a known, grantable permission
+// string for CRMConfig.RBAC / configs/crm.yaml, which the image handler
+// checks directly via rbac.Table.Allowed.
+const ImagesUploadPermission = "images:upload"
+
 // KnownPermissions returns every distinct non-wildcard, non-self-service
 // permission string a role can be granted (i.e. every value that can
 // legally appear under a role in CRMConfig.RBAC / configs/crm.yaml,
@@ -159,11 +167,12 @@ var permissions = map[string]string{
 // wasn't supposed to hold that permission anyway, and nobody would notice
 // until a caller who genuinely needed it hit PermissionDenied.
 func KnownPermissions() map[string]bool {
-	known := make(map[string]bool, len(permissions))
+	known := make(map[string]bool, len(permissions)+1)
 	for _, perm := range permissions {
 		if perm != permissionAuthenticatedOnly {
 			known[perm] = true
 		}
 	}
+	known[ImagesUploadPermission] = true
 	return known
 }

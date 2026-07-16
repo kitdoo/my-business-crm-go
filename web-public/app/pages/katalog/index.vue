@@ -7,7 +7,7 @@ const { listProducts, listCategories } = useCatalogApi()
 const route = useRoute()
 const router = useRouter()
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 16
 
 // Reka UI's SelectItem rejects an empty-string value outright (it's the
 // sentinel Radix/Reka reserves for "no selection"), which was silently

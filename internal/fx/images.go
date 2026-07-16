@@ -9,6 +9,7 @@ import (
 	httpserver "github.com/altessa-s/go-atlas/transport/http/server"
 
 	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
+	"github.com/kitdoo/my-business-crm-go/internal/rbac"
 	"github.com/kitdoo/my-business-crm-go/internal/services/user"
 	imagehandler "github.com/kitdoo/my-business-crm-go/internal/transports/http/handlers/image"
 	"github.com/kitdoo/my-business-crm-go/internal/storages/images"
@@ -33,7 +34,7 @@ func imagesModule() fx.Option {
 // and imagehandler.DefaultMaxSizeBytes. cfg.CRM itself is required by
 // appconfig.Config.Validate; the nil check only protects a hand-built
 // *Config that bypassed Load/Validate (e.g. in tests).
-func newImageHandler(cfg *appconfig.Config, users user.Service, imagesStorage images.Storage) (*imagehandler.Handler, error) {
+func newImageHandler(cfg *appconfig.Config, users user.Service, table rbac.Table, imagesStorage images.Storage) (*imagehandler.Handler, error) {
 	dir := filepath.Join(appinfo.VarDir(), "images")
 	var maxSize int64
 	if cfg.CRM != nil && cfg.CRM.Images != nil {
@@ -42,7 +43,7 @@ func newImageHandler(cfg *appconfig.Config, users user.Service, imagesStorage im
 		}
 		maxSize = cfg.CRM.Images.MaxSizeBytes
 	}
-	return imagehandler.New(dir, maxSize, users, imagesStorage)
+	return imagehandler.New(dir, maxSize, users, table, imagesStorage)
 }
 
 // registerImageHandler mounts the image handler on the HTTP server. srv is

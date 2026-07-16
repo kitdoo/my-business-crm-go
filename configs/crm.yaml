@@ -38,6 +38,7 @@
 #      - "productvariants:create"
 #      - "productskus:read"
 #      - "productskus:create"
+#      - "images:upload"
 #      - "categories:read"
 #      - "categories:create"
 #      - "brands:read"
