@@ -12,6 +12,11 @@ option go_package = ".;pricepb";
 service PricesService {
   rpc Create (ProductPriceCreateRequest) returns (ProductPriceCreateResponse) {}
   rpc Get (ProductPriceGetRequest) returns (ProductPriceGetResponse) {}
+  // List looks up the current price for a batch of SKUs in one round trip —
+  // used by the public catalog (web-public/) to price a whole page of
+  // products at once instead of one Get per SKU. Unlike Get, a SKU with no
+  // current price is silently omitted from items rather than erroring.
+  rpc List (ProductPriceListRequest) returns (ProductPriceListResponse) {}
   rpc Update (ProductPriceUpdateRequest) returns (ProductPriceUpdateResponse) {}
   rpc Delete (ProductPriceDeleteRequest) returns (ProductPriceDeleteResponse) {}
   rpc GetHistory (ProductPriceGetHistoryRequest) returns (ProductPriceGetHistoryResponse) {}
@@ -23,6 +28,17 @@ message ProductPriceGetRequest {
 
 message ProductPriceGetResponse {
   crm.types.price.ProductPrice price = 1;
+}
+
+message ProductPriceListRequest {
+  message Filter {
+    repeated string skuIds = 1 [(buf.validate.field).repeated.min_items = 1, (buf.validate.field).repeated.items.string.uuid = true];
+  }
+  Filter filter = 1 [(buf.validate.field).required = true];
+}
+
+message ProductPriceListResponse {
+  repeated crm.types.price.ProductPrice items = 1;
 }
 
 message ProductPriceCreateRequest {

@@ -70,6 +70,7 @@ func (h *Handler) List(ctx context.Context, in *inventorysvcpb.InventoryListRequ
 		if f.MaxQuantity != nil {
 			listIn.MaxQuantity = f.MaxQuantity
 		}
+		listIn.SKUIDs = f.GetSkuIds()
 	}
 	if sort := in.GetSort(); sort != nil {
 		listIn.Sort = &entities.InventoryListSort{

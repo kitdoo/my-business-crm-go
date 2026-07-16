@@ -16,6 +16,9 @@ type Service interface {
 	Create(ctx context.Context, in *entities.ProductPriceCreate) (*entities.ProductPrice, error)
 	// Get looks up the current price for a SKU.
 	Get(ctx context.Context, skuID string) (*entities.ProductPrice, error)
+	// List looks up the current price for a batch of SKUs in one round
+	// trip. SKUs with no current price are simply absent from the result.
+	List(ctx context.Context, skuIDs []string) ([]*entities.ProductPrice, error)
 	// Update snapshots the pre-change values into the price history log
 	// before applying in.
 	Update(ctx context.Context, in *entities.ProductPriceUpdate) (*entities.ProductPrice, error)

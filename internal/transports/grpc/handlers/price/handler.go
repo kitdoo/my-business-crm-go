@@ -67,6 +67,18 @@ func (h *Handler) Get(ctx context.Context, in *pricesvcpb.ProductPriceGetRequest
 	return &pricesvcpb.ProductPriceGetResponse{Price: converter.Convert(p, &pricepb.ProductPrice{}, withUnixTimeCodec)}, nil
 }
 
+func (h *Handler) List(ctx context.Context, in *pricesvcpb.ProductPriceListRequest) (*pricesvcpb.ProductPriceListResponse, error) {
+	prices, err := h.svc.List(ctx, in.GetFilter().GetSkuIds())
+	if err != nil {
+		return nil, MapError(err)
+	}
+	return &pricesvcpb.ProductPriceListResponse{
+		Items: coreslices.To(prices, func(p *entities.ProductPrice) *pricepb.ProductPrice {
+			return converter.Convert(p, &pricepb.ProductPrice{}, withUnixTimeCodec)
+		}),
+	}, nil
+}
+
 func (h *Handler) Update(ctx context.Context, in *pricesvcpb.ProductPriceUpdateRequest) (*pricesvcpb.ProductPriceUpdateResponse, error) {
 	update := &entities.ProductPriceUpdate{Etag: optionalString(in.GetOptions().GetEtag())}
 

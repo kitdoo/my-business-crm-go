@@ -64,6 +64,20 @@ export async function listActiveVariantsForProduct(productId) {
   return response.items || []
 }
 
+// Batched form of listActiveVariantsForProduct — one round trip for every
+// product on a catalog page instead of one per product (ProductVariantsService.List
+// already supports filter.productIds as an array). limit is generous
+// because it bounds the whole page's variants, not one product's.
+/** @param {string[]} productIds */
+export async function listActiveVariantsForProducts(productIds) {
+  if (!productIds.length) return []
+  const response = await call('product_variant.proto', 'crm.grpc.product_variant.v1.ProductVariantsService', 'List', {
+    filter: { statuses: [VARIANT_ACTIVE_STATUS], productIds },
+    pagination: { limit: 500 },
+  })
+  return response.items || []
+}
+
 // Resolves a variant by id (no `ids` filter exists on the List RPC, so this
 // is the only way to look one up directly) — used to walk a ProductSKU's
 // variantId back to its owning Variant on the product page. Unlike List,
@@ -90,6 +104,19 @@ export async function listActiveSkusForVariant(variantId) {
   return response.items || []
 }
 
+// Batched form of listActiveSkusForVariant — one round trip for every
+// variant on a catalog page instead of one per variant (ProductSKUsService.List
+// already supports filter.variantIds as an array).
+/** @param {string[]} variantIds */
+export async function listActiveSkusForVariants(variantIds) {
+  if (!variantIds.length) return []
+  const response = await call('product_sku.proto', 'crm.grpc.product_sku.v1.ProductSKUsService', 'List', {
+    filter: { statuses: [SKU_ACTIVE_STATUS], variantIds },
+    pagination: { limit: 500 },
+  })
+  return response.items || []
+}
+
 /** @param {string} sku */
 export async function getActiveSkuBySku(sku) {
   const response = await call('product_sku.proto', 'crm.grpc.product_sku.v1.ProductSKUsService', 'List', {
@@ -110,6 +137,18 @@ export async function getSkuPrice(skuId) {
   }
 }
 
+// Batched form of getSkuPrice — one round trip for every SKU on a catalog
+// page instead of one per SKU. Returns a Map keyed by skuId; a SKU with no
+// current price is simply absent (see PricesService.List).
+/** @param {string[]} skuIds */
+export async function listPricesBySkuIds(skuIds) {
+  if (!skuIds.length) return new Map()
+  const response = await call('price.proto', 'crm.grpc.price.v1.PricesService', 'List', {
+    filter: { skuIds },
+  })
+  return new Map((response.items || []).map((p) => [p.skuId, p]))
+}
+
 // Sums Inventory.quantity across every warehouse for a SKU and reduces it
 // to a boolean — the exact per-warehouse quantity must never reach a site
 // visitor, see the exemption comment on InventoryService.List in
@@ -120,6 +159,23 @@ export async function isSkuInStock(skuId) {
     pagination: { limit: 200 },
   })
   return (response.items || []).some((inv) => Number(inv.quantity) > 0)
+}
+
+// Batched form of isSkuInStock — one round trip for every SKU on a catalog
+// page instead of one per SKU. Returns a Set of skuIds that have stock in
+// at least one warehouse.
+/** @param {string[]} skuIds */
+export async function listInStockSkuIds(skuIds) {
+  if (!skuIds.length) return new Set()
+  const response = await call('inventory.proto', 'crm.grpc.inventory.v1.InventoryService', 'List', {
+    filter: { skuIds },
+    pagination: { limit: 1000 },
+  })
+  const inStock = new Set()
+  for (const inv of response.items || []) {
+    if (Number(inv.quantity) > 0) inStock.add(inv.skuId)
+  }
+  return inStock
 }
 
 export async function listActiveCategories() {

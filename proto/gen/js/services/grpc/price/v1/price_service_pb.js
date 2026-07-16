@@ -13,7 +13,7 @@ import { file_types_price_product_price } from "../../../../types/price/product_
  * Describes the file services/grpc/price/v1/price_service.proto.
  */
 export const file_services_grpc_price_v1_price_service = /*@__PURE__*/
-  fileDesc("CipzZXJ2aWNlcy9ncnBjL3ByaWNlL3YxL3ByaWNlX3NlcnZpY2UucHJvdG8SEWNybS5ncnBjLnByaWNlLnYxIjQKFlByb2R1Y3RQcmljZUdldFJlcXVlc3QSGgoFc2t1SWQYASABKAlCC7pICMgBAXIDsAEBIkcKF1Byb2R1Y3RQcmljZUdldFJlc3BvbnNlEiwKBXByaWNlGAEgASgLMh0uY3JtLnR5cGVzLnByaWNlLlByb2R1Y3RQcmljZSKRAQoZUHJvZHVjdFByaWNlQ3JlYXRlUmVxdWVzdBIaCgVza3VJZBgBIAEoCUILukgIyAEBcgOwAQESHwoLcHJpY2VBbW91bnQYAiABKANCCrpIB8gBASICKAASJAoOZGlzY291bnRBbW91bnQYAyABKANCB7pIBCICKABIAIgBAUIRCg9fZGlzY291bnRBbW91bnQiSgoaUHJvZHVjdFByaWNlQ3JlYXRlUmVzcG9uc2USLAoFcHJpY2UYASABKAsyHS5jcm0udHlwZXMucHJpY2UuUHJvZHVjdFByaWNlIuMCChlQcm9kdWN0UHJpY2VVcGRhdGVSZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABARIhCgtwcmljZUFtb3VudBgCIAEoA0IHukgEIgIoAEgAiAEBEiQKDmRpc2NvdW50QW1vdW50GAMgASgDQge6SAQiAigASAGIAQESSgoHb3B0aW9ucxhjIAEoCzI0LmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZVVwZGF0ZVJlcXVlc3QuT3B0aW9uc0gCiAEBGmkKB09wdGlvbnMSMwoKdXBkYXRlTWFzaxgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE1hc2tIAIgBARIRCgRldGFnGAIgASgJSAGIAQFCDQoLX3VwZGF0ZU1hc2tCBwoFX2V0YWdCDgoMX3ByaWNlQW1vdW50QhEKD19kaXNjb3VudEFtb3VudEIKCghfb3B0aW9ucyJKChpQcm9kdWN0UHJpY2VVcGRhdGVSZXNwb25zZRIsCgVwcmljZRgBIAEoCzIdLmNybS50eXBlcy5wcmljZS5Qcm9kdWN0UHJpY2UiswEKGVByb2R1Y3RQcmljZURlbGV0ZVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBEkoKB29wdGlvbnMYYyABKAsyNC5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VEZWxldGVSZXF1ZXN0Lk9wdGlvbnNIAIgBARolCgdPcHRpb25zEhEKBGV0YWcYASABKAlIAIgBAUIHCgVfZXRhZ0IKCghfb3B0aW9ucyIcChpQcm9kdWN0UHJpY2VEZWxldGVSZXNwb25zZSKqAgodUHJvZHVjdFByaWNlR2V0SGlzdG9yeVJlcXVlc3QSGgoFc2t1SWQYASABKAlCC7pICMgBAXIDsAEBEkwKBmZpbHRlchgCIAEoCzI3LmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUdldEhpc3RvcnlSZXF1ZXN0LkZpbHRlckgAiAEBEjUKCnBhZ2luYXRpb24YAyABKAsyHC5jcm0udHlwZXMuY29tbW9uLlBhZ2luYXRpb25IAYgBARpOCgZGaWx0ZXISNgoJY3JlYXRlZEF0GAEgASgLMh4uY3JtLnR5cGVzLmNvbW1vbi5QZXJpb2RGaWx0ZXJIAIgBAUIMCgpfY3JlYXRlZEF0QgkKB19maWx0ZXJCDQoLX3BhZ2luYXRpb24idgoeUHJvZHVjdFByaWNlR2V0SGlzdG9yeVJlc3BvbnNlEiwKBWl0ZW1zGAEgAygLMh0uY3JtLnR5cGVzLnByaWNlLlByb2R1Y3RQcmljZRIXCgpuZXh0Q3Vyc29yGAIgASgJSACIAQFCDQoLX25leHRDdXJzb3IynwQKDVByaWNlc1NlcnZpY2USZwoGQ3JlYXRlEiwuY3JtLmdycGMucHJpY2UudjEuUHJvZHVjdFByaWNlQ3JlYXRlUmVxdWVzdBotLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUNyZWF0ZVJlc3BvbnNlIgASXgoDR2V0EikuY3JtLmdycGMucHJpY2UudjEuUHJvZHVjdFByaWNlR2V0UmVxdWVzdBoqLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUdldFJlc3BvbnNlIgASZwoGVXBkYXRlEiwuY3JtLmdycGMucHJpY2UudjEuUHJvZHVjdFByaWNlVXBkYXRlUmVxdWVzdBotLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZVVwZGF0ZVJlc3BvbnNlIgASZwoGRGVsZXRlEiwuY3JtLmdycGMucHJpY2UudjEuUHJvZHVjdFByaWNlRGVsZXRlUmVxdWVzdBotLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZURlbGV0ZVJlc3BvbnNlIgAScwoKR2V0SGlzdG9yeRIwLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUdldEhpc3RvcnlSZXF1ZXN0GjEuY3JtLmdycGMucHJpY2UudjEuUHJvZHVjdFByaWNlR2V0SGlzdG9yeVJlc3BvbnNlIgBCC1oJLjtwcmljZXBiYgZwcm90bzM", [file_google_protobuf_field_mask, file_buf_validate_validate, file_types_common_common_pagination, file_types_common_common_period_filter, file_types_price_product_price]);
+  fileDesc("CipzZXJ2aWNlcy9ncnBjL3ByaWNlL3YxL3ByaWNlX3NlcnZpY2UucHJvdG8SEWNybS5ncnBjLnByaWNlLnYxIjQKFlByb2R1Y3RQcmljZUdldFJlcXVlc3QSGgoFc2t1SWQYASABKAlCC7pICMgBAXIDsAEBIkcKF1Byb2R1Y3RQcmljZUdldFJlc3BvbnNlEiwKBXByaWNlGAEgASgLMh0uY3JtLnR5cGVzLnByaWNlLlByb2R1Y3RQcmljZSKPAQoXUHJvZHVjdFByaWNlTGlzdFJlcXVlc3QSSQoGZmlsdGVyGAEgASgLMjEuY3JtLmdycGMucHJpY2UudjEuUHJvZHVjdFByaWNlTGlzdFJlcXVlc3QuRmlsdGVyQga6SAPIAQEaKQoGRmlsdGVyEh8KBnNrdUlkcxgBIAMoCUIPukgMkgEJCAEiBXIDsAEBIkgKGFByb2R1Y3RQcmljZUxpc3RSZXNwb25zZRIsCgVpdGVtcxgBIAMoCzIdLmNybS50eXBlcy5wcmljZS5Qcm9kdWN0UHJpY2UikQEKGVByb2R1Y3RQcmljZUNyZWF0ZVJlcXVlc3QSGgoFc2t1SWQYASABKAlCC7pICMgBAXIDsAEBEh8KC3ByaWNlQW1vdW50GAIgASgDQgq6SAfIAQEiAigAEiQKDmRpc2NvdW50QW1vdW50GAMgASgDQge6SAQiAigASACIAQFCEQoPX2Rpc2NvdW50QW1vdW50IkoKGlByb2R1Y3RQcmljZUNyZWF0ZVJlc3BvbnNlEiwKBXByaWNlGAEgASgLMh0uY3JtLnR5cGVzLnByaWNlLlByb2R1Y3RQcmljZSLjAgoZUHJvZHVjdFByaWNlVXBkYXRlUmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQESIQoLcHJpY2VBbW91bnQYAiABKANCB7pIBCICKABIAIgBARIkCg5kaXNjb3VudEFtb3VudBgDIAEoA0IHukgEIgIoAEgBiAEBEkoKB29wdGlvbnMYYyABKAsyNC5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VVcGRhdGVSZXF1ZXN0Lk9wdGlvbnNIAogBARppCgdPcHRpb25zEjMKCnVwZGF0ZU1hc2sYASABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrSACIAQESEQoEZXRhZxgCIAEoCUgBiAEBQg0KC191cGRhdGVNYXNrQgcKBV9ldGFnQg4KDF9wcmljZUFtb3VudEIRCg9fZGlzY291bnRBbW91bnRCCgoIX29wdGlvbnMiSgoaUHJvZHVjdFByaWNlVXBkYXRlUmVzcG9uc2USLAoFcHJpY2UYASABKAsyHS5jcm0udHlwZXMucHJpY2UuUHJvZHVjdFByaWNlIrMBChlQcm9kdWN0UHJpY2VEZWxldGVSZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABARJKCgdvcHRpb25zGGMgASgLMjQuY3JtLmdycGMucHJpY2UudjEuUHJvZHVjdFByaWNlRGVsZXRlUmVxdWVzdC5PcHRpb25zSACIAQEaJQoHT3B0aW9ucxIRCgRldGFnGAEgASgJSACIAQFCBwoFX2V0YWdCCgoIX29wdGlvbnMiHAoaUHJvZHVjdFByaWNlRGVsZXRlUmVzcG9uc2UiqgIKHVByb2R1Y3RQcmljZUdldEhpc3RvcnlSZXF1ZXN0EhoKBXNrdUlkGAEgASgJQgu6SAjIAQFyA7ABARJMCgZmaWx0ZXIYAiABKAsyNy5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VHZXRIaXN0b3J5UmVxdWVzdC5GaWx0ZXJIAIgBARI1CgpwYWdpbmF0aW9uGAMgASgLMhwuY3JtLnR5cGVzLmNvbW1vbi5QYWdpbmF0aW9uSAGIAQEaTgoGRmlsdGVyEjYKCWNyZWF0ZWRBdBgBIAEoCzIeLmNybS50eXBlcy5jb21tb24uUGVyaW9kRmlsdGVySACIAQFCDAoKX2NyZWF0ZWRBdEIJCgdfZmlsdGVyQg0KC19wYWdpbmF0aW9uInYKHlByb2R1Y3RQcmljZUdldEhpc3RvcnlSZXNwb25zZRIsCgVpdGVtcxgBIAMoCzIdLmNybS50eXBlcy5wcmljZS5Qcm9kdWN0UHJpY2USFwoKbmV4dEN1cnNvchgCIAEoCUgAiAEBQg0KC19uZXh0Q3Vyc29yMoIFCg1QcmljZXNTZXJ2aWNlEmcKBkNyZWF0ZRIsLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUNyZWF0ZVJlcXVlc3QaLS5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VDcmVhdGVSZXNwb25zZSIAEl4KA0dldBIpLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUdldFJlcXVlc3QaKi5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VHZXRSZXNwb25zZSIAEmEKBExpc3QSKi5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VMaXN0UmVxdWVzdBorLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUxpc3RSZXNwb25zZSIAEmcKBlVwZGF0ZRIsLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZVVwZGF0ZVJlcXVlc3QaLS5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VVcGRhdGVSZXNwb25zZSIAEmcKBkRlbGV0ZRIsLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZURlbGV0ZVJlcXVlc3QaLS5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VEZWxldGVSZXNwb25zZSIAEnMKCkdldEhpc3RvcnkSMC5jcm0uZ3JwYy5wcmljZS52MS5Qcm9kdWN0UHJpY2VHZXRIaXN0b3J5UmVxdWVzdBoxLmNybS5ncnBjLnByaWNlLnYxLlByb2R1Y3RQcmljZUdldEhpc3RvcnlSZXNwb25zZSIAQgtaCS47cHJpY2VwYmIGcHJvdG8z", [file_google_protobuf_field_mask, file_buf_validate_validate, file_types_common_common_pagination, file_types_common_common_period_filter, file_types_price_product_price]);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceGetRequest.
@@ -30,81 +30,102 @@ export const ProductPriceGetResponseSchema = /*@__PURE__*/
   messageDesc(file_services_grpc_price_v1_price_service, 1);
 
 /**
+ * Describes the message crm.grpc.price.v1.ProductPriceListRequest.
+ * Use `create(ProductPriceListRequestSchema)` to create a new message.
+ */
+export const ProductPriceListRequestSchema = /*@__PURE__*/
+  messageDesc(file_services_grpc_price_v1_price_service, 2);
+
+/**
+ * Describes the message crm.grpc.price.v1.ProductPriceListRequest.Filter.
+ * Use `create(ProductPriceListRequest_FilterSchema)` to create a new message.
+ */
+export const ProductPriceListRequest_FilterSchema = /*@__PURE__*/
+  messageDesc(file_services_grpc_price_v1_price_service, 2, 0);
+
+/**
+ * Describes the message crm.grpc.price.v1.ProductPriceListResponse.
+ * Use `create(ProductPriceListResponseSchema)` to create a new message.
+ */
+export const ProductPriceListResponseSchema = /*@__PURE__*/
+  messageDesc(file_services_grpc_price_v1_price_service, 3);
+
+/**
  * Describes the message crm.grpc.price.v1.ProductPriceCreateRequest.
  * Use `create(ProductPriceCreateRequestSchema)` to create a new message.
  */
 export const ProductPriceCreateRequestSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 2);
+  messageDesc(file_services_grpc_price_v1_price_service, 4);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceCreateResponse.
  * Use `create(ProductPriceCreateResponseSchema)` to create a new message.
  */
 export const ProductPriceCreateResponseSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 3);
+  messageDesc(file_services_grpc_price_v1_price_service, 5);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceUpdateRequest.
  * Use `create(ProductPriceUpdateRequestSchema)` to create a new message.
  */
 export const ProductPriceUpdateRequestSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 4);
+  messageDesc(file_services_grpc_price_v1_price_service, 6);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceUpdateRequest.Options.
  * Use `create(ProductPriceUpdateRequest_OptionsSchema)` to create a new message.
  */
 export const ProductPriceUpdateRequest_OptionsSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 4, 0);
+  messageDesc(file_services_grpc_price_v1_price_service, 6, 0);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceUpdateResponse.
  * Use `create(ProductPriceUpdateResponseSchema)` to create a new message.
  */
 export const ProductPriceUpdateResponseSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 5);
+  messageDesc(file_services_grpc_price_v1_price_service, 7);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceDeleteRequest.
  * Use `create(ProductPriceDeleteRequestSchema)` to create a new message.
  */
 export const ProductPriceDeleteRequestSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 6);
+  messageDesc(file_services_grpc_price_v1_price_service, 8);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceDeleteRequest.Options.
  * Use `create(ProductPriceDeleteRequest_OptionsSchema)` to create a new message.
  */
 export const ProductPriceDeleteRequest_OptionsSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 6, 0);
+  messageDesc(file_services_grpc_price_v1_price_service, 8, 0);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceDeleteResponse.
  * Use `create(ProductPriceDeleteResponseSchema)` to create a new message.
  */
 export const ProductPriceDeleteResponseSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 7);
+  messageDesc(file_services_grpc_price_v1_price_service, 9);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceGetHistoryRequest.
  * Use `create(ProductPriceGetHistoryRequestSchema)` to create a new message.
  */
 export const ProductPriceGetHistoryRequestSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 8);
+  messageDesc(file_services_grpc_price_v1_price_service, 10);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceGetHistoryRequest.Filter.
  * Use `create(ProductPriceGetHistoryRequest_FilterSchema)` to create a new message.
  */
 export const ProductPriceGetHistoryRequest_FilterSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 8, 0);
+  messageDesc(file_services_grpc_price_v1_price_service, 10, 0);
 
 /**
  * Describes the message crm.grpc.price.v1.ProductPriceGetHistoryResponse.
  * Use `create(ProductPriceGetHistoryResponseSchema)` to create a new message.
  */
 export const ProductPriceGetHistoryResponseSchema = /*@__PURE__*/
-  messageDesc(file_services_grpc_price_v1_price_service, 9);
+  messageDesc(file_services_grpc_price_v1_price_service, 11);
 
 /**
  * @generated from service crm.grpc.price.v1.PricesService

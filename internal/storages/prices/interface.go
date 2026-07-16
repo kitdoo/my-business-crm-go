@@ -20,6 +20,10 @@ type Storage interface {
 	Get(ctx context.Context, id string) (*entities.ProductPrice, error)
 	// GetBySkuID looks up the current price for a SKU.
 	GetBySkuID(ctx context.Context, skuID string) (*entities.ProductPrice, error)
+	// ListBySkuIDs looks up the current price for a batch of SKUs in one
+	// query. SKUs with no current price are simply absent from the result
+	// — this is a lookup, not a Get, so it never errors on a miss.
+	ListBySkuIDs(ctx context.Context, skuIDs []string) ([]*entities.ProductPrice, error)
 	// Update writes p, guarding on oldEtag when non-empty. Returns
 	// errs.ErrStaleEntity if the guard fails to match.
 	Update(ctx context.Context, p *entities.ProductPrice, oldEtag string) error

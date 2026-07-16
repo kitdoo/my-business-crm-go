@@ -1,14 +1,24 @@
 import {
   listActiveProducts,
-  listActiveVariantsForProduct,
-  listActiveSkusForVariant,
-  getSkuPrice,
-  isSkuInStock,
+  listActiveVariantsForProducts,
+  listActiveSkusForVariants,
+  listPricesBySkuIds,
+  listInStockSkuIds,
   listPublicAttributeDefinitions,
 } from '~~/server/utils/catalogClient.js'
 
 function filterPublic(details, publicKeys) {
   return Object.fromEntries(Object.entries(details || {}).filter(([key]) => publicKeys.has(key)))
+}
+
+function groupBy(items, key) {
+  const map = new Map()
+  for (const item of items) {
+    const list = map.get(item[key])
+    if (list) list.push(item)
+    else map.set(item[key], [item])
+  }
+  return map
 }
 
 // in_stock/name_asc/name_desc/newest — the only sort options exposed to
@@ -24,6 +34,25 @@ const SORT_OPTIONS = {
   newest: { sortField: 'FIELD_CREATED_AT', sortDirection: 'SORT_DIRECTION_DESC' },
 }
 
+// Looks up price + stock for a batch of SKU ids in two round trips total
+// (PricesService.List, InventoryService.List — see catalogClient), keyed
+// by skuId. Shared by the eager path (loadFilteredPage, which needs stock
+// to decide what belongs on a filtered page) and the standalone
+// products/stock.post.js endpoint the client calls once cards have
+// already rendered without price/stock (see toCards's includePriceStock).
+export async function loadPriceAndStockBySkuId(skuIds) {
+  const [prices, inStockSet] = await Promise.all([listPricesBySkuIds(skuIds), listInStockSkuIds(skuIds)])
+  const map = new Map()
+  for (const skuId of skuIds) {
+    const price = prices.get(skuId)
+    map.set(skuId, {
+      price: price ? { amount: price.priceAmount, currency: price.currency } : null,
+      inStock: inStockSet.has(skuId),
+    })
+  }
+  return map
+}
+
 // A product card shows one "representative" variant, and within it one
 // "representative" SKU — the first active one of each (lists are already
 // sorted by creation order) — for the card's own price/image/stock, since
@@ -34,49 +63,68 @@ const SORT_OPTIONS = {
 // the representative) so the card's two-tier option pickers (variant
 // swatches, then SKU pills) can swap the preview photo/price/availability
 // in place instead of only swapping the photo.
-async function toCard(product, publicKeys) {
-  const variants = await listActiveVariantsForProduct(product.id)
+//
+// Builds cards for a whole batch of products at once: every product's
+// variants are fetched in a single call (ProductVariantsService.List
+// filter.productIds), then every variant's SKUs in another single call
+// (ProductSKUsService.List filter.variantIds) — replacing what used to be
+// one round trip per product and one per variant.
+//
+// includePriceStock controls whether price/stock is resolved eagerly
+// here (needed by loadFilteredPage, which filters on inStock) or left
+// null for the client to fetch afterwards via products/stock.post.js once
+// the cards themselves — image, name, variant/SKU pickers — have already
+// painted (see katalog/index.vue). Every sku card always carries its own
+// skuId so that follow-up request can ask for exactly the SKUs on screen
+// without re-resolving anything.
+async function toCards(products, publicKeys, { includePriceStock }) {
+  if (!products.length) return []
 
-  const variantCards = (
-    await Promise.all(
-      variants.map(async (v) => {
-        const skus = await listActiveSkusForVariant(v.id)
-        if (!skus[0]) return null
+  const variants = await listActiveVariantsForProducts(products.map((p) => p.id))
+  const variantsByProduct = groupBy(variants, 'productId')
 
-        const skuCards = await Promise.all(
-          skus.map(async (s) => {
-            const [price, inStock] = await Promise.all([getSkuPrice(s.id), isSkuInStock(s.id)])
+  const skus = await listActiveSkusForVariants(variants.map((v) => v.id))
+  const skusByVariant = groupBy(skus, 'variantId')
+
+  const priceAndStockBySkuId = includePriceStock
+    ? await loadPriceAndStockBySkuId(skus.map((s) => s.id))
+    : new Map()
+
+  return products
+    .map((product) => {
+      const variantCards = (variantsByProduct.get(product.id) || [])
+        .map((v) => {
+          const variantSkus = skusByVariant.get(v.id) || []
+          if (!variantSkus[0]) return null
+          const skuCards = variantSkus.map((s) => {
+            const stock = priceAndStockBySkuId.get(s.id)
             return {
+              skuId: s.id,
               sku: s.sku,
               attributes: filterPublic(s.attributes, publicKeys),
-              price: price ? { amount: price.priceAmount, currency: price.currency } : null,
-              inStock,
+              price: stock ? stock.price : null,
+              inStock: stock ? stock.inStock : null, // null = not resolved yet, see includePriceStock
             }
-          }),
-        )
+          })
+          return { imageIds: v.imageIds, attributes: filterPublic(v.attributes, publicKeys), skus: skuCards }
+        })
+        .filter(Boolean)
+      if (!variantCards[0]) return null
 
-        return {
-          imageIds: v.imageIds,
-          attributes: filterPublic(v.attributes, publicKeys),
-          skus: skuCards,
-        }
-      }),
-    )
-  ).filter(Boolean)
-  if (!variantCards[0]) return null
+      const representativeVariant = variantCards[0]
+      const representativeSku = representativeVariant.skus[0]
 
-  const representativeVariant = variantCards[0]
-  const representativeSku = representativeVariant.skus[0]
-
-  return {
-    id: product.id,
-    sku: representativeSku.sku,
-    name: product.name,
-    imageIds: representativeVariant.imageIds,
-    price: representativeSku.price,
-    inStock: representativeSku.inStock,
-    variants: variantCards,
-  }
+      return {
+        id: product.id,
+        sku: representativeSku.sku,
+        name: product.name,
+        imageIds: representativeVariant.imageIds,
+        price: representativeSku.price,
+        inStock: representativeSku.inStock,
+        variants: variantCards,
+      }
+    })
+    .filter(Boolean)
 }
 
 // InventoryService has no "has stock" filter of its own (TZ §8.2 addendum:
@@ -89,7 +137,9 @@ const MAX_RAW_PAGES = 15
 
 // Always consumes whole raw pages (never slices mid-page) so nextCursor —
 // an opaque backend cursor, not an item offset — stays valid for the next
-// call; a returned page can therefore run a little over `limit`.
+// call; a returned page can therefore run a little over `limit`. Stock is
+// resolved eagerly here (includePriceStock: true) since which cards even
+// belong on the page depends on it.
 async function loadFilteredPage({ categoryId, cursor, limit, sortField, sortDirection, wantInStock, publicKeys }) {
   const items = []
   let nextCursor = cursor
@@ -98,7 +148,7 @@ async function loadFilteredPage({ categoryId, cursor, limit, sortField, sortDire
     const rawItems = response.items || []
     nextCursor = response.nextCursor || null
 
-    const cards = (await Promise.all(rawItems.map((p) => toCard(p, publicKeys)))).filter(Boolean)
+    const cards = await toCards(rawItems, publicKeys, { includePriceStock: true })
     for (const card of cards) {
       if (card.inStock === wantInStock) items.push(card)
     }
@@ -110,12 +160,17 @@ async function loadFilteredPage({ categoryId, cursor, limit, sortField, sortDire
 
 // GET /api/catalog/products?categoryId=&cursor=&limit=&sort=&inStock= — TZ §8.2.
 // Response is trimmed to card fields only, keyed off each product's
-// representative variant/SKU with every sibling variant's SKUs and their
-// own price/stock alongside (see toCard). inStock=true|false filters by
-// the representative SKU's warehouse stock (see
-// catalogClient.isSkuInStock); omitted means no stock filter. total is
-// only reliable when unfiltered — a stock filter makes ProductsService's
-// count meaningless, so it's dropped.
+// representative variant/SKU with every sibling variant's SKUs alongside
+// (see toCards). inStock=true|false filters by the representative SKU's
+// warehouse stock (see catalogClient.isSkuInStock); omitted means no stock
+// filter. total is only reliable when unfiltered — a stock filter makes
+// ProductsService's count meaningless, so it's dropped.
+//
+// Unfiltered requests skip price/stock entirely (cards render immediately
+// with image/name/variant pickers) — the client fetches price/stock in a
+// second pass via POST /api/catalog/products/stock once these cards have
+// painted. A stock filter forces the eager path since price/stock decides
+// which cards even qualify for the page.
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const sort = SORT_OPTIONS[query.sort?.toString()] || SORT_OPTIONS.in_stock
@@ -139,6 +194,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const response = await listActiveProducts({ categoryId, cursor, limit, ...sort })
-  const items = (await Promise.all((response.items || []).map((p) => toCard(p, publicKeys)))).filter(Boolean)
+  const items = await toCards(response.items || [], publicKeys, { includePriceStock: false })
   return { items, total: response.total ?? null, nextCursor: response.nextCursor || null }
 })

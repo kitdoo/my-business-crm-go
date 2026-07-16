@@ -29,6 +29,10 @@ message InventoryListRequest {
   message Filter {
     optional int64 minQuantity = 1 [(buf.validate.field).int64.gte = 0];
     optional int64 maxQuantity = 2 [(buf.validate.field).int64.gte = 0];
+    // Batch lookup across multiple SKUs in one call — mutually usable
+    // alongside the singular skuId above, though callers doing a batch
+    // lookup should leave skuId unset and use this instead.
+    repeated string skuIds = 3 [(buf.validate.field).repeated.items.string.uuid = true];
   }
   optional Filter filter = 3;
   optional crm.types.common.Pagination pagination = 4;

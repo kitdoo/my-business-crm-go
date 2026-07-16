@@ -143,6 +143,28 @@ func (s *Storage) GetBySkuID(ctx context.Context, skuID string) (*entities.Produ
 	return converter.Convert(&m, &entities.ProductPrice{}), nil
 }
 
+func (s *Storage) ListBySkuIDs(ctx context.Context, skuIDs []string) ([]*entities.ProductPrice, error) {
+	if len(skuIDs) == 0 {
+		return nil, nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
+	defer cancel()
+
+	cursor, err := s.collection.Find(ctx, activeOnly(bson.M{FieldSKUID: bson.M{"$in": skuIDs}}))
+	if err != nil {
+		return nil, coreerrs.WrapOperation(err, "list product prices by sku ids")
+	}
+	defer cursor.Close(ctx)
+
+	var models []model
+	if err := cursor.All(ctx, &models); err != nil {
+		return nil, coreerrs.WrapOperation(err, "decode product prices by sku ids")
+	}
+	return coreslices.To(models, func(m model) *entities.ProductPrice {
+		return converter.Convert(&m, &entities.ProductPrice{})
+	}), nil
+}
+
 func (s *Storage) Update(ctx context.Context, p *entities.ProductPrice, oldEtag string) error {
 	ctx, cancel := context.WithTimeout(ctx, datamongo.DefaultQueryTimeout)
 	defer cancel()

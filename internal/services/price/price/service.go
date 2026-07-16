@@ -71,6 +71,15 @@ func (s *Service) Get(ctx context.Context, skuID string) (*entities.ProductPrice
 	return p, nil
 }
 
+func (s *Service) List(ctx context.Context, skuIDs []string) ([]*entities.ProductPrice, error) {
+	prices, err := s.storage.ListBySkuIDs(ctx, skuIDs)
+	if err != nil {
+		s.logger.DebugContext(ctx, "list product prices failed", slog.String("error", err.Error()))
+		return nil, err
+	}
+	return prices, nil
+}
+
 func (s *Service) Update(ctx context.Context, in *entities.ProductPriceUpdate) (*entities.ProductPrice, error) {
 	_ = normalizer.Normalize(in) //nolint:errcheck
 

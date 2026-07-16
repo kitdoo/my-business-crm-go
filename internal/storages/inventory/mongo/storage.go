@@ -128,6 +128,9 @@ func (s *Storage) List(ctx context.Context, in *entities.InventoryList) (*entiti
 	if in.SKUID != nil {
 		filter[FieldSKUID] = *in.SKUID
 	}
+	if len(in.SKUIDs) > 0 {
+		filter[FieldSKUID] = bson.M{"$in": in.SKUIDs}
+	}
 	if in.WarehouseID != nil {
 		filter[FieldWarehouseID] = *in.WarehouseID
 	}

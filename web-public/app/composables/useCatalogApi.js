@@ -5,8 +5,11 @@ export function useCatalogApi() {
   function getProduct(sku) {
     return $fetch(`/api/catalog/products/${sku}`)
   }
+  function getProductsStock(skuIds) {
+    return $fetch('/api/catalog/products/stock', { method: 'POST', body: { skuIds } })
+  }
   function listCategories() {
     return $fetch('/api/catalog/categories')
   }
-  return { listProducts, getProduct, listCategories }
+  return { listProducts, getProduct, getProductsStock, listCategories }
 }

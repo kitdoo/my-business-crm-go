@@ -33,7 +33,10 @@ type InventoryListSort struct {
 // InventoryList is the single List input; scope/filters/pagination all live
 // inside it, per the List(ctx, in *XxxList) convention.
 type InventoryList struct {
-	SKUID       *string
+	SKUID *string
+	// SKUIDs batches a lookup across multiple SKUs in one query — set this
+	// instead of SKUID for a batch lookup, not alongside it.
+	SKUIDs      []string
 	WarehouseID *string
 	MinQuantity *int64
 	MaxQuantity *int64

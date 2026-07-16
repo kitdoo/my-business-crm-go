@@ -85,6 +85,7 @@ var permissions = map[string]string{
 
 	pricesvcpb.PricesService_Create_FullMethodName:     permission("prices", actionCreate),
 	pricesvcpb.PricesService_Get_FullMethodName:        permission("prices", actionRead),
+	pricesvcpb.PricesService_List_FullMethodName:       permission("prices", actionRead),
 	pricesvcpb.PricesService_GetHistory_FullMethodName: permission("prices", actionRead),
 	pricesvcpb.PricesService_Update_FullMethodName:     permission("prices", actionUpdate),
 	pricesvcpb.PricesService_Delete_FullMethodName:     permission("prices", actionDelete),

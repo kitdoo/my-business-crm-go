@@ -46,6 +46,12 @@ function nextImage() {
 
 const qtyInCart = computed(() => getQty(activeSku.value.sku))
 
+// The catalog page renders cards before price/stock has loaded (see
+// katalog/index.vue's staged fetch) — inStock is null on a SKU until the
+// follow-up request resolves it. Adding to cart needs a real price, so it
+// stays disabled until then instead of momentarily adding a null-priced item.
+const stockKnown = computed(() => activeSku.value.inStock !== null)
+
 function cartItem() {
   return { ...props.product, sku: activeSku.value.sku, price: activeSku.value.price }
 }
@@ -93,7 +99,8 @@ function decrement() {
       <NuxtLink :to="localePath(`/katalog/${activeSku.sku}`)">
         <h3 class="font-medium mb-1 line-clamp-2"><LocalizedText :value="product.name" /></h3>
       </NuxtLink>
-      <MoneyLabel v-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="font-semibold text-brand-700" />
+      <div v-if="!stockKnown" class="h-5 w-16 rounded bg-black/5 animate-pulse" />
+      <MoneyLabel v-else-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="font-semibold text-brand-700" />
 
       <div v-if="otherVariants.length" class="mt-2 flex gap-1.5 flex-wrap">
         <button
@@ -126,7 +133,8 @@ function decrement() {
       </div>
 
       <div class="mt-2 flex items-center justify-between gap-2">
-        <StatusBadge :available="activeSku.inStock" />
+        <div v-if="!stockKnown" class="h-5 w-20 rounded-full bg-black/5 animate-pulse" />
+        <StatusBadge v-else :available="activeSku.inStock" />
 
         <div v-if="qtyInCart" class="flex items-center gap-2">
           <button class="w-6 h-6 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="decrement">
@@ -139,7 +147,8 @@ function decrement() {
         </div>
         <button
           v-else
-          class="text-xs uppercase tracking-wide text-brand-700 hover:text-brand-500 flex items-center gap-1"
+          class="text-xs uppercase tracking-wide text-brand-700 hover:text-brand-500 flex items-center gap-1 disabled:opacity-30"
+          :disabled="!stockKnown"
           :aria-label="t('cart.addToCart')"
           @click.stop.prevent="addItem(cartItem())"
         >

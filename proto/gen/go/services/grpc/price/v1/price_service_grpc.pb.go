@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	PricesService_Create_FullMethodName     = "/crm.grpc.price.v1.PricesService/Create"
 	PricesService_Get_FullMethodName        = "/crm.grpc.price.v1.PricesService/Get"
+	PricesService_List_FullMethodName       = "/crm.grpc.price.v1.PricesService/List"
 	PricesService_Update_FullMethodName     = "/crm.grpc.price.v1.PricesService/Update"
 	PricesService_Delete_FullMethodName     = "/crm.grpc.price.v1.PricesService/Delete"
 	PricesService_GetHistory_FullMethodName = "/crm.grpc.price.v1.PricesService/GetHistory"
@@ -32,6 +33,11 @@ const (
 type PricesServiceClient interface {
 	Create(ctx context.Context, in *ProductPriceCreateRequest, opts ...grpc.CallOption) (*ProductPriceCreateResponse, error)
 	Get(ctx context.Context, in *ProductPriceGetRequest, opts ...grpc.CallOption) (*ProductPriceGetResponse, error)
+	// List looks up the current price for a batch of SKUs in one round trip —
+	// used by the public catalog (web-public/) to price a whole page of
+	// products at once instead of one Get per SKU. Unlike Get, a SKU with no
+	// current price is silently omitted from items rather than erroring.
+	List(ctx context.Context, in *ProductPriceListRequest, opts ...grpc.CallOption) (*ProductPriceListResponse, error)
 	Update(ctx context.Context, in *ProductPriceUpdateRequest, opts ...grpc.CallOption) (*ProductPriceUpdateResponse, error)
 	Delete(ctx context.Context, in *ProductPriceDeleteRequest, opts ...grpc.CallOption) (*ProductPriceDeleteResponse, error)
 	GetHistory(ctx context.Context, in *ProductPriceGetHistoryRequest, opts ...grpc.CallOption) (*ProductPriceGetHistoryResponse, error)
@@ -59,6 +65,16 @@ func (c *pricesServiceClient) Get(ctx context.Context, in *ProductPriceGetReques
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ProductPriceGetResponse)
 	err := c.cc.Invoke(ctx, PricesService_Get_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pricesServiceClient) List(ctx context.Context, in *ProductPriceListRequest, opts ...grpc.CallOption) (*ProductPriceListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProductPriceListResponse)
+	err := c.cc.Invoke(ctx, PricesService_List_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +117,11 @@ func (c *pricesServiceClient) GetHistory(ctx context.Context, in *ProductPriceGe
 type PricesServiceServer interface {
 	Create(context.Context, *ProductPriceCreateRequest) (*ProductPriceCreateResponse, error)
 	Get(context.Context, *ProductPriceGetRequest) (*ProductPriceGetResponse, error)
+	// List looks up the current price for a batch of SKUs in one round trip —
+	// used by the public catalog (web-public/) to price a whole page of
+	// products at once instead of one Get per SKU. Unlike Get, a SKU with no
+	// current price is silently omitted from items rather than erroring.
+	List(context.Context, *ProductPriceListRequest) (*ProductPriceListResponse, error)
 	Update(context.Context, *ProductPriceUpdateRequest) (*ProductPriceUpdateResponse, error)
 	Delete(context.Context, *ProductPriceDeleteRequest) (*ProductPriceDeleteResponse, error)
 	GetHistory(context.Context, *ProductPriceGetHistoryRequest) (*ProductPriceGetHistoryResponse, error)
@@ -119,6 +140,9 @@ func (UnimplementedPricesServiceServer) Create(context.Context, *ProductPriceCre
 }
 func (UnimplementedPricesServiceServer) Get(context.Context, *ProductPriceGetRequest) (*ProductPriceGetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedPricesServiceServer) List(context.Context, *ProductPriceListRequest) (*ProductPriceListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedPricesServiceServer) Update(context.Context, *ProductPriceUpdateRequest) (*ProductPriceUpdateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
@@ -182,6 +206,24 @@ func _PricesService_Get_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PricesServiceServer).Get(ctx, req.(*ProductPriceGetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PricesService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProductPriceListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PricesServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PricesService_List_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PricesServiceServer).List(ctx, req.(*ProductPriceListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -254,6 +296,10 @@ var PricesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _PricesService_Get_Handler,
+		},
+		{
+			MethodName: "List",
+			Handler:    _PricesService_List_Handler,
 		},
 		{
 			MethodName: "Update",

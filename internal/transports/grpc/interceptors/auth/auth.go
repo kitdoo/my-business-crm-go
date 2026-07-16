@@ -50,8 +50,8 @@ func UserFromContext(ctx context.Context) (*entities.User, bool) {
 
 // New builds the gRPC auth interceptor. Login is exempt (it is how a token
 // is obtained in the first place). ProductsService.List,
-// ProductVariantsService.List/Get, ProductSKUsService.List, PricesService.Get,
-// CategoriesService.List, InventoryService.List and
+// ProductVariantsService.List/Get, ProductSKUsService.List,
+// PricesService.Get/List, CategoriesService.List, InventoryService.List and
 // ProductAttributeDefinitionsService.List are
 // also exempt — they back the public website's catalog (web-public/),
 // ProductVariantsService.Get in particular resolves a ProductSKU's
@@ -116,6 +116,7 @@ func New(users usersvc.Service) interceptors.ServerInterceptor {
 			productvariantsvcpb.ProductVariantsService_Get_FullMethodName,
 			productskusvcpb.ProductSKUsService_List_FullMethodName,
 			pricesvcpb.PricesService_Get_FullMethodName,
+			pricesvcpb.PricesService_List_FullMethodName,
 			categorysvcpb.CategoriesService_List_FullMethodName,
 			partnersvcpb.PartnersService_ListPublic_FullMethodName,
 			inventorysvcpb.InventoryService_List_FullMethodName,
