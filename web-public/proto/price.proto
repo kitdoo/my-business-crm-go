@@ -26,6 +26,11 @@ message ProductPrice {
 service PricesService {
   rpc Create (ProductPriceCreateRequest) returns (ProductPriceCreateResponse) {}
   rpc Get (ProductPriceGetRequest) returns (ProductPriceGetResponse) {}
+  // List looks up the current price for a batch of SKUs in one round trip —
+  // used by the public catalog (web-public/) to price a whole page of
+  // products at once instead of one Get per SKU. Unlike Get, a SKU with no
+  // current price is silently omitted from items rather than erroring.
+  rpc List (ProductPriceListRequest) returns (ProductPriceListResponse) {}
   rpc Update (ProductPriceUpdateRequest) returns (ProductPriceUpdateResponse) {}
   rpc Delete (ProductPriceDeleteRequest) returns (ProductPriceDeleteResponse) {}
   rpc GetHistory (ProductPriceGetHistoryRequest) returns (ProductPriceGetHistoryResponse) {}
@@ -37,6 +42,17 @@ message ProductPriceGetRequest {
 
 message ProductPriceGetResponse {
   ProductPrice price = 1;
+}
+
+message ProductPriceListRequest {
+  message Filter {
+    repeated string skuIds = 1;
+  }
+  Filter filter = 1;
+}
+
+message ProductPriceListResponse {
+  repeated ProductPrice items = 1;
 }
 
 message ProductPriceCreateRequest {

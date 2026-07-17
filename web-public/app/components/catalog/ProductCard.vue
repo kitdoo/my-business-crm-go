@@ -15,6 +15,12 @@ const { addItem, setQty, getQty, removeItem } = useCart()
 // target in place, without a navigation (each variant/SKU carries its own,
 // see products.get.js toCard).
 const otherVariants = computed(() => (props.product.variants || []).filter((_, i) => i !== selectedVariantIndex.value))
+// Swatch row is capped at MAX_VARIANT_SWATCHES so a product with dozens of
+// colors doesn't blow out the card's height — the rest collapse into a
+// single "+N" chip instead of wrapping onto more rows.
+const MAX_VARIANT_SWATCHES = 5
+const displayedVariants = computed(() => (props.product.variants || []).slice(0, MAX_VARIANT_SWATCHES))
+const hiddenVariantsCount = computed(() => Math.max(0, (props.product.variants?.length || 0) - MAX_VARIANT_SWATCHES))
 const selectedVariantIndex = ref(0)
 const selectedSkuIndex = ref(0)
 const activeVariant = computed(() => props.product.variants?.[selectedVariantIndex.value])
@@ -66,7 +72,7 @@ function decrement() {
 </script>
 
 <template>
-  <div class="rounded-lg border border-black/10 overflow-hidden group">
+  <div class="rounded-lg border border-black/10 overflow-hidden group flex flex-col h-full">
     <NuxtLink :to="localePath(`/katalog/${activeSku.sku}`)" class="block relative aspect-square overflow-hidden bg-gray-50">
       <NuxtImg :src="activeImages[activeImageIndex]" alt="" loading="lazy" class="w-full h-full object-cover" />
       <template v-if="activeImages.length > 1">
@@ -95,16 +101,14 @@ function decrement() {
       </template>
     </NuxtLink>
 
-    <div class="p-4">
+    <div class="p-4 flex flex-col flex-1">
       <NuxtLink :to="localePath(`/katalog/${activeSku.sku}`)">
         <h3 class="font-medium mb-1 line-clamp-2"><LocalizedText :value="product.name" /></h3>
       </NuxtLink>
-      <div v-if="!stockKnown" class="h-5 w-16 rounded bg-black/5 animate-pulse" />
-      <MoneyLabel v-else-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="font-semibold text-brand-700" />
 
-      <div v-if="otherVariants.length" class="mt-2 flex gap-1.5 flex-wrap">
+      <div v-if="otherVariants.length" class="mt-2 flex gap-1.5 flex-wrap items-center">
         <button
-          v-for="(variant, i) in product.variants"
+          v-for="(variant, i) in displayedVariants"
           :key="i"
           type="button"
           class="w-7 h-7 rounded overflow-hidden border-2 shrink-0"
@@ -117,6 +121,7 @@ function decrement() {
             class="w-full h-full object-cover"
           />
         </button>
+        <span v-if="hiddenVariantsCount" class="text-xs text-black/50 px-1">{{ t('catalog.moreVariants', { n: hiddenVariantsCount }) }}</span>
       </div>
 
       <div v-if="activeVariant.skus.length > 1" class="mt-2 flex gap-1.5 flex-wrap">
@@ -132,28 +137,33 @@ function decrement() {
         </button>
       </div>
 
-      <div class="mt-2 flex items-center justify-between gap-2">
-        <div v-if="!stockKnown" class="h-5 w-20 rounded-full bg-black/5 animate-pulse" />
-        <StatusBadge v-else :available="activeSku.inStock" />
+      <div class="mt-auto pt-2">
+        <div v-if="!stockKnown" class="h-5 w-16 rounded bg-black/5 animate-pulse" />
+        <MoneyLabel v-else-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="font-semibold text-brand-700" />
 
-        <div v-if="qtyInCart" class="flex items-center gap-2">
-          <button class="w-6 h-6 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="decrement">
-            <UIcon name="i-lucide-minus" class="w-3 h-3" />
-          </button>
-          <span class="text-sm font-medium w-4 text-center">{{ qtyInCart }}</span>
-          <button class="w-6 h-6 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="increment">
-            <UIcon name="i-lucide-plus" class="w-3 h-3" />
+        <div class="mt-2 flex items-center justify-between gap-2">
+          <div v-if="!stockKnown" class="h-5 w-20 rounded-full bg-black/5 animate-pulse" />
+          <StatusBadge v-else :available="activeSku.inStock" />
+
+          <div v-if="qtyInCart" class="flex items-center gap-2">
+            <button class="w-6 h-6 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="decrement">
+              <UIcon name="i-lucide-minus" class="w-3 h-3" />
+            </button>
+            <span class="text-sm font-medium w-4 text-center">{{ qtyInCart }}</span>
+            <button class="w-6 h-6 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="increment">
+              <UIcon name="i-lucide-plus" class="w-3 h-3" />
+            </button>
+          </div>
+          <button
+            v-else
+            class="text-xs uppercase tracking-wide text-brand-700 hover:text-brand-500 flex items-center gap-1 disabled:opacity-30"
+            :disabled="!stockKnown"
+            :aria-label="t('cart.addToCart')"
+            @click.stop.prevent="addItem(cartItem())"
+          >
+            <UIcon name="i-lucide-shopping-cart" class="w-4 h-4" />
           </button>
         </div>
-        <button
-          v-else
-          class="text-xs uppercase tracking-wide text-brand-700 hover:text-brand-500 flex items-center gap-1 disabled:opacity-30"
-          :disabled="!stockKnown"
-          :aria-label="t('cart.addToCart')"
-          @click.stop.prevent="addItem(cartItem())"
-        >
-          <UIcon name="i-lucide-shopping-cart" class="w-4 h-4" />
-        </button>
       </div>
     </div>
   </div>
