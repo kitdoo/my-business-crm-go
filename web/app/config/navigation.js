@@ -8,3 +8,14 @@ export const NAV_ITEMS = [{ key: 'dashboard', label: 'nav.dashboard', icon: 'i-l
 
 // Order here controls the order sections render in the menu.
 export const NAV_GROUPS = [{ key: 'sales' }, { key: 'catalog' }, { key: 'warehouse' }, { key: 'users' }]
+
+// Curated menu subset per role, on top of the normal read-permission
+// filter. Employee has read access to the full catalog (brands,
+// categories, warehouses, product variants/SKUs, ...) because that data
+// backs relation lookups elsewhere (e.g. a product card showing its
+// brand name) — but only these five entities are meant to be entry
+// points in their menu. A role with no entry here (admin, guest) gets
+// every permission-visible entity, unrestricted.
+export const ROLE_MENU_KEYS = {
+  employee: ['clients', 'partners', 'sales', 'products', 'inventory'],
+}

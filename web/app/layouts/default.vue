@@ -14,7 +14,7 @@ const { menuOpen } = useLayoutState()
         <SideMenu />
       </aside>
 
-      <main class="flex-1 min-w-0 p-4 overflow-y-auto">
+      <main class="flex-1 min-w-0 min-h-0 p-4 overflow-y-auto">
         <slot />
       </main>
     </div>

@@ -42,13 +42,21 @@ export default {
   },
 
   form: {
+    // Admin accounts can never be deleted (backend refuses it outright,
+    // see internal/errs.ErrUserAdminProtected) — hide the button rather
+    // than let the operator hit a confirm dialog that always fails.
+    deleteGuard: (record) => record.role !== 'USER_ROLE_ADMIN',
     fields: [
       { key: 'name', type: 'localizedString', label: 'fields.name', required: true },
       { key: 'lastName', type: 'localizedString', label: 'fields.lastName' },
       { key: 'phone', type: 'text', label: 'fields.phone', required: true, maxLength: 32 },
       { key: 'email', type: 'text', label: 'fields.email', required: true, inputType: 'email' },
       { key: 'description', type: 'localizedString', label: 'fields.description' },
-      { key: 'role', type: 'enum', enum: 'UserRole', label: 'fields.role', required: true },
+      // USER_ROLE_ADMIN excluded: the only admin account comes from
+      // CRMConfig.BootstrapAdmin on first boot, the backend rejects
+      // Create/Update with role admin outright (see
+      // errs.ErrUserAdminCreateForbidden) — no point offering it here.
+      { key: 'role', type: 'enum', enum: 'UserRole', label: 'fields.role', required: true, excludeOptions: ['USER_ROLE_ADMIN'] },
       {
         key: 'password',
         type: 'text',

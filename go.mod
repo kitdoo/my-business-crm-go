@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260415201107-50325440f8f2.1
+	buf.build/go/protovalidate v1.2.0
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/altessa-s/go-atlas v0.0.0-20260610115405-84cc9ec0a9dd
 	github.com/altessa-s/proto-gen-go v0.1.2
@@ -23,7 +24,6 @@ require (
 )
 
 require (
-	buf.build/go/protovalidate v1.2.0 // indirect
 	cel.dev/expr v0.25.1 // indirect
 	github.com/adrg/postcode v0.1.0 // indirect
 	github.com/altessa-s/ozzo-rules v1.16.0 // indirect

@@ -141,6 +141,9 @@ func (s *Service) Delete(ctx context.Context, in *entities.UserDelete) error {
 		s.logger.DebugContext(ctx, "get user failed", slog.String("id", in.ID), slog.String("error", err.Error()))
 		return err
 	}
+	if u.Role == entities.UserRoleAdmin {
+		return errs.ErrUserAdminProtected
+	}
 	if in.Etag != nil && *in.Etag != u.Etag {
 		return errs.ErrStaleEntity
 	}

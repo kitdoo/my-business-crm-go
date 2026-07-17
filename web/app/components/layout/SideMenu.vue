@@ -4,19 +4,21 @@
 // separated by a plain divider line (no section labels), plus a Help
 // entry linking to the /help page (role-aware workflow guide). Sits on
 // the left; permanent panel on >= lg, overlay slideover below that (TD §6).
-import { NAV_ITEMS, NAV_GROUPS } from '~/config/navigation.js'
+import { NAV_ITEMS, NAV_GROUPS, ROLE_MENU_KEYS } from '~/config/navigation.js'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { can } = usePermission()
+const { can, role } = usePermission()
 const { menuOpen } = useLayoutState()
 
-const visibleEntities = computed(() =>
-  listEntityConfigs()
+const visibleEntities = computed(() => {
+  const allowedKeys = ROLE_MENU_KEYS[role.value]
+  return listEntityConfigs()
     .filter((cfg) => can(cfg.permissions.read))
-    .map((cfg) => ({ key: cfg.key, label: cfg.label, icon: cfg.icon, to: cfg.route, group: cfg.group })),
-)
+    .filter((cfg) => !allowedKeys || allowedKeys.includes(cfg.key))
+    .map((cfg) => ({ key: cfg.key, label: cfg.label, icon: cfg.icon, to: cfg.route, group: cfg.group }))
+})
 
 const groupedSections = computed(() =>
   NAV_GROUPS.map((group) => ({

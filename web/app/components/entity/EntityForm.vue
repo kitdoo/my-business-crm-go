@@ -49,7 +49,16 @@ const { form, record, etag, loading, saving, fieldErrors, etagConflict, isCreate
   useEntityForm(props.entity, props.id, props.initialValues)
 
 const confirmDeleteOpen = ref(false)
-const canDelete = computed(() => !isCreate && can(config.permissions.delete))
+// config.form.deleteGuard is an optional (record) => boolean — when
+// present and it returns false for the loaded record, Delete stays hidden
+// regardless of permission (e.g. Users hides it for admin accounts, which
+// the backend refuses to delete outright — see ErrUserAdminProtected).
+const canDelete = computed(
+  () =>
+    !isCreate &&
+    can(config.permissions.delete) &&
+    (!config.form.deleteGuard || !record.value || config.form.deleteGuard(record.value)),
+)
 const isDrawer = computed(() => props.mode === 'drawer')
 
 // Declarative non-CRUD actions (TD §12.2, e.g. Warehouse.Deactivate) — an
@@ -160,7 +169,11 @@ function fieldsToRender() {
             <UFormField v-else-if="field.type === 'enum'" :label="t(field.label)" :error="fieldErrors[field.key]">
               <USelect
                 v-model="form[field.key]"
-                :items="getEnumOptions(field.enum).map((v) => ({ label: t(`enums.status.${v}`), value: v }))"
+                :items="
+                  getEnumOptions(field.enum)
+                    .filter((v) => !field.excludeOptions?.includes(v))
+                    .map((v) => ({ label: t(`enums.status.${v}`), value: v }))
+                "
                 class="w-full"
               />
             </UFormField>

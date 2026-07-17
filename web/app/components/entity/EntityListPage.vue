@@ -119,7 +119,7 @@ function onDeleted() {
     <USlideover v-model:open="drawerOpen" side="right">
       <template #content>
         <div
-          class="p-6 space-y-4 w-full"
+          class="p-6 space-y-4 w-full h-full overflow-y-auto"
           :class="
             drawerMode === 'view' &&
             (getEntityConfig(activeEntity).view?.relatedSales || getEntityConfig(activeEntity).view?.variantsSummary)

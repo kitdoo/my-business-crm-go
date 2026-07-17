@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 
 	"google.golang.org/grpc"
@@ -98,6 +99,9 @@ func optionalString(s string) *string {
 }
 
 func (h *Handler) Create(ctx context.Context, in *usersvcpb.UserCreateRequest) (*usersvcpb.UserCreateResponse, error) {
+	if in.GetRole() == userpb.UserRole_USER_ROLE_ADMIN {
+		return nil, MapError(fmt.Errorf("role: %w", errs.ErrUserAdminCreateForbidden))
+	}
 	create := converter.Convert(in, &entities.UserCreate{}, withProtoCodecs)
 
 	u, err := h.svc.Create(ctx, create)
@@ -167,6 +171,9 @@ func (h *Handler) List(ctx context.Context, in *usersvcpb.UsersListRequest) (*us
 }
 
 func (h *Handler) Update(ctx context.Context, in *usersvcpb.UserUpdateRequest) (*usersvcpb.UserUpdateResponse, error) {
+	if in.Role != nil && *in.Role == userpb.UserRole_USER_ROLE_ADMIN {
+		return nil, MapError(fmt.Errorf("role: %w", errs.ErrUserAdminCreateForbidden))
+	}
 	update := &entities.UserUpdate{Etag: optionalString(in.GetOptions().GetEtag())}
 
 	if pbMask := in.GetOptions().GetUpdateMask(); pbMask != nil {
@@ -231,6 +238,13 @@ func MapError(err error) error {
 		return status.Error(codes.Unauthenticated, errs.ErrUserInvalidCredentials.Error())
 	case errors.Is(err, errs.ErrUserInactive):
 		return status.Error(codes.FailedPrecondition, errs.ErrUserInactive.Error())
+	case errors.Is(err, errs.ErrUserAdminProtected):
+		return status.Error(codes.FailedPrecondition, errs.ErrUserAdminProtected.Error())
+	case errors.Is(err, errs.ErrUserAdminCreateForbidden):
+		// err, not the sentinel: carries the "role: " field prefix so the
+		// BFF can attribute this to the role field, same pattern as
+		// ErrLocalizedStringMissingRequiredLocale above.
+		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, errs.ErrStaleEntity):
 		return status.Error(codes.Aborted, errs.ErrStaleEntity.Error())
 	case errors.Is(err, errs.ErrInvalidListCursor):

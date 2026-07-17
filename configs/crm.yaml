@@ -28,23 +28,52 @@
 #
 #  # <map<string, []string>> Role -> permission strings ("*" grants
 #  # everything for that role).
+#  #
+#  # employee: read access to the whole catalog except users (those extra
+#  # reads back relation lookups elsewhere, e.g. a product card showing
+#  # its brand name — see web/app/config/navigation.js ROLE_MENU_KEYS for
+#  # the curated menu subset built on top of this), plus the only
+#  # mutation employees get: creating/editing sales.
+#  #
+#  # guest: the same full read access, no mutations at all — every
+#  # create/update/delete control in the UI stays hidden (gated through
+#  # web/app/composables/usePermission.js can()).
 #  rbac:
 #    admin:
 #      - "*"
 #    employee:
-#      - "products:read"
-#      - "products:create"
-#      - "productvariants:read"
-#      - "productvariants:create"
-#      - "productskus:read"
-#      - "productskus:create"
-#      - "images:upload"
-#      - "categories:read"
-#      - "categories:create"
 #      - "brands:read"
-#      - "brands:create"
+#      - "categories:read"
+#      - "clients:read"
+#      - "inventory:read"
+#      - "inventorymovements:read"
+#      - "partners:read"
+#      - "prices:read"
+#      - "products:read"
+#      - "productattributedefinitions:read"
+#      - "productvariants:read"
+#      - "productskus:read"
+#      - "reports:read"
+#      - "sales:read"
 #      - "sales:create"
-#    guest: []
+#      - "sales:update"
+#      - "warehouses:read"
+#    guest:
+#      - "brands:read"
+#      - "categories:read"
+#      - "clients:read"
+#      - "inventory:read"
+#      - "inventorymovements:read"
+#      - "partners:read"
+#      - "prices:read"
+#      - "products:read"
+#      - "productattributedefinitions:read"
+#      - "productvariants:read"
+#      - "productskus:read"
+#      - "reports:read"
+#      - "sales:read"
+#      - "users:read"
+#      - "warehouses:read"
 #
 #  # <object> Product-image upload endpoint (plain HTTP, not gRPC).
 #  images:

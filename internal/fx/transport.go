@@ -1,12 +1,19 @@
 package fx
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/fx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
+
+	"buf.build/go/protovalidate"
 
 	"github.com/altessa-s/go-atlas/data/idempotency"
 	"github.com/altessa-s/go-atlas/data/limiters"
@@ -14,6 +21,7 @@ import (
 	"github.com/altessa-s/go-atlas/transport/grpc/handlers/health"
 	"github.com/altessa-s/go-atlas/transport/grpc/handlers/serviceinfo"
 	"github.com/altessa-s/go-atlas/transport/grpc/interceptors"
+	"github.com/altessa-s/go-atlas/transport/grpc/interceptors/protovalidator"
 
 	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
 	"github.com/kitdoo/my-business-crm-go/internal/rbac"
@@ -54,6 +62,7 @@ func TransportsModule() fx.Option {
 		fx.Provide(newRBACTable),
 		fx.Provide(AsGRPCInterceptor(grpcrbac.New)),
 		fx.Provide(AsGRPCInterceptor(newClientKeyInterceptor)),
+		fx.Provide(AsGRPCInterceptor(newProtoValidatorInterceptor)),
 
 		fx.Invoke(fx.Annotate(registerGRPCHandlers, fx.ParamTags(`group:"grpc-interceptors"`, `group:"grpc-handlers"`))),
 
@@ -205,4 +214,43 @@ func newClientKeyInterceptor(cfg *appconfig.Config) interceptors.ServerIntercept
 		}
 	}
 	return grpcclientkey.New(keys, notificationsvcpb.NotificationsService_Send_FullMethodName)
+}
+
+// newProtoValidatorInterceptor enforces every `buf.validate.field` rule
+// declared on the request messages (required fields, enum.defined_only,
+// string formats/lengths, etc.) — none of that was previously checked
+// anywhere at runtime; the annotations existed in the .proto files but had
+// no interceptor evaluating them, so e.g. UserCreateRequest.role being
+// left unset (UserRole_USER_ROLE_UNSPECIFIED) sailed straight through to
+// storage. go-atlas's protovalidator interceptor auto-orders itself after
+// auth (see its Dependencies()), so registration order here doesn't
+// matter. On a violation, the message is formatted as "<field>: <reason>"
+// — the same convention MapError already uses for
+// ErrLocalizedStringMissingRequiredLocale — so the BFF's
+// extractFieldFromMessage can attribute it to the right form field
+// instead of a generic toast.
+func newProtoValidatorInterceptor() (interceptors.ServerInterceptor, error) {
+	pv, err := protovalidate.New()
+	if err != nil {
+		return nil, coreerrs.WrapOperation(err, "create protovalidate validator")
+	}
+
+	validatorFn := protovalidator.ValidatorFunc(func(_ context.Context, msg proto.Message) error {
+		err := pv.Validate(msg)
+		if err == nil {
+			return nil
+		}
+
+		var verr *protovalidate.ValidationError
+		if errors.As(err, &verr) && len(verr.Violations) > 0 {
+			v := verr.Violations[0].Proto
+			if field := protovalidate.FieldPathString(v.GetField()); field != "" {
+				return status.Error(codes.InvalidArgument, field+": "+v.GetMessage())
+			}
+			return status.Error(codes.InvalidArgument, v.GetMessage())
+		}
+		return status.Error(codes.InvalidArgument, err.Error())
+	})
+
+	return protovalidator.ServerInterceptor(validatorFn), nil
 }

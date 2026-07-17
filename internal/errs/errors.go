@@ -60,6 +60,20 @@ var (
 	// whose status is not active.
 	ErrUserInactive = errors.New("user inactive")
 
+	// ErrUserAdminProtected is returned when Delete is attempted against a
+	// user whose role is admin — an admin account can never be deleted
+	// through the regular Delete RPC, regardless of caller role, so a
+	// locked-out operator always has at least one account left to recover
+	// through.
+	ErrUserAdminProtected = errors.New("admin user cannot be deleted")
+
+	// ErrUserAdminCreateForbidden is returned when Create or Update is
+	// attempted with role admin — the only admin account is the one
+	// materialized from CRMConfig.BootstrapAdmin on first boot (see
+	// internal/fx.registerBootstrapAdmin); there is no RPC path to mint a
+	// second one.
+	ErrUserAdminCreateForbidden = errors.New("admin role cannot be assigned through this endpoint")
+
 	// ErrProductNotFound is returned when a product lookup finds no active row.
 	ErrProductNotFound = errors.New("product not found")
 
