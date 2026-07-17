@@ -47,7 +47,7 @@ func MapError(err error) error {
 	switch {
 	case err == nil:
 		return nil
-	case errors.Is(err, errs.ErrSMTPNotConfigured):
+	case errors.Is(err, errs.ErrMailerNotConfigured):
 		return status.Error(codes.Unavailable, "email delivery is not configured")
 	default:
 		return status.Error(codes.Internal, "internal error")

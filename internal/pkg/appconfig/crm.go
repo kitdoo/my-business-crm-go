@@ -83,10 +83,18 @@ type CRMConfig struct {
 	Auth *AuthConfig `yaml:"auth" default:"-"`
 
 	// Smtp configures the outbound mail server NotificationsService.Send
-	// delivers messages through (internal/services/mailer). Optional: when
-	// absent, Send returns a "not configured" error instead of failing app
-	// boot.
+	// delivers messages through (internal/pkg/mailer) when Resend is
+	// absent. Optional: when both are absent, Send returns a "not
+	// configured" error instead of failing app boot.
 	Smtp *SMTPConfig `yaml:"smtp" default:"-"`
+
+	// Resend configures delivery through the Resend HTTP API
+	// (internal/pkg/mailer/resend). Takes precedence over Smtp when
+	// both are set — see newMailerService in internal/fx/services.go.
+	// Prefer this over Smtp: direct SMTP to providers like Gmail is
+	// commonly blackholed from cloud/VPS source IPs on reputation
+	// grounds, where an HTTPS API call is not.
+	Resend *ResendConfig `yaml:"resend" default:"-"`
 
 	// NotificationClients maps a client name (for audit logging — which
 	// frontend sent this) to the static API key it must present via the
@@ -109,6 +117,7 @@ func (c *CRMConfig) Validate() error {
 		validation.Field(&c.Auth, validation.Required),
 		validation.Field(&c.RBAC, validation.By(validateRBAC)),
 		validation.Field(&c.Smtp, validation.NilOrNotEmpty),
+		validation.Field(&c.Resend, validation.NilOrNotEmpty),
 		validation.Field(&c.NotificationClients, validation.By(validateNotificationClients)),
 	)
 }
@@ -133,7 +142,7 @@ func validateNotificationClients(value any) error {
 }
 
 // SMTPConfig configures the outbound mail server NotificationsService.Send
-// delivers messages through (internal/services/mailer) to To.
+// delivers messages through (internal/pkg/mailer) to To.
 type SMTPConfig struct {
 	// Host is the SMTP server hostname (e.g. "smtp.gmail.com").
 	Host string `yaml:"host"`
@@ -160,6 +169,29 @@ func (s *SMTPConfig) Validate() error {
 		validation.Field(&s.Port, validation.Required, validation.Min(1), validation.Max(65535)),
 		validation.Field(&s.From, validation.Required),
 		validation.Field(&s.To, validation.Required),
+	)
+}
+
+// ResendConfig configures outbound mail delivery through the Resend HTTP
+// API (internal/pkg/mailer/resend), to To.
+type ResendConfig struct {
+	// APIKey authenticates to the Resend API.
+	APIKey redacted.RedactedString `yaml:"apiKey"`
+	// From is the header From address emails are sent as. Must be on a
+	// domain verified with Resend.
+	From string `yaml:"from"`
+	// To is the single recipient address every message is delivered to.
+	To string `yaml:"to"`
+}
+
+// Validate requires APIKey, From, and To — a partially configured Resend
+// section would otherwise reach resend.Service with a blank field instead
+// of failing config load.
+func (r *ResendConfig) Validate() error {
+	return config.ValidateStruct(r,
+		validation.Field(&r.APIKey, validation.Required),
+		validation.Field(&r.From, validation.Required),
+		validation.Field(&r.To, validation.Required),
 	)
 }
 

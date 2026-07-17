@@ -7,6 +7,9 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/kitdoo/my-business-crm-go/internal/pkg/appconfig"
+	"github.com/kitdoo/my-business-crm-go/internal/pkg/mailer"
+	mailerservice "github.com/kitdoo/my-business-crm-go/internal/pkg/mailer/mailer"
+	resendservice "github.com/kitdoo/my-business-crm-go/internal/pkg/mailer/resend"
 	"github.com/kitdoo/my-business-crm-go/internal/services/brand"
 	brandservice "github.com/kitdoo/my-business-crm-go/internal/services/brand/brand"
 	"github.com/kitdoo/my-business-crm-go/internal/services/category"
@@ -17,8 +20,6 @@ import (
 	invservice "github.com/kitdoo/my-business-crm-go/internal/services/inventory/inventory"
 	invmovementsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
 	invmovementservice "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement/inventorymovement"
-	"github.com/kitdoo/my-business-crm-go/internal/services/mailer"
-	mailerservice "github.com/kitdoo/my-business-crm-go/internal/services/mailer/mailer"
 	"github.com/kitdoo/my-business-crm-go/internal/services/notification"
 	notificationservice "github.com/kitdoo/my-business-crm-go/internal/services/notification/notification"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
@@ -274,30 +275,47 @@ func newProductService(storage products.Storage, brandSvc brand.Service, categor
 	return productservice.New(storage, brandSvc, categorySvc, &variantsCascadeAdapter{variants: variantsStorage, skus: skusStorage}, resolveDefaultLocale(cfg))
 }
 
-// newMailerService resolves the SMTP connection/auth data from
-// cfg.CRM.Smtp. A nil section (optional — see CRMConfig.Smtp) yields a
-// Service whose Send always fails with errs.ErrSMTPNotConfigured, rather
-// than failing app boot.
-func newMailerService(cfg *appconfig.Config) *mailerservice.Service {
-	if cfg.CRM == nil || cfg.CRM.Smtp == nil {
+// newMailerService resolves the mailer provider from cfg.CRM: Resend takes
+// precedence over Smtp when both are set — direct SMTP to providers like
+// Gmail is commonly blackholed from cloud/VPS source IPs on reputation
+// grounds, where Resend's HTTPS API is not. Neither section configured
+// (both optional — see CRMConfig.Resend/Smtp) yields a Service whose Send
+// always fails with errs.ErrMailerNotConfigured, rather than failing app
+// boot.
+func newMailerService(cfg *appconfig.Config) mailer.Service {
+	if cfg.CRM == nil {
 		return mailerservice.New(nil)
 	}
-	smtp := cfg.CRM.Smtp
-	return mailerservice.New(&mailerservice.Config{
-		Host:     smtp.Host,
-		Port:     smtp.Port,
-		Username: smtp.Username,
-		Password: smtp.Password.Expose(),
-		From:     smtp.From,
-	})
+	if resend := cfg.CRM.Resend; resend != nil {
+		return resendservice.New(&resendservice.Config{
+			APIKey: resend.APIKey.Expose(),
+			From:   resend.From,
+		})
+	}
+	if smtp := cfg.CRM.Smtp; smtp != nil {
+		return mailerservice.New(&mailerservice.Config{
+			Host:     smtp.Host,
+			Port:     smtp.Port,
+			Username: smtp.Username,
+			Password: smtp.Password.Expose(),
+			From:     smtp.From,
+		})
+	}
+	return mailerservice.New(nil)
 }
 
 // newNotificationService resolves the message recipient from
-// cfg.CRM.Smtp.To.
+// cfg.CRM.Resend.To, falling back to cfg.CRM.Smtp.To — see newMailerService
+// for the same precedence applied to provider selection.
 func newNotificationService(mailerSvc mailer.Service, cfg *appconfig.Config) *notificationservice.Service {
 	var recipient string
-	if cfg.CRM != nil && cfg.CRM.Smtp != nil {
-		recipient = cfg.CRM.Smtp.To
+	if cfg.CRM != nil {
+		switch {
+		case cfg.CRM.Resend != nil:
+			recipient = cfg.CRM.Resend.To
+		case cfg.CRM.Smtp != nil:
+			recipient = cfg.CRM.Smtp.To
+		}
 	}
 	return notificationservice.New(mailerSvc, recipient)
 }

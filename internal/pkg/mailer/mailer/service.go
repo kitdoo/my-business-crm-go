@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/kitdoo/my-business-crm-go/internal/errs"
-	mailersvc "github.com/kitdoo/my-business-crm-go/internal/services/mailer"
+	mailersvc "github.com/kitdoo/my-business-crm-go/internal/pkg/mailer"
 )
 
 var _ mailersvc.Service = (*Service)(nil)
@@ -35,7 +35,7 @@ type Service struct {
 }
 
 // New builds a Service. cfg == nil yields a Service whose Send always
-// returns errs.ErrSMTPNotConfigured — see CRMConfig.Smtp being optional.
+// returns errs.ErrMailerNotConfigured — see CRMConfig.Smtp being optional.
 func New(cfg *Config) *Service {
 	return &Service{cfg: cfg}
 }
@@ -45,7 +45,7 @@ func New(cfg *Config) *Service {
 // net/smtp call — the standard library offers no hook for that.
 func (s *Service) Send(_ context.Context, msg mailersvc.Message) error {
 	if s.cfg == nil {
-		return errs.ErrSMTPNotConfigured
+		return errs.ErrMailerNotConfigured
 	}
 
 	body := buildMessage(s.cfg.From, msg)

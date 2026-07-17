@@ -9,7 +9,7 @@ import (
 	slogx "github.com/altessa-s/go-atlas/observability/slog"
 
 	"github.com/kitdoo/my-business-crm-go/internal/entities"
-	"github.com/kitdoo/my-business-crm-go/internal/services/mailer"
+	"github.com/kitdoo/my-business-crm-go/internal/pkg/mailer"
 	notificationsvc "github.com/kitdoo/my-business-crm-go/internal/services/notification"
 )
 
