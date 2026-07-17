@@ -93,6 +93,7 @@ async function onCheckoutSubmit() {
           <li v-for="item in items" :key="item.sku" class="flex items-center gap-3 border-b border-black/10 pb-4">
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium truncate">{{ item.name }}</p>
+              <p v-if="item.options" class="text-xs text-black/50 truncate">{{ item.options }}</p>
               <p class="text-xs text-black/40">{{ item.sku }}</p>
               <MoneyLabel
                 v-if="item.price"

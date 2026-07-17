@@ -18,6 +18,7 @@ export function useCart() {
     items.value.push({
       sku: product.sku,
       name: localizedText(product.name, locale.value) || product.sku,
+      options: product.options || '',
       price: product.price || null,
       qty,
     })
@@ -58,7 +59,7 @@ export function useCart() {
 
   // Plain-text product list for the checkout email's message field —
   // "текстовое поле где перечислены товары" (item 10).
-  const summaryText = computed(() => items.value.map((i) => `${i.sku} — ${i.name} × ${i.qty}`).join('\n'))
+  const summaryText = computed(() => items.value.map((i) => `${i.sku} — ${i.name}${i.options ? ` (${i.options})` : ''} × ${i.qty}`).join('\n'))
 
   return {
     items,

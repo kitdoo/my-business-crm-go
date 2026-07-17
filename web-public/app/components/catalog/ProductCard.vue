@@ -58,8 +58,15 @@ const qtyInCart = computed(() => getQty(activeSku.value.sku))
 // stays disabled until then instead of momentarily adding a null-priced item.
 const stockKnown = computed(() => activeSku.value.inStock !== null)
 
+// Combines variant attributes (e.g. color) and SKU attributes (e.g. size)
+// into one label so the cart/checkout message spells out exactly which
+// option was picked, not just the SKU code.
+function cartOptions() {
+  const attrs = { ...(activeVariant.value?.attributes || {}), ...(activeSku.value?.attributes || {}) }
+  return Object.values(attrs).map((v) => localizedText(v, locale.value)).filter(Boolean).join(' / ')
+}
 function cartItem() {
-  return { ...props.product, sku: activeSku.value.sku, price: activeSku.value.price }
+  return { ...props.product, sku: activeSku.value.sku, price: activeSku.value.price, options: cartOptions() }
 }
 function increment() {
   if (qtyInCart.value) setQty(activeSku.value.sku, qtyInCart.value + 1)

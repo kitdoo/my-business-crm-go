@@ -53,8 +53,15 @@ watch(activeSku, (sku) => {
 
 const qtyInCart = computed(() => getQty(activeSku.value.sku))
 
+// Combines variant attributes (e.g. color) and SKU attributes (e.g. size)
+// into one label so the cart/checkout message spells out exactly which
+// option the visitor picked, not just the SKU code.
+function cartOptions() {
+  const attrs = { ...(activeVariant.value?.attributes || {}), ...(activeSku.value?.attributes || {}) }
+  return Object.values(attrs).map((v) => localizedText(v, locale.value)).filter(Boolean).join(' / ')
+}
 function cartItem() {
-  return { ...product.value, sku: activeSku.value.sku, price: activeSku.value.price }
+  return { ...product.value, sku: activeSku.value.sku, price: activeSku.value.price, options: cartOptions() }
 }
 function increment() {
   if (qtyInCart.value) setQty(activeSku.value.sku, qtyInCart.value + 1)
