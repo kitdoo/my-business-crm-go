@@ -2,11 +2,12 @@ import { getServiceClient, grpcCall } from '~~/server/utils/grpcClient'
 import { mapGrpcError } from '~~/server/utils/mapGrpcError'
 import { requireSession } from '~~/server/utils/session'
 
-// { clientId, warehouseId, partnerId?, items: [{skuId, quantity, discountPercentage}] } -> Sale
+// { clientId, partnerId?, items: [{skuId, warehouseId, quantity, discountPercentage}] } -> Sale
 // clientId is mutually exclusive with:
-// { newClient: {name, phone, email, address}, warehouseId, ... } -> Sale
+// { newClient: {name, phone, email, address}, ... } -> Sale
 // (find-or-create by email server-side — TD §12.3, no separate "create a
-// client first" step on the frontend).
+// client first" step on the frontend). Each item carries its own
+// warehouseId — a sale can draw different lines from different warehouses.
 export default defineEventHandler(async (event) => {
   const session = requireSession(event)
   const body = (await readBody(event).catch(() => ({}))) || {}
@@ -17,7 +18,6 @@ export default defineEventHandler(async (event) => {
       'Create',
       {
         ...(body.clientId ? { clientId: body.clientId } : { newClient: body.newClient }),
-        warehouseId: body.warehouseId,
         partnerId: body.partnerId,
         items: body.items,
       },

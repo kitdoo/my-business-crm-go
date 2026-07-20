@@ -70,6 +70,9 @@ message SaleCreateRequest {
     string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
     int64 quantity = 2 [(buf.validate.field).required = true, (buf.validate.field).int64.gt = 0];
     int32 discountPercentage = 3 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
+    // Each item is fulfilled from its own warehouse — a sale can draw
+    // different lines from different warehouses.
+    string warehouseId = 4 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   }
   // Mirrors ClientCreateRequest's required fields (crm.grpc.client.v1) —
   // the caller doesn't separately create a client first; the seller
@@ -86,12 +89,13 @@ message SaleCreateRequest {
   message Options {
     optional google.protobuf.FieldMask readMask = 1;
   }
+  reserved 2;
+  reserved "warehouseId";
   oneof client_ref {
     option (buf.validate.oneof).required = true;
     string clientId = 1 [(buf.validate.field).string.uuid = true];
     NewClient newClient = 5;
   }
-  string warehouseId = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   optional string partnerId = 3 [(buf.validate.field).string.uuid = true];
   repeated Item items = 4 [(buf.validate.field).required = true, (buf.validate.field).repeated.min_items = 1];
   optional Options options = 99;

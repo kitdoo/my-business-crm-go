@@ -59,7 +59,7 @@ export function useCart() {
 
   // Plain-text product list for the checkout email's message field —
   // "текстовое поле где перечислены товары" (item 10).
-  const summaryText = computed(() => items.value.map((i) => `${i.sku} — ${i.name}${i.options ? ` (${i.options})` : ''} × ${i.qty}`).join('\n'))
+  const summaryText = computed(() => items.value.map((i) => `${i.qty} × ${i.name}${i.options ? `, ${i.options}` : ''} (sku: ${i.sku})`).join('\n'))
 
   return {
     items,

@@ -24,7 +24,12 @@ func init() {
 					SetName("idx_sales_client_id"),
 			},
 			{
-				Keys: bson.D{{Key: FieldWarehouseID, Value: 1}},
+				// Historical: sale-level warehouse_id, since removed —
+				// literal key kept as-is rather than referencing a current
+				// constant, see 1784300000_sales_item_warehouse_index.go
+				// which drops this index and replaces it with one on
+				// items.warehouse_id.
+				Keys: bson.D{{Key: "warehouse_id", Value: 1}},
 				Options: options.Index().
 					SetName("idx_sales_warehouse_id"),
 			},

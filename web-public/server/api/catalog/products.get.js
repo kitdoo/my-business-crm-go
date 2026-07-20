@@ -121,6 +121,11 @@ async function toCards(products, publicKeys, { includePriceStock }) {
         imageIds: representativeVariant.imageIds,
         price: representativeSku.price,
         inStock: representativeSku.inStock,
+        // Every SKU carries its own "generation" characteristic (see
+        // productAttributeDefinitions seed migration "generation") inside
+        // its attributes — the same color/size at different generations
+        // are different SKUs (see tmp/PHOMI MATERIJALI.xlsx), so this is
+        // never a per-product value and never derived from a category.
         variants: variantCards,
       }
     })

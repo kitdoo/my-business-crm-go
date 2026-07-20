@@ -65,16 +65,16 @@ watch(() => [props.entity, props.id], load, { immediate: true })
       </div>
     </dl>
 
+    <div v-if="record" class="flex justify-end gap-2">
+      <UButton color="neutral" variant="soft" @click="emit('close')">{{ t('common.cancel') }}</UButton>
+      <UButton v-if="canUpdate" @click="emit('edit')">{{ t('common.edit') }}</UButton>
+    </div>
+
     <div v-if="relatedSales && record" class="space-y-2">
       <h3 class="text-sm font-medium text-neutral-500">{{ t('entities.sales.label') }}</h3>
       <EntityDataTable entity="sales" :fixed-filter="relatedSales(record)" :row-to="(item) => `/sales/${item.id}`" />
     </div>
 
     <ProductVariantsReadOnly v-if="config.view?.variantsSummary && record" :product-id="record.id" />
-
-    <div class="flex justify-end gap-2">
-      <UButton color="neutral" variant="soft" @click="emit('close')">{{ t('common.cancel') }}</UButton>
-      <UButton v-if="canUpdate" @click="emit('edit')">{{ t('common.edit') }}</UButton>
-    </div>
   </div>
 </template>

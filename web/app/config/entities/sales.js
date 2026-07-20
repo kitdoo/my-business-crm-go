@@ -21,7 +21,7 @@ export default {
     columns: [
       { key: 'number', label: 'fields.number' },
       { key: 'clientId', label: 'fields.client', component: 'RelationLabel', relation: 'clients' },
-      { key: 'warehouseId', label: 'fields.warehouse', component: 'RelationLabel', relation: 'warehouses' },
+      { key: 'items', label: 'fields.warehouse', component: 'SaleWarehousesLabel' },
       { key: 'createdBy', label: 'fields.seller', component: 'RelationLabel', relation: 'users' },
       { key: 'totalAmount', label: 'fields.totalAmount', component: 'MoneyAmountLabel' },
       { key: 'status', label: 'fields.status', component: 'StatusBadge', statusMap: 'sale' },

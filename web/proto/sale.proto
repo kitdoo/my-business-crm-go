@@ -16,6 +16,8 @@ message SaleItem {
   int64 priceAmount = 3;
   // Always 0-100, never a fixed amount.
   int32 discountPercentage = 4;
+  // Each item is fulfilled from its own warehouse.
+  string warehouseId = 5;
 }
 
 enum SaleStatus {
@@ -34,8 +36,6 @@ message Sale {
   int64 updatedAt = 3;
   optional int64 deletedAt = 4;
   string clientId = 5;
-  // Fulfilled from exactly one warehouse.
-  string warehouseId = 6;
   optional string partnerId = 7;
   repeated SaleItem items = 8;
   // Basis points, sum of item lines after discount.
@@ -100,6 +100,7 @@ message SaleCreateRequest {
     string skuId = 1;
     int64 quantity = 2;
     int32 discountPercentage = 3;
+    string warehouseId = 4;
   }
   // Mirrors ClientCreateRequest's required fields — the seller types the
   // client's details here and SalesService finds-or-creates it by email
@@ -114,7 +115,6 @@ message SaleCreateRequest {
     string clientId = 1;
     NewClient newClient = 5;
   }
-  string warehouseId = 2;
   optional string partnerId = 3;
   repeated Item items = 4;
 }

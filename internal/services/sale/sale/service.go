@@ -81,27 +81,19 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 		return nil, err
 	}
 
-	wh, err := s.warehouses.Get(ctx, in.WarehouseID)
-	if err != nil {
-		return nil, err
-	}
-	if wh.Status != entities.WarehouseStatusActive {
-		return nil, errs.ErrSaleWarehouseInactive
-	}
 	if in.PartnerID != nil {
 		if _, err := s.partners.Get(ctx, *in.PartnerID); err != nil {
 			return nil, err
 		}
 	}
 
-	items, total, err := s.buildItems(ctx, in.WarehouseID, in.Items)
+	items, total, err := s.buildItems(ctx, in.Items)
 	if err != nil {
 		return nil, err
 	}
 
 	sale := entities.SaleNew(func(sl *entities.Sale) {
 		sl.ClientID = clientID
-		sl.WarehouseID = in.WarehouseID
 		sl.PartnerID = in.PartnerID
 		sl.Items = items
 		sl.TotalAmount = total
@@ -121,7 +113,7 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	for _, item := range sale.Items {
 		if _, err := s.movements.Create(ctx, &entities.InventoryMovementCreate{
 			SKUID:       item.SKUID,
-			WarehouseID: sale.WarehouseID,
+			WarehouseID: item.WarehouseID,
 			Type:        entities.MovementTypeSale,
 			Quantity:    -item.Quantity,
 			Comment:     fmt.Sprintf("sale %s", sale.ID),
@@ -137,14 +129,30 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	return sale, nil
 }
 
-// buildItems validates each SKU's existence and stock availability at
-// warehouseID, captures its current price, and computes per-line and total
-// amounts (basis points).
-func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entities.SaleCreateItem) ([]entities.SaleItem, int64, error) {
+// buildItems validates each item's warehouse and SKU existence and stock
+// availability there, captures the SKU's current price, and computes
+// per-line and total amounts (basis points). Each item may target a
+// different warehouse, so warehouse lookups are cached per distinct id to
+// avoid redundant Gets within one sale.
+func (s *Service) buildItems(ctx context.Context, in []entities.SaleCreateItem) ([]entities.SaleItem, int64, error) {
 	items := make([]entities.SaleItem, 0, len(in))
+	warehouses := make(map[string]*entities.Warehouse, len(in))
 	var total int64
 
 	for _, req := range in {
+		wh, ok := warehouses[req.WarehouseID]
+		if !ok {
+			var err error
+			wh, err = s.warehouses.Get(ctx, req.WarehouseID)
+			if err != nil {
+				return nil, 0, err
+			}
+			warehouses[req.WarehouseID] = wh
+		}
+		if wh.Status != entities.WarehouseStatusActive {
+			return nil, 0, errs.ErrSaleWarehouseInactive
+		}
+
 		if _, err := s.skus.Get(ctx, req.SKUID); err != nil {
 			return nil, 0, err
 		}
@@ -154,7 +162,7 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 			return nil, 0, err
 		}
 
-		stock, err := s.inventory.Get(ctx, req.SKUID, warehouseID)
+		stock, err := s.inventory.Get(ctx, req.SKUID, req.WarehouseID)
 		if err != nil {
 			if errors.Is(err, errs.ErrInventoryNotFound) {
 				return nil, 0, errs.ErrInsufficientStock
@@ -173,6 +181,7 @@ func (s *Service) buildItems(ctx context.Context, warehouseID string, in []entit
 			Quantity:           req.Quantity,
 			PriceAmount:        price.PriceAmount,
 			DiscountPercentage: req.DiscountPercentage,
+			WarehouseID:        req.WarehouseID,
 		})
 	}
 
@@ -250,7 +259,7 @@ func (s *Service) Cancel(ctx context.Context, in *entities.SaleCancel) (*entitie
 	for _, item := range sl.Items {
 		if _, err := s.movements.Create(ctx, &entities.InventoryMovementCreate{
 			SKUID:       item.SKUID,
-			WarehouseID: sl.WarehouseID,
+			WarehouseID: item.WarehouseID,
 			Type:        entities.MovementTypeAdjustment,
 			Quantity:    item.Quantity,
 			Comment:     comment,

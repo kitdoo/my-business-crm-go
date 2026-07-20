@@ -28,19 +28,19 @@ const collectionName = "sales"
 const countersCollectionName = "sale_counters"
 
 const (
-	FieldID          = "_id"
-	FieldNumber      = "number"
-	FieldClientID    = "client_id"
-	FieldWarehouseID = "warehouse_id"
-	FieldPartnerID   = "partner_id"
-	FieldItemSKUs    = "items.sku_id"
-	FieldStatus      = "status"
-	FieldCreatedBy   = "created_by"
-	FieldCreatedAt   = "created_at"
-	FieldUpdatedAt   = "updated_at"
-	FieldDeletedAt   = "deleted_at"
-	FieldEtag        = "etag"
-	FieldCursorId    = "cursor_id"
+	FieldID              = "_id"
+	FieldNumber          = "number"
+	FieldClientID        = "client_id"
+	FieldItemWarehouseID = "items.warehouse_id"
+	FieldPartnerID       = "partner_id"
+	FieldItemSKUs        = "items.sku_id"
+	FieldStatus          = "status"
+	FieldCreatedBy       = "created_by"
+	FieldCreatedAt       = "created_at"
+	FieldUpdatedAt       = "updated_at"
+	FieldDeletedAt       = "deleted_at"
+	FieldEtag            = "etag"
+	FieldCursorId        = "cursor_id"
 )
 
 const defaultListLimit = datamongo.DefaultListLimit
@@ -50,13 +50,13 @@ type itemModel struct {
 	Quantity           int64  `bson:"quantity"`
 	PriceAmount        int64  `bson:"price_amount"`
 	DiscountPercentage int32  `bson:"discount_percentage"`
+	WarehouseID        string `bson:"warehouse_id"`
 }
 
 type model struct {
 	ID          string              `bson:"_id"`
 	Number      int64               `bson:"number"`
 	ClientID    string              `bson:"client_id"`
-	WarehouseID string              `bson:"warehouse_id"`
 	PartnerID   *string             `bson:"partner_id"`
 	Items       []itemModel         `bson:"items,omitonupdate"`
 	TotalAmount int64               `bson:"total_amount,omitonupdate"`
@@ -185,7 +185,7 @@ func (s *Storage) List(ctx context.Context, in *entities.SalesList) (*entities.L
 		filter[FieldClientID] = *in.ClientID
 	}
 	if in.WarehouseID != nil {
-		filter[FieldWarehouseID] = *in.WarehouseID
+		filter[FieldItemWarehouseID] = *in.WarehouseID
 	}
 	if in.PartnerID != nil {
 		filter[FieldPartnerID] = *in.PartnerID

@@ -33,6 +33,10 @@ const selectedVariantIndex = ref(initialVariantIndex)
 const selectedSkuIndex = ref(initialSkuIndex)
 const activeVariant = computed(() => product.value?.variants?.[selectedVariantIndex.value])
 const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.value])
+// "generation" is a SKU-level characteristic (same color+size can exist at
+// more than one generation — see products/[sku].get.js) — never a
+// per-product value, so it must follow the active size selection.
+const activeGeneration = computed(() => activeSku.value?.attributes?.generation)
 
 function selectVariant(index) {
   selectedVariantIndex.value = index
@@ -43,7 +47,13 @@ function selectSku(index) {
   selectedSkuIndex.value = index
 }
 function skuLabel(sku) {
-  return Object.values(sku.attributes || {}).map((v) => localizedText(v, locale.value)).filter(Boolean).join(' / ') || sku.sku
+  // "generation" is surfaced as its own badge (see activeGeneration), not
+  // repeated inline in the size pill.
+  return Object.entries(sku.attributes || {})
+    .filter(([key]) => key !== 'generation')
+    .map(([, v]) => localizedText(v, locale.value))
+    .filter(Boolean)
+    .join(' / ') || sku.sku
 }
 watch(activeSku, (sku) => {
   if (sku && sku.sku !== route.params.sku) {
@@ -166,7 +176,10 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
 
       <div>
         <p class="text-sm text-black/40 mb-1">{{ activeSku.sku }}</p>
-        <h1 class="text-2xl font-bold mb-3"><LocalizedText :value="product.name" /></h1>
+        <h1 class="text-2xl font-bold mb-3 flex items-center gap-2">
+          <LocalizedText :value="product.name" />
+          <span v-if="activeGeneration" class="text-sm font-normal text-black/40"><LocalizedText :value="activeGeneration" /></span>
+        </h1>
         <MoneyLabel v-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="text-xl font-semibold text-brand-700 block mb-3" />
         <StatusBadge :available="activeSku.inStock" class="mb-6 inline-block" />
 

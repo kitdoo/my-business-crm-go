@@ -5,13 +5,13 @@ option go_package = "github.com/kitdoo/my-business-crm-go/proto/gen/go/types/sal
 
 // Items are immutable once created — reverse a mistake with Cancel.
 message Sale {
+  reserved 6;
+  reserved "warehouseId";
   string id = 1;
   int64 createdAt = 2;
   int64 updatedAt = 3;
   optional int64 deletedAt = 4;
   string clientId = 5;
-  // Fulfilled from exactly one warehouse.
-  string warehouseId = 6;
   optional string partnerId = 7;
   repeated SaleItem items = 8;
   // Basis points, sum of item lines after discount.
@@ -31,6 +31,8 @@ message SaleItem {
   int64 priceAmount = 3;
   // Always 0-100, never a fixed amount.
   int32 discountPercentage = 4;
+  // Each item is fulfilled from its own warehouse.
+  string warehouseId = 5;
 }
 
 enum SaleStatus {

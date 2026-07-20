@@ -36,6 +36,7 @@ const items = computed(() => {
 async function load() {
   if (props.disabled && !props.modelValue) {
     optionItems.value = []
+    loading.value = false
     return
   }
   loading.value = true

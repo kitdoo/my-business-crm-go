@@ -30,21 +30,22 @@ type SaleItem struct {
 	PriceAmount int64
 	// DiscountPercentage is always 0-100, never a fixed amount.
 	DiscountPercentage int32
+	// WarehouseID is this item's own fulfillment warehouse — different
+	// items in the same sale may draw stock from different warehouses.
+	WarehouseID string
 }
 
-// Sale is fulfilled from exactly one warehouse. Items are immutable once
-// created — reverse a mistake with Cancel, not a generic Update (there is
-// none).
+// Items are immutable once created — reverse a mistake with Cancel, not a
+// generic Update (there is none).
 type Sale struct {
 	ID string
 	// Number is a human-readable, sequential identifier assigned
 	// atomically by the storage layer on Insert (see
 	// storages/sales/mongo.Storage.nextNumber) — never set by callers.
-	Number      int64
-	ClientID    string
-	WarehouseID string
-	PartnerID   *string
-	Items       []SaleItem
+	Number    int64
+	ClientID  string
+	PartnerID *string
+	Items     []SaleItem
 	// TotalAmount is basis points, sum of item lines after discount.
 	TotalAmount int64
 	Status      SaleStatus
@@ -90,6 +91,7 @@ type SaleCreateItem struct {
 	SKUID              string `normalize:"trim"`
 	Quantity           int64
 	DiscountPercentage int32
+	WarehouseID        string `normalize:"trim"`
 }
 
 // SaleCreate is the Create input. There is no generic Merge onto a fresh
@@ -100,12 +102,11 @@ type SaleCreateItem struct {
 // by the caller) or NewClient (find-or-create by email — TD §12.3, the
 // caller never has to create a client as a separate step first).
 type SaleCreate struct {
-	ClientID    string `normalize:"trim"`
-	NewClient   *ClientCreate
-	WarehouseID string  `normalize:"trim"`
-	PartnerID   *string `normalize:"trim,nil_on_empty"`
-	Items       []SaleCreateItem
-	CreatedBy   string `normalize:"trim"`
+	ClientID  string `normalize:"trim"`
+	NewClient *ClientCreate
+	PartnerID *string `normalize:"trim,nil_on_empty"`
+	Items     []SaleCreateItem
+	CreatedBy string `normalize:"trim"`
 }
 
 // SaleUpdateStatus is the UpdateStatus input.

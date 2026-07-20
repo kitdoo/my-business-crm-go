@@ -79,10 +79,19 @@ export default defineEventHandler(async (event) => {
     .find((v) => v.skus.some((s) => s.sku === currentSku.sku))
     ?.skus.find((s) => s.sku === currentSku.sku)
 
+  // Admin-set SKU characteristic (see productAttributeDefinitions seed
+  // migration "generation") — the same color/size at a different
+  // generation is a different SKU (see tmp/PHOMI MATERIJALI.xlsx), so this
+  // lives on ProductSKU.attributes, never on the product or derived from a
+  // category — the page reads it off the active SKU's own attributes (see
+  // activeGeneration in [sku].vue), so it's dropped here only to avoid
+  // also showing up as a plain row in the generic details table below.
+  const { generation: _generation, ...currentSkuDetails } = filterPublic(currentSku.attributes, publicKeys)
+
   const details = {
     ...filterPublic(product.details, publicKeys),
     ...filterPublic(currentVariant.attributes, publicKeys),
-    ...filterPublic(currentSku.attributes, publicKeys),
+    ...currentSkuDetails,
   }
 
   return {

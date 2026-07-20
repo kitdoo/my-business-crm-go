@@ -25,6 +25,10 @@ const selectedVariantIndex = ref(0)
 const selectedSkuIndex = ref(0)
 const activeVariant = computed(() => props.product.variants?.[selectedVariantIndex.value])
 const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.value])
+// "generation" is a SKU-level characteristic (same color+size can exist at
+// more than one generation — see products.get.js) — never a per-product
+// value, so it must follow the active size selection, not stay fixed.
+const activeGeneration = computed(() => activeSku.value?.attributes?.generation)
 
 const activeImages = computed(() => {
   const ids = activeVariant.value?.imageIds
@@ -39,7 +43,13 @@ function selectSku(index) {
   selectedSkuIndex.value = index
 }
 function skuLabel(sku) {
-  return Object.values(sku.attributes || {}).map((v) => localizedText(v, locale.value)).filter(Boolean).join(' / ') || sku.sku
+  // "generation" is surfaced as its own badge (see activeGeneration), not
+  // repeated inline in the size pill.
+  return Object.entries(sku.attributes || {})
+    .filter(([key]) => key !== 'generation')
+    .map(([, v]) => localizedText(v, locale.value))
+    .filter(Boolean)
+    .join(' / ') || sku.sku
 }
 
 const activeImageIndex = ref(0)
@@ -110,7 +120,10 @@ function decrement() {
 
     <div class="p-4 flex flex-col flex-1">
       <NuxtLink :to="localePath(`/katalog/${activeSku.sku}`)">
-        <h3 class="font-medium mb-1 line-clamp-2"><LocalizedText :value="product.name" /></h3>
+        <h3 class="font-medium mb-1 line-clamp-2 flex items-center gap-1.5">
+          <LocalizedText :value="product.name" />
+          <span v-if="activeGeneration" class="text-xs font-normal text-black/40 shrink-0"><LocalizedText :value="activeGeneration" /></span>
+        </h3>
       </NuxtLink>
 
       <div v-if="otherVariants.length" class="mt-2 flex gap-1.5 flex-wrap items-center">
