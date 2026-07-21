@@ -8,13 +8,22 @@ const props = defineProps({
   delayMs: { type: Number, default: 0 },
 })
 
-const pointsAttr = props.points.map(([x, y]) => `${x},${y}`).join(' ')
+// points arrives with its final (clearance-adjusted) values only after
+// InfographicPanel's ResizeObserver measures the real badge size post-mount
+// — both of these must stay reactive to that later update, not just the
+// initial mount, or the polyline silently keeps rendering the pre-measurement
+// coordinates forever.
+const pointsAttr = computed(() => props.points.map(([x, y]) => `${x},${y}`).join(' '))
 const line = ref(null)
 const length = ref(0)
 
-onMounted(() => {
+async function updateLength() {
+  await nextTick()
   if (line.value) length.value = line.value.getTotalLength()
-})
+}
+
+onMounted(updateLength)
+watch(() => props.points, updateLength, { deep: true })
 </script>
 
 <template>

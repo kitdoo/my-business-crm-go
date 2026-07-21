@@ -7,7 +7,7 @@ useSeoMeta({
   description: t('seo.contact.description'),
   ogTitle: t('seo.contact.title'),
   ogDescription: t('seo.contact.description'),
-  ogImage: '/images/showroom/2.png',
+  ogImage: '/images/social-share.jpg',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 

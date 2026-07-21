@@ -153,7 +153,7 @@ useSeoMeta({
   description: t('seo.katalog.description'),
   ogTitle: t('seo.katalog.title'),
   ogDescription: t('seo.katalog.description'),
-  ogImage: '/images/mini_house.jpg',
+  ogImage: '/images/social-share.jpg',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 </script>

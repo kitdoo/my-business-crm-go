@@ -7,7 +7,7 @@ useSeoMeta({
   description: t('seo.home.description'),
   ogTitle: t('seo.home.title'),
   ogDescription: t('seo.home.description'),
-  ogImage: '/images/background/top.jpeg',
+  ogImage: '/images/social-share.jpg',
 })
 useHead(() => ({
   htmlAttrs: { lang: locale.value },

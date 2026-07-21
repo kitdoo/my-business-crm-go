@@ -4,7 +4,7 @@
 // line layer, all in percentage/viewBox coordinates so the whole panel
 // (including badge size and label text) scales together with the container
 // at every breakpoint — same line-pointer format on mobile, just smaller.
-defineProps({
+const props = defineProps({
   image: { type: String, required: true },
   imageAlt: { type: String, default: '' },
   viewBoxW: { type: Number, required: true },
@@ -29,6 +29,73 @@ defineProps({
 })
 
 const { el, visible } = useRevealOnScroll()
+const firstBadgeEl = ref(null)
+
+// Clearance radius (viewBox units) a line must clear before it's allowed to
+// bend — measured from the actual rendered CalloutBadge (not a copy of its
+// CSS clamp() formula, so it can't drift out of sync) and converted via the
+// panel's live px-per-unit ratio, so it tracks every breakpoint exactly.
+const badgeRadiusUnits = ref(0)
+
+function updateBadgeRadius() {
+  if (!el.value || !firstBadgeEl.value) return
+  const pxPerUnit = el.value.clientWidth / props.viewBoxW
+  const badgeRadiusPx = firstBadgeEl.value.getBoundingClientRect().width / 2
+  if (pxPerUnit > 0 && badgeRadiusPx > 0) {
+    // +40% clearance so the line clears the icon's edge, not just its center.
+    badgeRadiusUnits.value = (badgeRadiusPx / pxPerUnit) * 1.4
+  }
+}
+
+let resizeObserver
+onMounted(() => {
+  updateBadgeRadius()
+  resizeObserver = new ResizeObserver(updateBadgeRadius)
+  if (el.value) resizeObserver.observe(el.value)
+  window.addEventListener('resize', updateBadgeRadius)
+})
+onUnmounted(() => {
+  resizeObserver?.disconnect()
+  window.removeEventListener('resize', updateBadgeRadius)
+})
+
+// Pushes the line's exit point out to the clearance circle's edge, straight
+// out from the badge center along whichever side (top/bottom/left/right)
+// the line already leaves from — never at an arbitrary angle. Axis-aligned
+// callout lines (the only kind these infographics use) exit sharing either
+// their x or y with the badge center; that shared coordinate is preserved,
+// only the other one is pushed out.
+//
+// Critically, when the very next point sits on the same "shelf" as the
+// original exit point (an immediate right-angle turn right next to the
+// badge, e.g. glasses-insurance/lightweight), that point is pushed out by
+// the same amount too. Moving only the first point in that case would leave
+// the turn behind at the old, too-close height/position — turning a clean
+// vertical-then-horizontal exit into a diagonal cutting back across the
+// icon, which is exactly what still crossed the icon for those two items.
+const clippedItems = computed(() =>
+  props.items.map((item) => {
+    const r = badgeRadiusUnits.value
+    const [p0x, p0y] = item.line[0]
+    const isVerticalExit = p0x === item.badge.x
+    const isHorizontalExit = p0y === item.badge.y
+    if (!r || (!isVerticalExit && !isHorizontalExit)) return item
+
+    const axis = isVerticalExit ? 'y' : 'x'
+    const oldVal = axis === 'y' ? p0y : p0x
+    const anchor = axis === 'y' ? item.badge.y : item.badge.x
+    const sign = Math.sign(oldVal - anchor) || 1
+    const newVal = anchor + sign * r
+    const delta = newVal - oldVal
+
+    const line = item.line.map((pt) => [...pt])
+    line[0][axis === 'y' ? 1 : 0] = newVal
+    if (line[1] && line[1][axis === 'y' ? 1 : 0] === oldVal) {
+      line[1][axis === 'y' ? 1 : 0] += delta
+    }
+    return { ...item, line }
+  }),
+)
 </script>
 
 <template>
@@ -56,7 +123,7 @@ const { el, visible } = useRevealOnScroll()
         preserveAspectRatio="none"
       >
         <RevealLine
-          v-for="(item, i) in items"
+          v-for="(item, i) in clippedItems"
           :key="'line-' + i"
           :points="item.line"
           :visible="visible"
@@ -75,7 +142,7 @@ const { el, visible } = useRevealOnScroll()
           transitionDelay: i * 90 + 200 + 'ms',
         }"
       >
-        <CalloutBadge :icon="item.icon" />
+        <CalloutBadge :ref="i === 0 ? (r) => (firstBadgeEl = r?.$el ?? r) : undefined" :icon="item.icon" />
       </div>
 
       <div

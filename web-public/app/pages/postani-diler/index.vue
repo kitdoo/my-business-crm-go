@@ -12,7 +12,7 @@ useSeoMeta({
   description: t('seo.dealer.description'),
   ogTitle: t('seo.dealer.title'),
   ogDescription: t('seo.dealer.description'),
-  ogImage: '/images/why_phomi.jpg',
+  ogImage: '/images/social-share.jpg',
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 
