@@ -1,6 +1,8 @@
 # ТЗ — MyBusiness CRM
 
 > Ревизия исходного ТЗ с учётом уточнений. Изменения отмечены пометкой **[изменено]**. Места, где решение принято как best practice (без явного указания), отмечены **[best practice]** с обоснованием.
+>
+> **Изменения в 1.1** (по факту реализации, см. `internal/entities/`): каталог товаров получил трёхуровневую иерархию Product → ProductVariant → ProductSKU (раздел 4/4a/4b), справочник характеристик `ProductAttributeDefinition` (раздел 4c), Price/Inventory/InventoryMovement теперь ключуются по `SKUID`, а не `ProductID` (разделы 5-7), `Sale.WarehouseID` перенесён с уровня продажи на уровень позиции (раздел 9), Partner получил раздельные `CommissionPercentage`/`DiscountPercentage` вместо единого `Percentage`, плюс публичные поля `Address/Website/IsPublic` (раздел 10), и добавлен сервис уведомлений (раздел 15). Разделы ниже обновлены под текущее состояние кода; там, где решение отличается от исходной версии 1.0, это отмечено **[v1.1]**.
 
 ## Стек
 **Backend:** Go, MongoDB, Redis, Docker, Protobuf/gRPC
@@ -178,7 +180,15 @@ Create, Get, List, Update, SoftDelete
 
 ---
 
-## 4. Products
+## 4. Products **[v1.1 — см. также 4a/4b/4c]**
+
+Каталог — не плоский `Product`, а трёхуровневая иерархия
+`Product → ProductVariant → ProductSKU`. Причина: одному товару
+соответствует несколько визуальных исполнений (цвет/фактура — `ProductVariant`,
+со своим набором фото), а каждое исполнение продаётся в нескольких
+покупаемых вариантах (размер/фасовка — `ProductSKU`, со своей ценой и
+остатком). Исходная плоская модель (`Product.SKU`, `Product.ImageIDs`)
+из ревизии 1.0 **не реализована** — вместо неё:
 
 ```go
 type Product struct {
@@ -187,53 +197,134 @@ type Product struct {
     Name        LocalizedString
     Description LocalizedString
 
-    SKU string // unique
-
     BrandID     uuid.UUID
-    CategoryIDs []uuid.UUID // [изменено] many-to-many вместо одного CategoryID
+    CategoryIDs []uuid.UUID // many-to-many, категории параллельны друг другу
 
-    Details map[string]LocalizedString // [изменено] значения характеристик локализуются
+    // Details — характеристики, общие для ВСЕХ вариантов товара (материал,
+    // коллекция и т.п.). Характеристики, различающие варианты по внешнему
+    // виду (цвет, фактура), живут на ProductVariant.Attributes; влияющие
+    // на цену/доступность (размер, толщина) — на ProductSKU.Attributes.
+    Details map[string]LocalizedString
 
-    // Image identifiers returned by the HTTP upload endpoint, in display
-    // order. First entry is the main image. [изменено]
-    ImageIDs []string
+    // HasStock — вычисляется системой (пересчитывается при каждом
+    // InventoryMovement, затрагивающем любой SKU любого варианта товара),
+    // не устанавливается через API. Существует только для сортировки
+    // списка товаров "сначала в наличии".
+    HasStock bool
 
-    Status ProductStatus
+    Status ProductStatus // Draft | Active | Inactive
 
     CreatedAt int64
     UpdatedAt int64
     DeletedAt *int64
-
-    ETag string
+    ETag      string
 }
-
-type ProductStatus string
-const (
-    ProductStatusDraft    ProductStatus = "draft"
-    ProductStatusActive   ProductStatus = "active"
-    ProductStatusInactive ProductStatus = "inactive"
-)
 ```
 
 ### Methods
 Create, Get, List, Update, SoftDelete
 
 ### Logic
-- Product не хранит остатки и не хранит цену — только описание товара.
-- `SKU` уникален глобально.
-- `CategoryIDs` — товар может принадлежать нескольким категориям, категории параллельны друг другу (не нужно указывать "главную").
-- `Details` — характеристики товара (материал, размер и т.п.), значения локализуются, т.к. показываются пользователю.
-- **Изображения — без отдельной сущности [изменено]**: обычный HTTP-эндпоинт принимает файл, сохраняет его на диск под именем `{id}` (расширение и MIME определяются при отдаче) и возвращает `id`. Клиент прикрепляет полученные `id` к `Product.ImageIDs` через `Update`. Никакого отдельного хранилища метаданных, никаких gRPC-методов на изображение.
+- `Product` не хранит SKU, изображения, цену или остаток напрямую — это карточка-контейнер над `ProductVariant`/`ProductSKU`.
+- `CategoryIDs` — товар может принадлежать нескольким категориям одновременно.
+- `Details` — общие для всех вариантов характеристики, значения локализуются.
 
 ---
 
-## 5. Prices
+## 4a. Product Variants **[v1.1, новая сущность]**
+
+`ProductVariant` — визуальное исполнение товара: один набор изображений, один набор внешних характеристик (цвет, фактура, узор).
+
+```go
+type ProductVariant struct {
+    ID        uuid.UUID
+    ProductID uuid.UUID
+
+    Attributes map[string]LocalizedString // цвет/фактура/узор — влияет на внешний вид
+    ImageIDs   []string                    // порядок показа, первый — главный
+
+    Status ProductVariantStatus // Draft | Active | Inactive
+
+    CreatedAt int64
+    UpdatedAt int64
+    DeletedAt *int64
+    ETag      string
+}
+```
+
+### Methods
+Create, Get, List, Update, SoftDelete
+
+### Logic
+- Изображения (как в исходной ревизии 1.0) прикрепляются через HTTP upload-эндпоинт, возвращающий `id`; клиент прикрепляет `id` к `ProductVariant.ImageIDs` через `Update` — сам механизм загрузки не изменился, просто переехал с `Product` на `ProductVariant`.
+- `ProductID` неизменяем после создания.
+
+---
+
+## 4b. Product SKUs **[v1.1, новая сущность]**
+
+`ProductSKU` — покупаемая единица: одна цена (`ProductPrice`), один остаток (`Inventory`) на склад, характеристики, влияющие на цену/доступность (размер, толщина, фасовка).
+
+```go
+type ProductSKU struct {
+    ID        uuid.UUID
+    VariantID uuid.UUID
+
+    SKU string // уникален среди активных записей — заменяет Product.SKU из ревизии 1.0
+
+    Attributes map[string]LocalizedString // размер/толщина/фасовка — влияет на цену/доступность
+
+    Status ProductSkuStatus // Draft | Active | Inactive
+
+    CreatedAt int64
+    UpdatedAt int64
+    DeletedAt *int64
+    ETag      string
+}
+```
+
+### Methods
+Create, Get, List, Update, SoftDelete
+
+### Logic
+- `VariantID`/`SKU` неизменяемы после создания.
+- Цена (раздел 5) и остаток (раздел 6) ключуются по `SKUID`, не по `ProductID`/`VariantID`.
+
+---
+
+## 4c. Product Attribute Definitions **[v1.1, новая сущность]**
+
+Справочник допустимых ключей `Product.Details`/`ProductVariant.Attributes`/`ProductSKU.Attributes` (материал, цвет, размер и т.п.).
+
+```go
+type ProductAttributeDefinition struct {
+    ID    uuid.UUID
+    Key   string
+    Label LocalizedString
+
+    IsPublic  bool  // ключ можно показывать на публичном сайте
+    SortOrder int32
+
+    CreatedAt int64
+}
+```
+
+### Methods
+List (read-only на уровне API)
+
+### Logic
+- **Нет CRUD через API** — записи заводятся напрямую в БД разработчиком, в отличие от всех остальных сущностей документа. Не проектировать для этого админ-форму.
+- `IsPublic` — публичный сайт отдаёт только те ключи `Product.Details`, у которых `IsPublic = true`, остальные скрываются из каталога-витрины.
+
+---
+
+## 5. Prices **[v1.1: ключ — SKUID, не ProductID]**
 
 ```go
 type ProductPrice struct {
     ID uuid.UUID
 
-    ProductID uuid.UUID
+    SKUID uuid.UUID // [v1.1] было ProductID — один товар может иметь несколько SKU с разной ценой
 
     Price    decimal.Decimal
     Currency Currency
@@ -243,10 +334,9 @@ type ProductPrice struct {
     CreatedAt int64
     UpdatedAt int64
 
-    ETag string // [изменено] добавлено
+    ETag string
 }
 
-// [изменено] Валюта одна на всю систему, задаётся через конфиг, а не выбирается per-entity
 type Currency string
 // значение читается из конфига при старте сервиса, напр. Currency = "RSD"
 ```
@@ -256,23 +346,24 @@ Create, Get, Update, History
 
 ### Logic
 - Система работает с **одной валютой**, заданной в конфиге. Поле `Currency` в модели сохраняется для истории/отчётности, но не выбирается пользователем при создании цены.
-- `decimal.Decimal` при передаче через gRPC/хранении в Mongo сериализуется как **строка** (во избежание потери точности) — фиксируем это как конвенцию проекта.
+- Не более одной активной цены на `SKUID`; прежние значения — в истории.
+- `decimal.Decimal` при передаче через gRPC/хранении в Mongo сериализуется как **строка** (во избежание потери точности).
 
 ---
 
-## 6. Inventory
+## 6. Inventory **[v1.1: ключ — (SKUID, WarehouseID), не (ProductID, WarehouseID)]**
 
 ```go
 type Inventory struct {
     ID uuid.UUID
 
-    ProductID   uuid.UUID
+    SKUID       uuid.UUID // [v1.1] было ProductID
     WarehouseID uuid.UUID
 
     Quantity int
 
     UpdatedAt int64
-    ETag      string // [изменено] добавлено — горячая точка гонок записи
+    ETag      string // горячая точка гонок записи
 }
 ```
 
@@ -281,26 +372,26 @@ Get, List
 
 ### Logic
 - Используется для отображения наличия и проверки перед продажей.
-- **Уникальный индекс на (ProductID, WarehouseID)** — не может быть двух записей остатка для одной пары товар/склад **[изменено, зафиксировано явно]**.
-- **Кешируется в Redis** для быстрого чтения (частые запросы наличия). Инвалидация кеша — при каждом `InventoryMovement` **[изменено]**.
+- **Уникальный индекс на (SKUID, WarehouseID)** — не может быть двух записей остатка для одной пары SKU/склад.
+- **Кешируется в Redis** для быстрого чтения. Инвалидация кеша — при каждом `InventoryMovement`.
 
 ---
 
-## 7. Inventory Movements
+## 7. Inventory Movements **[v1.1: ключ — SKUID, не ProductID]**
 
 ```go
 type InventoryMovement struct {
     ID uuid.UUID
 
-    ProductID   uuid.UUID
+    SKUID       uuid.UUID // [v1.1] было ProductID
     WarehouseID uuid.UUID
 
     Type MovementType
     // Receipt
-    // Sale
+    // Sale         — создаётся только сервером внутри SalesService.Create, не руками
     // WriteOff
     // Adjustment
-    // Transfer — [изменено] добавлен тип для переноса остатков между складами (нужен при деактивации склада, см. п.13)
+    // Transfer
 
     Quantity int
     Comment  string
@@ -316,7 +407,7 @@ Create, List, GetHistory
 
 ### Logic
 - Неизменяемый лог: нет Update/Delete методов и соответствующих полей (см. "Общие требования").
-- При изменении остатка: создать `InventoryMovement` → обновить `Inventory` → инвалидировать Redis-кеш.
+- При изменении остатка: создать `InventoryMovement` → обновить `Inventory` → инвалидировать Redis-кеш; также пересчитывает `Product.HasStock` для затронутого товара.
 - Пример: приход `+100 Receipt`, продажа `-5 Sale`, перенос между складами — пара движений `Transfer` (списание с одного, приход на другой).
 
 ---
@@ -350,19 +441,19 @@ Create, Get, List, Update, SoftDelete
 
 ---
 
-## 9. Sales
+## 9. Sales **[v1.1: WarehouseID перенесён с продажи на позицию; ProductID → SKUID]**
 
 ```go
 type Sale struct {
     ID uuid.UUID
 
-    ClientID    uuid.UUID
-    WarehouseID uuid.UUID   // [изменено] обязателен — продажа списывается с одного склада целиком
-    PartnerID   *uuid.UUID  // [изменено] опционален — продажа может быть без партнёра
+    Number    int64      // [v1.1] человекочитаемый номер, назначается атомарно storage-слоем при вставке
+    ClientID  uuid.UUID
+    PartnerID *uuid.UUID // опционален — продажа может быть без партнёра
 
     Items []SaleItem
 
-    TotalPrice decimal.Decimal
+    TotalAmount int64 // [v1.1] basis points (было decimal.Decimal), сумма позиций после скидки
 
     Status SaleStatus
 
@@ -371,17 +462,24 @@ type Sale struct {
     CreatedAt int64
     UpdatedAt int64
 
-    DeletedAt *int64 // [изменено] добавлено
-    ETag      string // [изменено] добавлено
+    DeletedAt *int64 // всегда nil — Sale не имеет пути soft-delete, поле хранится только для паритета со схемой
+    ETag      string
 }
 
 type SaleItem struct {
-    ProductID uuid.UUID
+    SKUID uuid.UUID // [v1.1] было ProductID — продажа списывает конкретный SKU, не абстрактный товар
 
-    Quantity int
-    Price    decimal.Decimal
+    Quantity int64
+    // PriceAmount фиксируется из текущей ProductPrice SKU в момент
+    // создания (basis points) — последующие изменения цены не затрагивают
+    // уже созданную продажу.
+    PriceAmount int64
 
-    Discount decimal.Decimal // [изменено] всегда процент (0-100)
+    DiscountPercentage int32 // всегда 0-100, никогда фиксированная сумма
+
+    // WarehouseID — [v1.1] перенесено с уровня Sale на уровень позиции:
+    // разные позиции одной продажи могут списываться с разных складов.
+    WarehouseID uuid.UUID
 }
 
 type SaleStatus string
@@ -399,27 +497,43 @@ const (
 Create, Get, List, UpdateStatus, Cancel
 
 ### Logic
-- Продажа списывается **с одного склада целиком** (не по позициям) **[изменено, зафиксировано]**.
-- Продажа может быть без партнёра (обычная розница) или с партнёром (дилерская) **[изменено, зафиксировано]**.
-- Если указан `PartnerID` — при завершении продажи партнёру начисляется **процент от суммы продажи** согласно `Partner.Percentage` (комиссия, а не скидка клиенту) **[изменено, зафиксировано]**.
-- `Discount` в `SaleItem` — всегда в процентах, а не фиксированной суммой.
-- При создании продажи: проверить наличие на `WarehouseID` → создать Sale → создать `InventoryMovement` (Sale) для каждой позиции → уменьшить `Inventory` → инвалидировать Redis-кеш.
+- **[v1.1]** Продажа списывается **по позициям**, каждая — со своего склада (не с одного склада целиком, как в ревизии 1.0) — нужно для сценария "продать N штук, автоматически распределив между складами по остатку".
+- Продажа может быть без партнёра (обычная розница), с партнёром-рефералом (партнёр приводит клиента — `ClientID` и `PartnerID` оба заданы), или напрямую партнёру (`PartnerID` без `ClientID`, партнёр покупает сам) — три валидных формы, см. `Partner.CommissionPercentage`/`DiscountPercentage` в разделе 10.
+- `DiscountPercentage` в `SaleItem` — всегда в процентах. При прямой продаже партнёру (`PartnerID` без `ClientID`) сервер **принудительно подставляет** `Partner.DiscountPercentage`, переопределяя запрошенное значение позиции — доверять вводу оператора в этом случае нельзя.
+- Клиент ищется/создаётся по email (find-or-create) прямо внутри `Create` — отдельного шага "сначала создать клиента" на API нет.
+- Позиции неизменяемы после создания (нет метода Update) — ошибку исправляет `Cancel`, не редактирование.
+- При создании продажи: на каждую позицию — проверить наличие на её `WarehouseID` → создать Sale → создать `InventoryMovement` (Sale) для каждой позиции → уменьшить `Inventory` → инвалидировать Redis-кеш. Это не кросс-коллекционная транзакция: если движение по одной из последующих позиций не удаётся записать, уже обработанные позиции остаются списанными, а ошибка логируется как `ErrorContext` (осознанный компромисс, см. `internal/services/sale/sale/service.go`).
+- `Cancel` восстанавливает остаток по всем позициям тем же best-effort механизмом (движение типа `Adjustment`, а не `Sale`).
 
 ---
 
-## 10. Partners
+## 10. Partners **[v1.1: единый Percentage разделён на два поля + публичные поля]**
 
 ```go
 type Partner struct {
     ID uuid.UUID
 
-    Name string
+    Name  string
     Phone string // unique
     Email string
 
-    Percentage int64 // [уточнено] процент комиссии, начисляемый партнёру с суммы продажи
+    // CommissionPercentage — [v1.1] выплата партнёру, когда он привёл
+    // клиента (Sale.ClientID и Sale.PartnerID оба заданы); применяется к
+    // Sale.TotalAmount, но не как скидка клиенту, а как начисление партнёру.
+    CommissionPercentage int32
+    // DiscountPercentage — [v1.1, новое поле] скидка, применяемая
+    // автоматически ко всем позициям, когда партнёр покупает напрямую
+    // (Sale.PartnerID задан, Sale.ClientID нет) — см. sale.Service.buildItems.
+    DiscountPercentage int32
 
     Note string
+
+    Address string // [v1.1] не локализуется — факт, не каталожный контент
+    Website string // [v1.1, новое поле]
+
+    // IsPublic — [v1.1, новое поле] управляет видимостью в публичном
+    // списке дилеров на сайте-витрине (PartnersService.ListPublic).
+    IsPublic bool
 
     Status PartnerStatus
 
@@ -438,11 +552,12 @@ const (
 ```
 
 ### Methods
-Create, Get, List, Update, SoftDelete
+Create, Get, List, Update, SoftDelete, **ListPublic** [v1.1, новый метод]
 
 ### Logic
-- `Phone` уникален глобально **[изменено, зафиксировано]**.
-- `Percentage` — фиксированный процент комиссии партнёра, применяется к `Sale.TotalPrice` при продажах с этим партнёром.
+- `Phone` уникален глобально.
+- Исходная ревизия описывала один `Percentage`; по факту реализации это две независимые ставки, применяемые в разных сценариях продажи (см. раздел 9) — комиссия за реферала и скидка при прямой покупке не одно и то же и не взаимоисключающи по смыслу, поэтому разделены.
+- `ListPublic` — урезанная read-only выборка (`IsPublic = true` активные партнёры) для дилерской карты на публичном сайте (см. `TZ_PHOMI_Public_Site_v1.md`); не требует аутентификации.
 
 ---
 
@@ -520,20 +635,33 @@ Redis используется **только для кеша `Inventory`** (б�
 
 ---
 
-## Основные связи (обновлено)
+## 15. Notifications **[v1.1, новый раздел — отсутствовал в ревизии 1.0]**
+
+Исходящая почта (`internal/services/notification`, `internal/pkg/mailer`) — не была описана в первой ревизии, реализована по ходу разработки.
+
+### Logic
+- Доставка — **SMTP или Resend HTTP API**, выбирается конфигом (`crm.mail`), без изменений в коде вызывающей стороны.
+- **Client-key gating**: сервис уведомлений принимает вызовы только с пред-выданным ключом на вызывающий фронтенд (admin/public-site — разные ключи), а не с обычным bearer-токеном пользователя — так вызвать отправку письма не может произвольный аутентифицированный клиент, только доверенный фронтенд-процесс. Ключ передаётся вне обычного RBAC-интерцептора.
+- Используется в двух местах: (1) публичный сайт — формы «Стать дилером»/«Контакт» отправляют письмо через этот сервис вместо создания записи в CRM (см. `TZ_PHOMI_Public_Site_v1.md` §7.1); (2) зарезервировано для будущих CRM-уведомлений (не задействовано на момент этой ревизии).
+
+---
+
+## Основные связи (обновлено, v1.1)
 
 ```
 Category *---* Product
 Brand     1---* Product
-Product   1---* ProductPrice
-Product   1---* Inventory
+Product   1---* ProductVariant
+ProductVariant 1---* ProductSKU
+ProductSKU 1---* ProductPrice   [v1.1 — было Product 1---* ProductPrice]
+ProductSKU 1---* Inventory      [v1.1 — было Product 1---* Inventory]
 Warehouse 1---* Inventory
 Warehouse 1---* InventoryMovement
 Client    1---* Sale
-Partner   0..1---* Sale   [изменено — партнёр опционален]
-Warehouse 1---* Sale      [изменено — добавлена связь]
+Partner   0..1---* Sale
 Sale      1---* SaleItem
-SaleItem  *---1 Product
+SaleItem  *---1 ProductSKU      [v1.1 — было SaleItem *---1 Product]
+SaleItem  *---1 Warehouse       [v1.1 — было Warehouse 1---* Sale на уровне продажи]
 User      1---* Sale (CreatedBy)
 User      1---* InventoryMovement (CreatedBy)
 ```

@@ -3,6 +3,8 @@
 > Версия: 1.2. Основано на `docs/MyBusiness_CRM_TD_v1.md` (бэкенд) и текущих контрактах в `proto/` (все сервисы уже реализованы на бэкенде — см. `internal/`). Каждое решение ниже либо прямо следует из proto/бэкенд-ТЗ, либо помечено **[best practice]** с обоснованием, чтобы при реализации не пришлось гадать.
 >
 > **Изменения в 1.2**: цветовая схема (п.7) и layout (п.8) обновлены по итогам стилистической ревизии заказчика после первой реализации (Brand — эталонная сущность) — см. историю правок. Заменены: синий акцент → бирюзовый `#85C5CF`, тёмное меню — не чёрное, а серое `#333333`, поля форм — явные чёрные рамки. RightDrawer стал плоским списком (без промежуточного клика по разделу), LeftDrawer как навигация по сущностям упразднён — создание/редактирование записи открывается в выезжающем слева drawer поверх списка, а не на отдельной странице.
+>
+> **Изменения в 1.3** (по факту реализации): каталог обзавёлся вариантами/SKU (`internal/entities/product_variant.go`, `product_sku.go` на бэкенде, см. `MyBusiness_CRM_TD_v1.md` §4/4a/4b) — detail-страница товара получила вкладки управления вариантами и SKU, не описанные в 1.2 (см. п.12.1). Продажа (п.12.3) реализована не двухшаговым мастером с одним складом на продажу, а одностраничной формой с цепочкой выбора Товар→Вариант→SKU и складом на уровне позиции (авто-распределение по остаткам или ручной выбор склада на позицию) — существенно отличается от первоначального описания, раздел переписан под фактическую реализацию (`web/app/pages/sales/new.vue`).
 
 ---
 
@@ -515,13 +517,15 @@ export function useEntityApi(entityKey) {
 | Brand | `BrandsService` | C R U D | `brands:read/create/update/delete` | Delete запрещён, если есть товары (`FailedPrecondition`) |
 | Category | `CategoriesService` | C R U D | `categories:read/create/update/delete` | `parentId` — плоское дерево (select с отступами по глубине в `<RelationSelect>`); Delete запрещён при наличии товаров |
 | Warehouse | `WarehousesService` | C R U D + **Deactivate** | `warehouses:read/create/update/delete` (Deactivate тоже гейтится `warehouses:update` — отдельного permission-ключа для него на бэкенде нет, RPC разные, право одно) | Deactivate — отдельная кнопка (не через статус в форме!) с `<ConfirmDialog>`; блокируется `FailedPrecondition`, если есть остаток — текст ошибки должен явно сказать «перенесите остатки на другой склад» |
-| Partner | `PartnersService` | C R U D | `partners:read/create/update/delete` | `commissionPercentage` — 0-100 (`<PercentLabel>`/number input с суффиксом %) |
+| Partner | `PartnersService` | C R U D | `partners:read/create/update/delete` | **[v1.3]** Два процентных поля, не одно: `commissionPercentage` (выплата за реферала) и `discountPercentage` (скидка при прямой покупке) — оба 0-100 (`<PercentLabel>`/number input с суффиксом %); плюс `address`/`website`/`isPublic` (галочка «показывать в публичном списке дилеров» — см. `TZ_PHOMI_Public_Site_v1.md`) |
 | Client | `ClientsService` | C R U D | `clients:read/create/update/delete` | Простейшая сущность-эталон для generic CRUD |
 | User | `UsersService` | C R U D + **Login** (публично) + **ChangePassword** | `users:read/create/update/delete` | Раздел виден только `admin` (и себе — своя карточка профиля вне общего списка); список **не** показывает пароль/хэш (бэкенд их и не отдаёт); `ChangePassword` — модалка из меню профиля, не через `EntityForm` |
-| Product | `ProductsService` | C R U D | `products:read/create/update/delete` | `sku` неизменяем после создания (readonly при edit); `details` — key→LocalizedString редактор (см. компонент ниже); `imageIds` — загрузка через отдельный HTTP-эндпоинт, см. п.4.6; на detail-странице — вкладка «Цена» (см. Price) и вкладка «Остатки по складам» (Inventory, отфильтровано по `productId`) |
-| ProductPrice | `PricesService` | C R U D + **GetHistory** | `prices:read/create/update/delete` | Не отдельный список в меню — живёт как вкладка на detail-странице Product (`GetByProductID`); история цен — таблица (readonly) под текущей ценой; суммы — basis points → `<MoneyLabel>` |
-| Inventory | `InventoryService` | R only | `inventory:read` | Список с фильтром по складу/товару/диапазону количества; ссылки на Product/Warehouse; отдельный пункт меню **и** вкладка на Product |
-| InventoryMovement | `InventoryMovementsService` | C (только Create — ручная операция «Приход»/«Списание»/«Корректировка») + R + **GetHistory** | `inventorymovements:read/create` (**без подчёркивания** — ключ ресурса на бэкенде `inventorymovements`, не `inventory_movements`, несмотря на то что gRPC-пакет называется `inventory_movement`) | Форма Create — только для типов `Receipt/WriteOff/Adjustment/Transfer` (тип `Sale` создаётся только бэкендом внутри `SalesService.Create`, руками через форму создавать «Sale»-движение не давать — исключить его из select типа в форме); список — неизменяемый лог, без edit/delete в UI вообще (кнопок нет физически, не просто disabled) |
+| Product | `ProductsService` | C R U D | `products:read/create/update/delete` | **[переписано — см. п.0/12.1]** Не хранит `sku`/`imageIds` напрямую — карточка над вариантами/SKU; `details` — key→LocalizedString, общие для всех вариантов; detail-страница — вкладки «Варианты» → «SKU» → «Цена»/«Остатки»/«Движения» (см. п.12.1), не плоские вкладки на самом Product |
+| ProductVariant | `ProductVariantsService` | C R U D | `productVariants:read/create/update/delete` | **[новая строка, см. п.12.1]** Вложен в Product; `imageIds` — загрузка через HTTP-эндпоинт (п.4.6), теперь на этом уровне, не на Product; `attributes` — характеристики, влияющие на внешний вид (цвет/фактура) |
+| ProductSKU | `ProductSKUsService` | C R U D | `productSkus:read/create/update/delete` | **[новая строка, см. п.12.1]** Вложен в ProductVariant; `sku` неизменяем после создания (readonly при edit); `attributes` — характеристики, влияющие на цену/доступность (размер/фасовка); только отсюда доступны вкладки Цена/Остатки/Движения |
+| ProductPrice | `PricesService` | C R U D + **GetHistory** | `prices:read/create/update/delete` | Не отдельный список в меню — живёт как вкладка на detail-странице ProductSKU (**[v1.3]** было Product, `GetByProductID` → фактически `GetBySKUID`); история цен — таблица (readonly) под текущей ценой; суммы — basis points → `<MoneyLabel>` |
+| Inventory | `InventoryService` | R only | `inventory:read` | Список с фильтром по складу/**SKU** (**[v1.3]** было «товару» — ключ теперь `skuId`, не `productId`)/диапазону количества; ссылки на ProductSKU/Warehouse; отдельный пункт меню **и** вкладка на ProductSKU |
+| InventoryMovement | `InventoryMovementsService` | C (только Create — ручная операция «Приход»/«Списание»/«Корректировка») + R + **GetHistory** | `inventorymovements:read/create` (**без подчёркивания** — ключ ресурса на бэкенде `inventorymovements`, не `inventory_movements`, несмотря на то что gRPC-пакет называется `inventory_movement`) | Форма Create — только для типов `Receipt/WriteOff/Adjustment/Transfer` (тип `Sale` создаётся только бэкендом внутри `SalesService.Create`, руками через форму создавать «Sale»-движение не давать — исключить его из select типа в форме); фильтр/предзаполнение — по `skuId` (**[v1.3]**, было `productId`); список — неизменяемый лог, без edit/delete в UI вообще (кнопок нет физически, не просто disabled) |
 | Sale | `SalesService` | C R + **UpdateStatus** + **Cancel** (нет generic Update/Delete) | `sales:read/create/update` (**оба** `UpdateStatus` и `Cancel` гейтятся одним ключом `sales:update` — отдельных `updateStatus`/`cancel` на бэкенде нет, оба RPC — просто переходы статуса существующей продажи) | См. п.12.3 — отдельный, не generic, флоу |
 | Report* | `ReportsService` | R only (6 методов) | `reports:read` | См. п.8.4 — только виджеты дашборда + отдельная страница `/reports` с теми же виджетами в полноэкранном/детальном виде и экспортом в CSV (**[best practice]**: экспорт — частый запрос для отчётов, простой client-side CSV из уже загруженных строк, без нового бэкенд-эндпоинта) |
 
@@ -551,25 +555,35 @@ export function useEntityApi(entityKey) {
 
 ## 12. Нестандартные флоу (не покрываются generic `EntityForm`)
 
-### 12.1 Product — вкладки на detail-странице
+### 12.1 Product — вкладки на detail-странице **[переписано под фактическую реализацию — см. п.0]**
 
-`/products/[id]` — не просто форма, а страница с вкладками:
-1. **Общее** — стандартная `EntityForm` (название, описание, бренд, категории, характеристики, статус).
-2. **Изображения** — `ProductImageUploader` (см. п.4.6/12.6, изолированный компонент).
-3. **Цена** — текущая `ProductPrice` (создать, если нет; редактировать `priceAmount`/`discountAmount`; кнопка «История» → таблица `GetHistory`).
-4. **Остатки** — `<EntityDataTable entity="inventory" :fixed-filter="{ productId: id }" />` (readonly).
-5. **Движения склада** — `<EntityDataTable entity="inventoryMovements" :fixed-filter="{ productIds: [id] }" />` + кнопка «Новое движение» (открывает форму Create InventoryMovement с предзаполненным `productId`).
+`/products/[id]` — не просто форма, а страница с вкладками. Каталог трёхуровневый (`Product → ProductVariant → ProductSKU`, см. бэкенд-ТЗ §4/4a/4b) — вкладки «Цена»/«Остатки»/«Движения», привязанные к конкретному товару в версии 1.2, на деле привязаны к конкретному **SKU**, а не к `Product` напрямую:
+
+1. **Общее** — `ProductGeneralForm` (название, описание, бренд, категории, общие характеристики `Product.Details`, статус).
+2. **Варианты** — `ProductVariantsPanel` + `ProductVariantGeneralForm`: список визуальных исполнений товара (цвет/фактура), у каждого — свои изображения (через `ProductImageUploader`, см. п.4.6/12.6, теперь прикрепляет `imageIds` к `ProductVariant`, не к `Product`) и свои внешние характеристики (`ProductVariant.Attributes`).
+3. **SKU** — `ProductSkusPanel` + `ProductSkuGeneralForm`, вложены внутрь конкретного варианта: покупаемые единицы (размер/фасовка), артикул (`SKU`, неизменяем после создания), характеристики, влияющие на цену (`ProductSKU.Attributes`). Только отсюда открываются вкладки «Цена»/«Остатки»/«Движения» — они относятся к SKU, не к товару в целом.
+4. **Цена** (на уровне SKU) — текущая `ProductPrice` (создать, если нет; редактировать `priceAmount`/`discountAmount`; кнопка «История» → таблица `GetHistory`).
+5. **Остатки** (на уровне SKU) — `<EntityDataTable entity="inventory" :fixed-filter="{ skuId: id }" />` (readonly).
+6. **Движения склада** (на уровне SKU) — `<EntityDataTable entity="inventoryMovements" :fixed-filter="{ skuIds: [id] }" />` + кнопка «Новое движение» (открывает форму Create InventoryMovement с предзаполненным `skuId`).
+
+`ProductVariantsReadOnly` — упрощённое read-only отображение вариантов/SKU там, где нужен только просмотр (например, внутри мастера продажи, см. п.12.3), без панелей редактирования.
 
 ### 12.2 Warehouse — Deactivate
 
 Отдельная кнопка на detail-странице (не через смену `status` в форме — в proto `Deactivate` вообще отдельный RPC, а `status` в `WarehouseUpdateRequest` даже не редактируется напрямую пользователем, т.к. `WarehouseUpdateRequest` не содержит поля `status`!). Список складов показывает статус read-only (в бейдже), меняется только через `Deactivate`.
 
-### 12.3 Sale — самый сложный флоу
+### 12.3 Sale — самый сложный флоу **[переписано под фактическую реализацию — см. п.0]**
 
-**Создание** (`/sales/new`, мастер в 2 шага, не одна форма):
-1. Шаг 1: выбрать `clientId` (с опцией «создать нового клиента прямо здесь» — модалка `EntityForm entity="clients"` внутри мастера, чтобы не терять контекст), `warehouseId` (только активные склады в select), опционально `partnerId`.
-2. Шаг 2: добавление позиций — `<RelationSelect relation="products">` на каждой строке + `quantity` + `discountPercentage`; **цена не вводится** (proto не принимает `priceAmount` в Create — сервер сам берёт текущую цену), но UI обязан **показать текущую цену и предварительный итог** (клиентский расчёт: `priceAmount × quantity × (100 − discount) / 100`, посчитанный по актуальной `ProductPrice`, подтянутой при выборе товара — это предварительный расчёт для UX, финальный `totalAmount` всегда берётся из ответа сервера, не из клиентского расчёта). Показывать остаток на выбранном складе рядом с каждой позицией (запрос к `InventoryService.Get`), с предупреждением (не блокировкой ввода — сервер всё равно даст авторитетный `FailedPrecondition`, если не хватит), если запрошенное количество превышает остаток.
-3. После создания — редирект на `/sales/[id]`.
+**Создание** (`/sales/new`) реализована как **одна страница**, не двухшаговый мастер — клиент/партнёр и позиции редактируются одновременно на одной форме (`web/app/pages/sales/new.vue`):
+
+1. **Клиент/партнёр**: поле email клиента — при потере фокуса делает поиск (`FindOrCreateByEmail` семантика на бэкенде); найденный клиент — телефон/имя/адрес подставляются read-only, ненайденный — те же поля становятся редактируемыми для создания нового клиента прямо на этой форме. Оставить email пустым и указать только `partnerId` — валидный третий вариант (прямая продажа партнёру, см. бэкенд-ТЗ §9/§10). Отдельного шага «сначала создать клиента» нет — `Create` уходит одним вызовом с либо `clientId`, либо полями нового клиента.
+2. **Позиции**: каждая строка — цепочка каскадных `RelationSelect`: **Товар → Вариант → SKU** (каждый следующий select заблокирован/пуст, пока не выбран предыдущий; `filter` у `RelationSelect` сужает Вариант по `productId`, SKU по `variantId` — тот же паттерн, что в `ProductVariantsPanel`). Цена не вводится (proto не принимает `priceAmount` в Create — сервер берёт текущую `ProductPrice` SKU), но UI показывает предварительную цену/итог по актуальной цене, подтянутой при выборе SKU — только для UX, авторитетный `totalAmount` всегда из ответа сервера.
+3. **Склад — на уровне позиции**, в двух режимах на выбор построчно (см. бэкенд-ТЗ §9 — `WarehouseID` живёт на `SaleItem`, не на `Sale`):
+   - **авто** — оператор вводит одно суммарное количество; при отправке форма читает остаток по складам для выбранного SKU (`InventoryService.List`) и жадно распределяет запрошенное количество по складам с наибольшим остатком, формируя по одной позиции `SaleCreateItem` на использованный склад;
+   - **ручной** — оператор сам добавляет одну или несколько пар «склад — количество» на строку, когда нужно списать именно с конкретного склада.
+   В обоих случаях то, что реально уходит на бэкенд в `SaleCreate.Items` — плоский список `{skuId, warehouseId, quantity, discountPercentage}`; авто/ручной режим — чисто клиентское удобство поверх этой формы.
+4. Скидка партнёра при прямой продаже (`partnerId` без клиента) — `Partner.DiscountPercentage` подставляется и отображается на каждой позиции, поле ввода скидки становится неактивным (сервер всё равно проигнорирует введённое значение — см. бэкенд-ТЗ §9).
+5. После создания — редирект на `/sales/[id]`.
 
 **Detail-страница** (`/sales/[id]`):
 - Позиции — **всегда readonly** (proto: «Items are immutable once created»).
@@ -649,8 +663,8 @@ i18n/locales/{sr,en,ru}.json
 
 - [ ] Node.js gRPC-клиент (п.1.1) поднят внутри `server/api/**`, деплой Nitro сконфигурирован на Node server runtime (не edge/serverless-пресет).
 - [ ] BFF-схема (п.2) реализована, токен не покидает сервер.
-- [ ] Все 11 сущностей из бэкенд-ТЗ доступны через `EntityRegistry`, generic список+форма работают минимум для Brand/Category/Warehouse/Partner/Client (эталонный простой CRUD).
-- [ ] Product/Price/Inventory/InventoryMovement — вкладочный флоу (п.12.1), включая рабочий `ProductImageUploader` (п.4.6/12.6).
+- [ ] Все сущности из бэкенд-ТЗ доступны через `EntityRegistry` (**[v1.3]** теперь включая ProductVariant/ProductSKU — см. п.10; `ProductAttributeDefinition` не нужен в реестре, у него нет admin CRUD по бэкенд-ТЗ §4c), generic список+форма работают минимум для Brand/Category/Warehouse/Partner/Client (эталонный простой CRUD).
+- [ ] Product → ProductVariant → ProductSKU → Price/Inventory/InventoryMovement — вложенный вкладочный флоу (п.12.1, **[v1.3]** трёхуровневый, не одноуровневый), включая рабочий `ProductImageUploader` на уровне варианта (п.4.6/12.6).
 - [ ] Sale — мастер создания + detail с UpdateStatus/Cancel (п.12.3).
 - [ ] User — список (admin-only) + `/profile` + смена пароля.
 - [ ] Dashboard — все 6 виджетов отчётов, каждый независимо грузится.
