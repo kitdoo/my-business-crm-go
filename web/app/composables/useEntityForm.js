@@ -31,6 +31,7 @@ export function useEntityForm(entityKey, id, initialValues = {}) {
     if (field.type === 'localizedString') return { values: {} }
     if (field.type === 'relationMulti' || field.type === 'images') return []
     if (field.type === 'attributeDetails') return {}
+    if (field.type === 'boolean') return false
     return null
   }
 

@@ -15,12 +15,18 @@ message Partner {
   string name = 5;
   string phone = 6;
   string email = 7;
-  // Commission applied to Sale.totalAmount, 0-100.
+  // Payout percentage when this partner refers a client's sale (Sale has
+  // both clientId and partnerId).
   int32 commissionPercentage = 8;
   string note = 9;
   PartnerStatus status = 10;
   string address = 11;
   string website = 12;
+  // Discount percentage when this partner buys directly (Sale has
+  // partnerId but no clientId) — applied automatically server-side.
+  int32 discountPercentage = 13;
+  // Whether this partner appears in the public dealer-network listing.
+  bool isPublic = 14;
   string etag = 101;
 }
 
@@ -91,6 +97,8 @@ message PartnerCreateRequest {
   string note = 5;
   string address = 6;
   string website = 7;
+  int32 discountPercentage = 8;
+  bool isPublic = 9;
   optional Options options = 99;
 }
 
@@ -112,6 +120,8 @@ message PartnerUpdateRequest {
   optional PartnerStatus status = 7;
   optional string address = 8;
   optional string website = 9;
+  optional int32 discountPercentage = 10;
+  optional bool isPublic = 11;
   optional Options options = 99;
 }
 

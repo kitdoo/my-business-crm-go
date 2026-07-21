@@ -139,6 +139,11 @@ var (
 	// attempted on a sale already in a terminal status (cancelled/refunded).
 	ErrSaleTerminalStatus = errors.New("sale already in a terminal status")
 
+	// ErrSaleMissingClientOrPartner is returned when Create names neither a
+	// client (clientId/newClient) nor a partner — every sale needs at
+	// least one counterparty.
+	ErrSaleMissingClientOrPartner = errors.New("sale must have a client or a partner")
+
 	// ErrUnauthenticated is returned when a request carries no valid session
 	// token (missing, malformed, or not matching an active user). Generic
 	// across every non-gRPC endpoint that needs auth (currently only image

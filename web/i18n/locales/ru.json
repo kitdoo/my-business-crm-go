@@ -63,7 +63,11 @@
     "sales": {
       "label": "Продажи",
       "create": "Новая продажа",
+      "clientOptionalHint": "Необязательно — оставьте email пустым, чтобы продать напрямую партнёру",
       "newClient": "Клиент с таким email не найден — заполните данные, он будет создан автоматически",
+      "partnerCommissionHint": "Партнёр получит комиссию {rate}% с этой продажи",
+      "partnerDiscountHint": "Продажа напрямую партнёру со скидкой {rate}%",
+      "discountFromPartnerHint": "Применяется скидка партнёра автоматически",
       "addItem": "Добавить позицию",
       "lineTotal": "Сумма позиции",
       "warehouseMode": "Распределение по складам",
@@ -122,7 +126,10 @@
     "partner": "Партнёр",
     "seller": "Продавец",
     "totalAmount": "Итого",
-    "discountPercentage": "Скидка, %"
+    "discountPercentage": "Скидка, %",
+    "discountPercentageHint": "Применяется автоматически, когда партнёр покупает сам (без клиента)",
+    "commissionPercentageHint": "Начисляется партнёру, когда он привёл продажу клиенту",
+    "isPublic": "Публичный (виден на сайте)"
   },
   "sort": {
     "createdAt": "По дате создания",

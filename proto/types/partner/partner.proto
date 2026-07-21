@@ -11,12 +11,22 @@ message Partner {
   string name = 5;
   string phone = 6;
   string email = 7;
-  // Commission applied to Sale.totalAmount, 0-100.
+  // Payout percentage when this partner refers a client's sale (Sale has
+  // both clientId and partnerId) — applied to Sale.totalAmount as a
+  // commission owed to the partner, never as a discount to the client.
   int32 commissionPercentage = 8;
   string note = 9;
   PartnerStatus status = 10;
   string address = 11;
   string website = 12;
+  // Discount percentage when this partner buys directly (Sale has
+  // partnerId but no clientId) — applied automatically to every item's
+  // discountPercentage, overriding whatever the caller sent.
+  int32 discountPercentage = 13;
+  // Whether this partner appears in PartnersService.ListPublic (the
+  // public website's dealer-network listing). false hides it there while
+  // remaining fully visible/usable in the admin.
+  bool isPublic = 14;
   string etag = 101;
 }
 

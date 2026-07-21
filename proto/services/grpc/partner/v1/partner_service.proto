@@ -19,8 +19,9 @@ service PartnersService {
   // ListPublic is the only method exempt from auth (see
   // internal/transports/grpc/interceptors/auth.New) — it backs the public
   // website's dealer-network listing (web-public/). It always forces
-  // status=ACTIVE and returns PartnerPublic, never the full Partner, so
-  // commissionPercentage/note can never leak to an anonymous caller.
+  // status=ACTIVE and isPublic=true, and returns PartnerPublic, never the
+  // full Partner, so commissionPercentage/discountPercentage/note can
+  // never leak to an anonymous caller.
   rpc ListPublic (PartnersListPublicRequest) returns (PartnersListPublicResponse) {}
 }
 
@@ -77,6 +78,8 @@ message PartnerCreateRequest {
   string note = 5 [(buf.validate.field).string.max_len = 1024];
   string address = 6 [(buf.validate.field).string.max_len = 500];
   string website = 7 [(buf.validate.field).string.max_len = 255];
+  int32 discountPercentage = 8 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
+  bool isPublic = 9;
   optional Options options = 99;
 }
 
@@ -98,6 +101,8 @@ message PartnerUpdateRequest {
   optional crm.types.partner.PartnerStatus status = 7 [(buf.validate.field).enum.defined_only = true];
   optional string address = 8 [(buf.validate.field).string.max_len = 500];
   optional string website = 9 [(buf.validate.field).string.max_len = 255];
+  optional int32 discountPercentage = 10 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
+  optional bool isPublic = 11;
   optional Options options = 99;
 }
 

@@ -26,16 +26,25 @@ type Partner struct {
 	// Phone is unique across active partners.
 	Phone string
 	Email string
-	// CommissionPercentage applied to Sale.TotalAmount, 0-100.
+	// CommissionPercentage is the payout rate when this partner refers a
+	// client's sale (Sale has both ClientID and PartnerID) — applied to
+	// Sale.TotalAmount as an amount owed to the partner.
 	CommissionPercentage int32
 	Note                 string
 	Status               PartnerStatus
 	Address              string
 	Website              string
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-	DeletedAt            *time.Time // nil = active
-	Etag                 string     // OCC token; rolled on every write
+	// DiscountPercentage is the rate applied automatically to every item
+	// when this partner buys directly (Sale has PartnerID but no
+	// ClientID) — see sale/sale.Service.buildItems.
+	DiscountPercentage int32
+	// IsPublic controls visibility in PartnersService.ListPublic (the
+	// public website's dealer-network listing).
+	IsPublic  bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time // nil = active
+	Etag      string     // OCC token; rolled on every write
 }
 
 // PartnerNew creates a Partner with a fresh ID, timestamps, and etag.
@@ -76,6 +85,8 @@ type PartnerCreate struct {
 	Note                 string `normalize:"trim"`
 	Address              string `normalize:"trim"`
 	Website              string `normalize:"trim"`
+	DiscountPercentage   int32
+	IsPublic             bool
 }
 
 func (c *PartnerCreate) Merge(dst *Partner) *Partner {
@@ -97,6 +108,8 @@ type PartnerUpdate struct {
 	Status               *PartnerStatus
 	Address              *string `normalize:"trim,nil_on_empty"`
 	Website              *string `normalize:"trim,nil_on_empty"`
+	DiscountPercentage   *int32
+	IsPublic             *bool
 	Etag                 *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
 
@@ -131,6 +144,7 @@ type PartnersListSort struct {
 // live inside it, per the List(ctx, in *XxxList) convention.
 type PartnersList struct {
 	Statuses          []PartnerStatus
+	IsPublic          *bool
 	CreatedAt         *PeriodFilter
 	Sort              PartnersListSort
 	Pagination        ListPagination

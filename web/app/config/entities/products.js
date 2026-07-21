@@ -59,7 +59,7 @@ export default {
     // Order per the request: brand, categories, name, description,
     // details (status stays editOnly, unaffected).
     fields: [
-      { key: 'brandId', type: 'relation', relation: 'brands', label: 'fields.brand', required: true },
+      { key: 'brandId', type: 'relation', relation: 'brands', label: 'fields.brand', required: true, searchable: true },
       { key: 'categoryIds', type: 'relationMulti', relation: 'categories', label: 'fields.categories' },
       { key: 'name', type: 'localizedString', label: 'fields.name', required: true },
       { key: 'description', type: 'localizedString', label: 'fields.description' },

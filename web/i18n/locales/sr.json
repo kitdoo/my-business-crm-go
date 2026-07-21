@@ -63,7 +63,11 @@
     "sales": {
       "label": "Prodaje",
       "create": "Nova prodaja",
+      "clientOptionalHint": "Opciono — ostavite email prazan da prodate direktno partneru",
       "newClient": "Klijent sa ovim email-om nije pronađen — unesite podatke, biće kreiran automatski",
+      "partnerCommissionHint": "Partner će zaraditi proviziju od {rate}% na ovu prodaju",
+      "partnerDiscountHint": "Prodaja direktno partneru sa popustom od {rate}%",
+      "discountFromPartnerHint": "Popust partnera se primenjuje automatski",
       "addItem": "Dodaj stavku",
       "lineTotal": "Iznos stavke",
       "warehouseMode": "Raspodela po magacinima",
@@ -122,7 +126,10 @@
     "partner": "Partner",
     "seller": "Prodavac",
     "totalAmount": "Ukupno",
-    "discountPercentage": "Popust, %"
+    "discountPercentage": "Popust, %",
+    "discountPercentageHint": "Primenjuje se automatski kada partner kupuje direktno (bez klijenta)",
+    "commissionPercentageHint": "Isplaćuje se partneru kada dovede prodaju klijentu",
+    "isPublic": "Javno (prikazano na sajtu)"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",

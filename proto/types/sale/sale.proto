@@ -11,7 +11,10 @@ message Sale {
   int64 createdAt = 2;
   int64 updatedAt = 3;
   optional int64 deletedAt = 4;
-  string clientId = 5;
+  // Empty when this sale's only counterparty is partnerId (the partner
+  // bought directly) — see SaleCreateRequest for the three valid
+  // combinations of clientId/partnerId.
+  optional string clientId = 5;
   optional string partnerId = 7;
   repeated SaleItem items = 8;
   // Basis points, sum of item lines after discount.

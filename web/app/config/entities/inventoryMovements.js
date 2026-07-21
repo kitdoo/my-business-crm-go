@@ -36,8 +36,18 @@ export default {
 
   form: {
     fields: [
-      { key: 'skuId', type: 'relation', relation: 'productSkus', label: 'fields.sku', required: true },
-      { key: 'warehouseId', type: 'relation', relation: 'warehouses', label: 'fields.warehouse', required: true },
+      // Product -> Variant -> SKU cascade (SkuCascadeSelect), not a flat
+      // relation dropdown — with a large catalog, a raw list of every SKU
+      // (ProductSKUsService.List has no free-text search) is unusable.
+      { key: 'skuId', type: 'skuCascade', label: 'fields.sku', required: true },
+      {
+        key: 'warehouseId',
+        type: 'relation',
+        relation: 'warehouses',
+        label: 'fields.warehouse',
+        required: true,
+        searchable: true,
+      },
       { key: 'type', type: 'enum', enum: 'MovementType', label: 'fields.movementType', required: true },
       { key: 'quantity', type: 'number', label: 'fields.quantity', required: true },
       { key: 'comment', type: 'text', label: 'fields.comment', maxLength: 1024 },

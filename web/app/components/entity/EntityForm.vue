@@ -197,9 +197,17 @@ function fieldsToRender() {
               :label="t(field.label)"
               :required="field.required"
               :error="fieldErrors[field.key]"
+              :hint="field.hint ? t(field.hint) : undefined"
             >
               <UInputNumber v-model="form[field.key]" class="w-full" :min="field.min" :max="field.max" />
             </UFormField>
+            <SkuCascadeSelect
+              v-else-if="field.type === 'skuCascade'"
+              v-model="form[field.key]"
+              :label="t(field.label)"
+              :error="fieldErrors[field.key]"
+              :required="field.required"
+            />
             <RelationSelect
               v-else-if="field.type === 'relation'"
               v-model="form[field.key]"
@@ -207,6 +215,7 @@ function fieldsToRender() {
               :label="t(field.label)"
               :error="fieldErrors[field.key]"
               :required="field.required"
+              :searchable="field.searchable"
             />
             <RelationMultiSelect
               v-else-if="field.type === 'relationMulti'"
@@ -217,6 +226,9 @@ function fieldsToRender() {
             />
             <UFormField v-else-if="field.type === 'images'" :label="t(field.label)" class="md:col-span-2">
               <ProductImageUploader v-model="form[field.key]" />
+            </UFormField>
+            <UFormField v-else-if="field.type === 'boolean'" :error="fieldErrors[field.key]">
+              <UCheckbox v-model="form[field.key]" :label="t(field.label)" />
             </UFormField>
           </template>
         </FormGrid>

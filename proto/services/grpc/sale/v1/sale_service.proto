@@ -91,8 +91,14 @@ message SaleCreateRequest {
   }
   reserved 2;
   reserved "warehouseId";
+  // clientId/newClient/partnerId together express the three valid sale
+  // shapes: client only, partner only (partner buys directly, discounted
+  // by their own Partner.discountPercentage), or client with partnerId
+  // set (partner referred the client's sale and earns
+  // Partner.commissionPercentage on it). At least one of client_ref or
+  // partnerId is required — enforced server-side (no CEL cross-field
+  // validation elsewhere in this codebase), not by buf.validate here.
   oneof client_ref {
-    option (buf.validate.oneof).required = true;
     string clientId = 1 [(buf.validate.field).string.uuid = true];
     NewClient newClient = 5;
   }

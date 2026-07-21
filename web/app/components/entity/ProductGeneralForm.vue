@@ -114,6 +114,7 @@ async function onDelete() {
             :error="fieldErrors.brandId"
             :disabled="locked"
             required
+            searchable
           />
           <RelationMultiSelect
             v-model="form.categoryIds"

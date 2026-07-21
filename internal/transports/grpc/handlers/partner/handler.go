@@ -129,8 +129,10 @@ func (h *Handler) List(ctx context.Context, in *partnersvcpb.PartnersListRequest
 // commissionPercentage/note can never reach an anonymous caller, even if
 // this method is later exempted from RBAC.
 func (h *Handler) ListPublic(ctx context.Context, _ *partnersvcpb.PartnersListPublicRequest) (*partnersvcpb.PartnersListPublicResponse, error) {
+	isPublic := true
 	result, err := h.svc.List(ctx, &entities.PartnersList{
 		Statuses:   []entities.PartnerStatus{entities.PartnerStatusActive},
+		IsPublic:   &isPublic,
 		Pagination: entities.ListPagination{Limit: 200},
 	})
 	if err != nil {

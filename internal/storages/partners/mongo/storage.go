@@ -26,6 +26,7 @@ const (
 	FieldName      = "name"
 	FieldPhone     = "phone"
 	FieldStatus    = "status"
+	FieldIsPublic  = "is_public"
 	FieldCreatedAt = "created_at"
 	FieldUpdatedAt = "updated_at"
 	FieldDeletedAt = "deleted_at"
@@ -45,6 +46,8 @@ type model struct {
 	Status               entities.PartnerStatus `bson:"status"`
 	Address              string                 `bson:"address"`
 	Website              string                 `bson:"website"`
+	DiscountPercentage   int32                  `bson:"discount_percentage"`
+	IsPublic             bool                   `bson:"is_public"`
 	CreatedAt            time.Time              `bson:"created_at,omitonupdate"`
 	UpdatedAt            time.Time              `bson:"updated_at"`
 	DeletedAt            *time.Time             `bson:"deleted_at,omitonupdate"`
@@ -184,6 +187,9 @@ func (s *Storage) List(ctx context.Context, in *entities.PartnersList) (*entitie
 	filter := activeOnly(bson.M{})
 	if len(in.Statuses) > 0 {
 		filter[FieldStatus] = bson.M{"$in": in.Statuses}
+	}
+	if in.IsPublic != nil {
+		filter[FieldIsPublic] = *in.IsPublic
 	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)

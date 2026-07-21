@@ -32,11 +32,13 @@ const router = useRouter()
 const { t } = useI18n()
 const saleApi = useSaleApi()
 const clientApi = useEntityApi('clients')
+const partnerApi = useEntityApi('partners')
 const inventoryApi = useEntityApi('inventory')
 const priceApi = usePriceApi()
 const { handle } = useApiErrorHandler()
 
 const partnerId = ref(null)
+const selectedPartner = ref(null)
 const saving = ref(false)
 
 const clientEmail = ref('')
@@ -46,6 +48,29 @@ const foundClient = ref(null)
 const newClientName = ref('')
 const newClientPhone = ref('')
 const newClientAddress = ref('')
+
+// A client section is only required once the seller starts typing an
+// email — leaving it blank means "sell directly to the partner"
+// (partnerId set, no clientId/newClient on Create), one of the three
+// valid Sale shapes alongside client-only and client-with-partner.
+const clientProvided = computed(() => !!clientEmail.value)
+// Partner-only sale: their Partner.discountPercentage is applied to every
+// item automatically server-side, overriding whatever's typed below — see
+// sale.Service.buildItems. Kept in sync here purely for the line-total
+// preview and to grey out the now-meaningless manual input.
+const partnerDiscountActive = computed(() => !clientProvided.value && !!selectedPartner.value)
+
+watch(partnerId, async (id) => {
+  if (!id) {
+    selectedPartner.value = null
+    return
+  }
+  try {
+    selectedPartner.value = await partnerApi.get(id)
+  } catch {
+    selectedPartner.value = null
+  }
+})
 
 async function searchClient() {
   clientSearched.value = false
@@ -70,8 +95,9 @@ function onEmailChange() {
 }
 
 const clientValid = computed(() => {
+  if (!clientProvided.value) return true
   if (foundClient.value) return true
-  return !!(clientEmail.value && newClientName.value && newClientPhone.value && newClientAddress.value)
+  return !!(newClientName.value && newClientPhone.value && newClientAddress.value)
 })
 
 let nextItemId = 0
@@ -111,7 +137,9 @@ const itemsValid = computed(
       return item.allocations.length > 0 && item.allocations.every((a) => a.warehouseId && a.quantity > 0)
     }),
 )
-const formValid = computed(() => clientValid.value && itemsValid.value)
+const formValid = computed(
+  () => itemsValid.value && clientValid.value && (clientProvided.value || !!partnerId.value),
+)
 
 function addItem() {
   items.value = [...items.value, blankItem()]
@@ -162,9 +190,13 @@ function itemQuantity(item) {
   return item.allocations.reduce((sum, a) => sum + (a.quantity || 0), 0)
 }
 
+function effectiveDiscount(item) {
+  return partnerDiscountActive.value ? selectedPartner.value.discountPercentage : item.discountPercentage
+}
+
 function lineTotal(item) {
   if (item.priceAmount == null) return null
-  return Math.round(item.priceAmount * itemQuantity(item) * (100 - item.discountPercentage) / 100)
+  return Math.round(item.priceAmount * itemQuantity(item) * (100 - effectiveDiscount(item)) / 100)
 }
 
 const { formatMoney } = useFormatMoney()
@@ -215,22 +247,24 @@ async function onSubmit() {
           skuId: item.skuId,
           warehouseId: a.warehouseId,
           quantity: a.quantity,
-          discountPercentage: item.discountPercentage,
+          discountPercentage: effectiveDiscount(item),
         })
       }
     }
 
     const sale = await saleApi.create({
-      ...(foundClient.value
-        ? { clientId: foundClient.value.id }
-        : {
-            newClient: {
-              name: newClientName.value,
-              phone: newClientPhone.value,
-              email: clientEmail.value,
-              address: newClientAddress.value,
-            },
-          }),
+      ...(clientProvided.value
+        ? foundClient.value
+          ? { clientId: foundClient.value.id }
+          : {
+              newClient: {
+                name: newClientName.value,
+                phone: newClientPhone.value,
+                email: clientEmail.value,
+                address: newClientAddress.value,
+              },
+            }
+        : {}),
       partnerId: partnerId.value,
       items: flatItems,
     })
@@ -256,8 +290,9 @@ async function onSubmit() {
 
     <div class="space-y-4">
       <h2 class="font-medium">{{ t('fields.client') }}</h2>
+      <p class="text-sm text-neutral-500">{{ t('entities.sales.clientOptionalHint') }}</p>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <UFormField :label="t('fields.email')" required>
+        <UFormField :label="t('fields.email')">
           <UInput
             v-model="clientEmail"
             type="email"
@@ -297,8 +332,14 @@ async function onSubmit() {
     <div class="space-y-4">
       <h2 class="font-medium">{{ t('fields.partner') }}</h2>
       <FormGrid>
-        <RelationSelect v-model="partnerId" relation="partners" :label="t('fields.partner')" />
+        <RelationSelect v-model="partnerId" relation="partners" :label="t('fields.partner')" searchable />
       </FormGrid>
+      <p v-if="clientProvided && selectedPartner" class="text-sm text-neutral-500">
+        {{ t('entities.sales.partnerCommissionHint', { rate: selectedPartner.commissionPercentage }) }}
+      </p>
+      <p v-else-if="partnerDiscountActive" class="text-sm text-neutral-500">
+        {{ t('entities.sales.partnerDiscountHint', { rate: selectedPartner.discountPercentage }) }}
+      </p>
     </div>
 
     <div class="space-y-4">
@@ -314,6 +355,7 @@ async function onSubmit() {
             relation="products"
             :label="t('fields.product')"
             required
+            searchable
             @update:model-value="(v) => onProductSelected(item, v)"
           />
           <RelationSelect
@@ -336,8 +378,18 @@ async function onSubmit() {
             required
             @update:model-value="(v) => onSkuSelected(item, v)"
           />
-          <UFormField :label="t('fields.discountPercentage')">
-            <UInputNumber v-model="item.discountPercentage" class="w-full" :min="0" :max="100" />
+          <UFormField
+            :label="t('fields.discountPercentage')"
+            :hint="partnerDiscountActive ? t('entities.sales.discountFromPartnerHint') : undefined"
+          >
+            <UInputNumber
+              :model-value="partnerDiscountActive ? selectedPartner.discountPercentage : item.discountPercentage"
+              class="w-full"
+              :min="0"
+              :max="100"
+              :disabled="partnerDiscountActive"
+              @update:model-value="(v) => (item.discountPercentage = v)"
+            />
           </UFormField>
         </FormGrid>
 
@@ -358,6 +410,7 @@ async function onSubmit() {
                 :label="t('fields.warehouse')"
                 :disabled="!item.skuId"
                 required
+                searchable
                 class="flex-1"
               />
               <UFormField :label="t('fields.quantity')" class="w-32">

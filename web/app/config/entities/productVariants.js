@@ -35,7 +35,15 @@ export default {
   // action available through the UI.
   form: {
     fields: [
-      { key: 'productId', type: 'relation', relation: 'products', label: 'fields.product', required: true, createOnly: true },
+      {
+        key: 'productId',
+        type: 'relation',
+        relation: 'products',
+        label: 'fields.product',
+        required: true,
+        createOnly: true,
+        searchable: true,
+      },
       { key: 'attributes', type: 'attributeDetails', label: 'fields.attributes' },
       { key: 'imageIds', type: 'images', label: 'fields.images' },
     ],

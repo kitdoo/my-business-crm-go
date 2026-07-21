@@ -39,8 +39,9 @@ type PartnersServiceClient interface {
 	// ListPublic is the only method exempt from auth (see
 	// internal/transports/grpc/interceptors/auth.New) — it backs the public
 	// website's dealer-network listing (web-public/). It always forces
-	// status=ACTIVE and returns PartnerPublic, never the full Partner, so
-	// commissionPercentage/note can never leak to an anonymous caller.
+	// status=ACTIVE and isPublic=true, and returns PartnerPublic, never the
+	// full Partner, so commissionPercentage/discountPercentage/note can
+	// never leak to an anonymous caller.
 	ListPublic(ctx context.Context, in *PartnersListPublicRequest, opts ...grpc.CallOption) (*PartnersListPublicResponse, error)
 }
 
@@ -124,8 +125,9 @@ type PartnersServiceServer interface {
 	// ListPublic is the only method exempt from auth (see
 	// internal/transports/grpc/interceptors/auth.New) — it backs the public
 	// website's dealer-network listing (web-public/). It always forces
-	// status=ACTIVE and returns PartnerPublic, never the full Partner, so
-	// commissionPercentage/note can never leak to an anonymous caller.
+	// status=ACTIVE and isPublic=true, and returns PartnerPublic, never the
+	// full Partner, so commissionPercentage/discountPercentage/note can
+	// never leak to an anonymous caller.
 	ListPublic(context.Context, *PartnersListPublicRequest) (*PartnersListPublicResponse, error)
 	mustEmbedUnimplementedPartnersServiceServer()
 }

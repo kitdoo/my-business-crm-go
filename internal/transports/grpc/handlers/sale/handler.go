@@ -208,6 +208,8 @@ func MapError(err error) error {
 		return status.Error(codes.FailedPrecondition, errs.ErrInsufficientStock.Error())
 	case errors.Is(err, errs.ErrSaleTerminalStatus):
 		return status.Error(codes.FailedPrecondition, errs.ErrSaleTerminalStatus.Error())
+	case errors.Is(err, errs.ErrSaleMissingClientOrPartner):
+		return status.Error(codes.InvalidArgument, errs.ErrSaleMissingClientOrPartner.Error())
 	case errors.Is(err, errs.ErrStaleEntity):
 		return status.Error(codes.Aborted, errs.ErrStaleEntity.Error())
 	case errors.Is(err, errs.ErrInvalidListCursor):

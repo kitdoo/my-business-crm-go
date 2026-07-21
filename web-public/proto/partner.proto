@@ -6,7 +6,8 @@ package crm.grpc.partner.v1;
 // the public site's dealer-network list (postani-diler page). It is the
 // only PartnersService method exempt from auth (see
 // internal/transports/grpc/interceptors/auth.New) and it never returns
-// commissionPercentage/note, only name/phone/email/address.
+// commissionPercentage/discountPercentage/note, only name/phone/email/
+// address.
 
 service PartnersService {
   rpc ListPublic (PartnersListPublicRequest) returns (PartnersListPublicResponse) {}

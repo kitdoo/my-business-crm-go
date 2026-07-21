@@ -69,6 +69,11 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 	_ = normalizer.Normalize(in) //nolint:errcheck
 
 	clientID := in.ClientID
+	hasClient := clientID != "" || in.NewClient != nil
+	if !hasClient && in.PartnerID == nil {
+		return nil, errs.ErrSaleMissingClientOrPartner
+	}
+
 	if in.NewClient != nil {
 		// Find-or-create by email (TD §12.3) — the caller never has to
 		// create a client as a separate step before this one.
@@ -77,17 +82,30 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 			return nil, err
 		}
 		clientID = c.ID
-	} else if _, err := s.clients.Get(ctx, clientID); err != nil {
-		return nil, err
-	}
-
-	if in.PartnerID != nil {
-		if _, err := s.partners.Get(ctx, *in.PartnerID); err != nil {
+	} else if clientID != "" {
+		if _, err := s.clients.Get(ctx, clientID); err != nil {
 			return nil, err
 		}
 	}
 
-	items, total, err := s.buildItems(ctx, in.Items)
+	var partnerDiscount *int32
+	if in.PartnerID != nil {
+		p, err := s.partners.Get(ctx, *in.PartnerID)
+		if err != nil {
+			return nil, err
+		}
+		// Partner buying directly (no client on this sale) — their
+		// discount rate overrides whatever per-item discount was
+		// requested, rather than trusting the caller to enter it
+		// correctly. When a client is also present, the partner only
+		// earns Partner.CommissionPercentage (tracked, not applied here)
+		// and the item discount stays caller-controlled.
+		if !hasClient {
+			partnerDiscount = &p.DiscountPercentage
+		}
+	}
+
+	items, total, err := s.buildItems(ctx, in.Items, partnerDiscount)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +151,10 @@ func (s *Service) Create(ctx context.Context, in *entities.SaleCreate) (*entitie
 // availability there, captures the SKU's current price, and computes
 // per-line and total amounts (basis points). Each item may target a
 // different warehouse, so warehouse lookups are cached per distinct id to
-// avoid redundant Gets within one sale.
-func (s *Service) buildItems(ctx context.Context, in []entities.SaleCreateItem) ([]entities.SaleItem, int64, error) {
+// avoid redundant Gets within one sale. forcedDiscount, when non-nil,
+// overrides every item's requested DiscountPercentage — used when the
+// sale's only counterparty is a discount-bearing partner.
+func (s *Service) buildItems(ctx context.Context, in []entities.SaleCreateItem, forcedDiscount *int32) ([]entities.SaleItem, int64, error) {
 	items := make([]entities.SaleItem, 0, len(in))
 	warehouses := make(map[string]*entities.Warehouse, len(in))
 	var total int64
@@ -173,14 +193,19 @@ func (s *Service) buildItems(ctx context.Context, in []entities.SaleCreateItem) 
 			return nil, 0, errs.ErrInsufficientStock
 		}
 
-		line := price.PriceAmount * req.Quantity * int64(100-req.DiscountPercentage) / 100
+		discount := req.DiscountPercentage
+		if forcedDiscount != nil {
+			discount = *forcedDiscount
+		}
+
+		line := price.PriceAmount * req.Quantity * int64(100-discount) / 100
 		total += line
 
 		items = append(items, entities.SaleItem{
 			SKUID:              req.SKUID,
 			Quantity:           req.Quantity,
 			PriceAmount:        price.PriceAmount,
-			DiscountPercentage: req.DiscountPercentage,
+			DiscountPercentage: discount,
 			WarehouseID:        req.WarehouseID,
 		})
 	}
