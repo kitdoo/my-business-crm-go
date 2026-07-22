@@ -96,6 +96,7 @@ func (h *Handler) List(ctx context.Context, in *partnersvcpb.PartnersListRequest
 		listIn.Statuses = coreslices.To(f.GetStatuses(), func(s partnerpb.PartnerStatus) entities.PartnerStatus {
 			return entities.PartnerStatus(s)
 		})
+		listIn.IDs = f.GetIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withUnixTimeCodec)
 		}

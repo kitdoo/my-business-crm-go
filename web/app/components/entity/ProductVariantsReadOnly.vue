@@ -6,7 +6,7 @@
 // create/edit/delete affordances — this drawer is "look, don't touch",
 // editing always happens on the full /products/:id page instead.
 import { localizedText } from '~/utils/localizedText.js'
-import { fetchTotalStock } from '~/utils/inventoryStock.js'
+import { fetchTotalStockBySkuIds } from '~/utils/inventoryStock.js'
 
 const props = defineProps({
   productId: { type: String, required: true },
@@ -35,15 +35,26 @@ async function load() {
       filter: { productIds: [props.productId] },
       pagination: { limit: 100 },
     })
-    variants.value = await Promise.all(
-      (variantsRes.items || []).map(async (variant) => {
-        const skusRes = await skusApi.list({ filter: { variantIds: [variant.id] }, pagination: { limit: 100 } })
-        const skus = await Promise.all(
-          (skusRes.items || []).map(async (sku) => ({ ...sku, stock: await fetchTotalStock(inventoryApi, sku.id) })),
-        )
-        return { ...variant, skus }
-      }),
+    const variantItems = variantsRes.items || []
+    const variantIds = variantItems.map((variant) => variant.id)
+
+    const skusRes = variantIds.length
+      ? await skusApi.list({ filter: { variantIds }, pagination: { limit: 1000 } })
+      : { items: [] }
+    const skusByVariantId = {}
+    for (const sku of skusRes.items || []) {
+      ;(skusByVariantId[sku.variantId] ||= []).push(sku)
+    }
+
+    const stockBySkuId = await fetchTotalStockBySkuIds(
+      inventoryApi,
+      (skusRes.items || []).map((sku) => sku.id),
     )
+
+    variants.value = variantItems.map((variant) => ({
+      ...variant,
+      skus: (skusByVariantId[variant.id] || []).map((sku) => ({ ...sku, stock: stockBySkuId[sku.id] || 0 })),
+    }))
   } catch (err) {
     handle(err)
   } finally {

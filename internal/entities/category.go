@@ -136,6 +136,7 @@ type CategoriesListSort struct {
 // live inside it, per the List(ctx, in *XxxList) convention.
 type CategoriesList struct {
 	Statuses          []CategoryStatus
+	IDs               []string
 	CreatedAt         *PeriodFilter
 	Sort              CategoriesListSort
 	Pagination        ListPagination

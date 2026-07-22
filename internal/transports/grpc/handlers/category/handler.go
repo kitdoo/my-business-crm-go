@@ -132,6 +132,7 @@ func (h *Handler) List(ctx context.Context, in *categorysvcpb.CategoriesListRequ
 		listIn.Statuses = coreslices.To(f.GetStatuses(), func(s categorypb.CategoryStatus) entities.CategoryStatus {
 			return entities.CategoryStatus(s)
 		})
+		listIn.IDs = f.GetIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withPeriodCodec)
 		}

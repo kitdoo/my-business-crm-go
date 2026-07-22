@@ -50,6 +50,9 @@ message ClientsListRequest {
     // sale (find-or-create, crm.grpc.sale.v1.SaleCreateRequest.NewClient),
     // distinct from the fuzzy/not-yet-implemented searchQuery above.
     optional string email = 3 [(buf.validate.field).string.email = true];
+    // Batch lookup by id — lets callers resolve several known clients in
+    // one List call instead of one Get per id (e.g. RelationLabel).
+    repeated string ids = 4 [(buf.validate.field).repeated.items.string.uuid = true];
   }
   optional Filter filter = 3;
   message Options {

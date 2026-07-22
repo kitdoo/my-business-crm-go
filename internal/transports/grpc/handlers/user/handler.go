@@ -143,6 +143,7 @@ func (h *Handler) List(ctx context.Context, in *usersvcpb.UsersListRequest) (*us
 		listIn.Roles = coreslices.To(f.GetRoles(), func(r userpb.UserRole) entities.UserRole {
 			return entities.UserRole(r)
 		})
+		listIn.IDs = f.GetIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withPeriodCodec)
 		}

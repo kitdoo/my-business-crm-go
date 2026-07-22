@@ -33,6 +33,11 @@ export default {
   },
 
   list: {
+    // Lets useReferenceCacheStore batch RelationLabel lookups (e.g.
+    // productVariants' "product" column) into one filter.ids List call
+    // instead of one Get per row — backend already supports it
+    // (ProductsListRequest.Filter.ids).
+    idsFilterKey: 'ids',
     columns: [
       { key: 'name', label: 'fields.name', component: 'LocalizedText' },
       { key: 'brandId', label: 'fields.brand', component: 'RelationLabel', relation: 'brands' },

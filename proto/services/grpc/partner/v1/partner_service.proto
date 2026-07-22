@@ -52,6 +52,9 @@ message PartnersListRequest {
     repeated crm.types.partner.PartnerStatus statuses = 1 [(buf.validate.field).repeated.unique = true];
     optional string searchQuery = 2 [(buf.validate.field).string.max_len = 255];
     optional crm.types.common.PeriodFilter createdAt = 3;
+    // Batch lookup by id — lets callers resolve several known partners in
+    // one List call instead of one Get per id (e.g. RelationLabel).
+    repeated string ids = 4 [(buf.validate.field).repeated.items.string.uuid = true];
   }
   optional Filter filter = 3;
   message Options {

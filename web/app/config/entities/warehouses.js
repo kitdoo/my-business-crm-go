@@ -18,6 +18,9 @@ export default {
   },
 
   list: {
+    // Lets useReferenceCacheStore batch RelationLabel lookups into one
+    // filter.ids List call instead of one Get per row.
+    idsFilterKey: 'ids',
     columns: [
       { key: 'name', label: 'fields.name', component: 'LocalizedText' },
       { key: 'address', label: 'fields.address' },

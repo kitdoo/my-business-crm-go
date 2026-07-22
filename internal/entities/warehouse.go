@@ -141,6 +141,7 @@ type WarehousesListSort struct {
 // live inside it, per the List(ctx, in *XxxList) convention.
 type WarehousesList struct {
 	Statuses          []WarehouseStatus
+	IDs               []string
 	CreatedAt         *PeriodFilter
 	Sort              WarehousesListSort
 	Pagination        ListPagination

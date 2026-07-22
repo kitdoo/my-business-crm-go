@@ -52,6 +52,9 @@ message UsersListRequest {
     // not implemented yet.
     optional string searchQuery = 3 [(buf.validate.field).string.max_len = 255];
     optional crm.types.common.PeriodFilter createdAt = 4;
+    // Batch lookup by id — lets callers resolve several known users in
+    // one List call instead of one Get per id (e.g. RelationLabel).
+    repeated string ids = 5 [(buf.validate.field).repeated.items.string.uuid = true];
   }
   optional Filter filter = 3;
   message Options {

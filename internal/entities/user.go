@@ -200,6 +200,7 @@ type UsersListSort struct {
 type UsersList struct {
 	Statuses          []UserStatus
 	Roles             []UserRole
+	IDs               []string
 	CreatedAt         *PeriodFilter
 	Sort              UsersListSort
 	Pagination        ListPagination

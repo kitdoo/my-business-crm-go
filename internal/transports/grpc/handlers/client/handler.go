@@ -99,6 +99,7 @@ func (h *Handler) List(ctx context.Context, in *clientsvcpb.ClientsListRequest) 
 		if f.Email != nil {
 			listIn.Email = f.Email
 		}
+		listIn.IDs = f.GetIds()
 	}
 
 	result, err := h.svc.List(ctx, listIn)

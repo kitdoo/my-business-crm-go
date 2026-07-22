@@ -7,7 +7,7 @@
 // shows its one compact General form (sku/price/attributes together,
 // locked/edit pattern — see ProductSkuGeneralForm.vue). Saving a new SKU
 // auto-expands it so the operator can see it settle in place.
-import { fetchTotalStock } from '~/utils/inventoryStock.js'
+import { fetchTotalStock, fetchTotalStockBySkuIds } from '~/utils/inventoryStock.js'
 
 const props = defineProps({
   variantId: { type: String, required: true },
@@ -29,8 +29,10 @@ const creating = ref(false)
 const expandedId = ref(null)
 
 async function loadStock(skuItems) {
-  const entries = await Promise.all(skuItems.map(async (item) => [item.id, await fetchTotalStock(inventoryApi, item.id)]))
-  stockBySkuId.value = Object.fromEntries(entries)
+  stockBySkuId.value = await fetchTotalStockBySkuIds(
+    inventoryApi,
+    skuItems.map((item) => item.id),
+  )
 }
 
 async function load() {

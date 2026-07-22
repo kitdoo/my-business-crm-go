@@ -164,6 +164,9 @@ func (s *Storage) List(ctx context.Context, in *entities.WarehousesList) (*entit
 	if len(in.Statuses) > 0 {
 		filter[FieldStatus] = bson.M{"$in": in.Statuses}
 	}
+	if len(in.IDs) > 0 {
+		filter[FieldID] = bson.M{"$in": in.IDs}
+	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)
 	}

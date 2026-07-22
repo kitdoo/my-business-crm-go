@@ -145,6 +145,7 @@ type PartnersListSort struct {
 type PartnersList struct {
 	Statuses          []PartnerStatus
 	IsPublic          *bool
+	IDs               []string
 	CreatedAt         *PeriodFilter
 	Sort              PartnersListSort
 	Pagination        ListPagination

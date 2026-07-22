@@ -191,6 +191,9 @@ func (s *Storage) List(ctx context.Context, in *entities.PartnersList) (*entitie
 	if in.IsPublic != nil {
 		filter[FieldIsPublic] = *in.IsPublic
 	}
+	if len(in.IDs) > 0 {
+		filter[FieldID] = bson.M{"$in": in.IDs}
+	}
 	if in.CreatedAt != nil {
 		periodFilter(filter, FieldCreatedAt, in.CreatedAt)
 	}

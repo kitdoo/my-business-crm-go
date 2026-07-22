@@ -136,6 +136,7 @@ func (h *Handler) List(ctx context.Context, in *warehousesvcpb.WarehousesListReq
 		listIn.Statuses = coreslices.To(f.GetStatuses(), func(s warehousepb.WarehouseStatus) entities.WarehouseStatus {
 			return entities.WarehouseStatus(s)
 		})
+		listIn.IDs = f.GetIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withPeriodCodec)
 		}
