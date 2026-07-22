@@ -40,16 +40,28 @@ export default {
       // relation dropdown — with a large catalog, a raw list of every SKU
       // (ProductSKUsService.List has no free-text search) is unusable.
       { key: 'skuId', type: 'skuCascade', label: 'fields.sku', required: true },
-      {
-        key: 'warehouseId',
-        type: 'relation',
-        relation: 'warehouses',
-        label: 'fields.warehouse',
-        required: true,
-        searchable: true,
-      },
+      // Scoped to warehouses that actually carry this SKU (Inventory.List
+      // filtered by skuId) — a flat `warehouses` relation would offer
+      // every warehouse, most of which never stocked it. Stays disabled
+      // until skuId is picked (WarehouseStockSelect reads it off `form`
+      // directly, same cross-field wiring EntityForm already does for
+      // `capByStock` below).
+      { key: 'warehouseId', type: 'warehouseStock', label: 'fields.warehouse', required: true },
       { key: 'type', type: 'enum', enum: 'MovementType', label: 'fields.movementType', required: true },
-      { key: 'quantity', type: 'number', label: 'fields.quantity', required: true },
+      // capByStock: floors the input at -(current on-hand quantity for the
+      // selected skuId/warehouseId pair) once both are picked, so an
+      // operator can't type a write-off/adjustment larger than what's
+      // actually on the shelf (backend would reject it anyway via
+      // Inventory.ApplyMovement, but catching it client-side is a much
+      // clearer error than a generic insufficient-stock failure).
+      {
+        key: 'quantity',
+        type: 'number',
+        label: 'fields.quantity',
+        required: true,
+        capByStock: true,
+        requiresFields: ['skuId', 'warehouseId'],
+      },
       { key: 'comment', type: 'text', label: 'fields.comment', maxLength: 1024 },
       { key: 'saleId', type: 'relation', relation: 'sales', label: 'fields.sale' },
     ],

@@ -36,24 +36,29 @@ function onSkuChange(id) {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
-    <RelationSelect
-      :model-value="productId"
-      relation="products"
-      :label="t('fields.product')"
-      required
-      searchable
-      @update:model-value="onProductChange"
-    />
-    <RelationSelect
-      :model-value="variantId"
-      relation="productVariants"
-      :label="t('fields.variant')"
-      :filter="{ productIds: [productId] }"
-      :disabled="!productId"
-      required
-      @update:model-value="onVariantChange"
-    />
+  <div class="space-y-4 md:col-span-2">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <RelationSelect
+        :model-value="productId"
+        relation="products"
+        :label="t('fields.product')"
+        required
+        searchable
+        @update:model-value="onProductChange"
+      />
+      <RelationSelect
+        :model-value="variantId"
+        relation="productVariants"
+        :label="t('fields.variant')"
+        :filter="{ productIds: [productId] }"
+        :disabled="!productId"
+        required
+        @update:model-value="onVariantChange"
+      />
+    </div>
+    <!-- Its own full-width row, not a third grid column: SKU codes run
+    long and get clipped when squeezed to a third of the row alongside
+    Product/Variant. -->
     <RelationSelect
       :model-value="modelValue"
       relation="productSkus"

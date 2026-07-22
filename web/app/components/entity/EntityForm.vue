@@ -148,6 +148,17 @@ function fieldsToRender() {
   // once at Create, changed only through the separate ChangePassword flow).
   return config.form.fields.filter((f) => (!f.editOnly || !isCreate) && (!f.createOnly || isCreate))
 }
+
+// On-hand quantity for the currently picked skuId/warehouseId pair,
+// reported by WarehouseStockSelect — only meaningful for InventoryMovement
+// (its `quantity` field is the only one with capByStock set), but kept
+// here rather than inside that component since it needs to reach a
+// sibling field's UInputNumber min, not just its own.
+const stockAvailable = ref(null)
+function quantityMin(field) {
+  if (!field.capByStock || stockAvailable.value == null) return field.min
+  return -stockAvailable.value
+}
 </script>
 
 <template>
@@ -182,8 +193,17 @@ function fieldsToRender() {
               :label="t(field.label)"
               :required="field.required"
               :error="fieldErrors[field.key]"
+              :class="field.multiline ? 'md:col-span-2' : undefined"
             >
+              <UTextarea
+                v-if="field.multiline"
+                v-model="form[field.key]"
+                class="w-full"
+                :required="field.required"
+                :maxlength="field.maxLength"
+              />
               <UInput
+                v-else
                 v-model="form[field.key]"
                 class="w-full"
                 :type="field.inputType || 'text'"
@@ -199,7 +219,13 @@ function fieldsToRender() {
               :error="fieldErrors[field.key]"
               :hint="field.hint ? t(field.hint) : undefined"
             >
-              <UInputNumber v-model="form[field.key]" class="w-full" :min="field.min" :max="field.max" />
+              <UInputNumber
+                v-model="form[field.key]"
+                class="w-full"
+                :min="quantityMin(field)"
+                :max="field.max"
+                :disabled="field.requiresFields?.some((k) => !form[k])"
+              />
             </UFormField>
             <SkuCascadeSelect
               v-else-if="field.type === 'skuCascade'"
@@ -207,6 +233,15 @@ function fieldsToRender() {
               :label="t(field.label)"
               :error="fieldErrors[field.key]"
               :required="field.required"
+            />
+            <WarehouseStockSelect
+              v-else-if="field.type === 'warehouseStock'"
+              v-model="form[field.key]"
+              :sku-id="form.skuId"
+              :label="t(field.label)"
+              :error="fieldErrors[field.key]"
+              :required="field.required"
+              @update:available="stockAvailable = $event"
             />
             <RelationSelect
               v-else-if="field.type === 'relation'"
