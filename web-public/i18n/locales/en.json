@@ -144,7 +144,8 @@
     "whyText1": "We are actively growing our distributor network in Serbia and the region, offering a product with over 4,000 designs, fast installation and proven demand in the facade and interior market.",
     "whyText2": "Partners get retail and wholesale support, marketing materials and access to the full PHOMI catalog — join a network that is already growing worldwide.",
     "partnersTitle": "Our current partners",
-    "partnersEmpty": "The partner list is currently unavailable."
+    "partnersEmpty": "No partners to show yet.",
+    "partnersError": "The partner list is currently unavailable."
   },
   "contact": {
     "thanks": "Thank you! Your message has been sent.",

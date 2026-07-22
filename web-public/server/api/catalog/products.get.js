@@ -120,6 +120,14 @@ async function toCards(products, publicKeys, { includePriceStock }) {
         name: product.name,
         imageIds: representativeVariant.imageIds,
         price: representativeSku.price,
+        // The representative SKU's own stock (used for its own card badge
+        // elsewhere) — NOT what the inStock filter below checks. A product
+        // can have several variants (color/size), and the representative
+        // is just the first one; whether the product as a whole belongs on
+        // the "Na stanju" tab needs to look across every SKU of every
+        // variant (see anyInStock in loadFilteredPage), or a product with
+        // stock only on its second/third variant would wrongly disappear
+        // from that tab entirely.
         inStock: representativeSku.inStock,
         // Every SKU carries its own "generation" characteristic (see
         // productAttributeDefinitions seed migration "generation") inside
@@ -155,7 +163,10 @@ async function loadFilteredPage({ categoryId, cursor, limit, sortField, sortDire
 
     const cards = await toCards(rawItems, publicKeys, { includePriceStock: true })
     for (const card of cards) {
-      if (card.inStock === wantInStock) items.push(card)
+      // Whole-product stock, across every variant's every SKU — not just
+      // the representative one (see the comment on card.inStock above).
+      const anyInStock = card.variants.some((v) => v.skus.some((s) => s.inStock))
+      if (anyInStock === wantInStock) items.push(card)
     }
 
     if (!nextCursor) break

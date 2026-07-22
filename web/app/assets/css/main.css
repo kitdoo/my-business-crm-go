@@ -34,6 +34,7 @@ body {
 :root,
 .light {
   --ui-bg: #ffffff;
+  --ui-text: #000000;
   --ui-text-highlighted: #000000;
   --ui-border-accented: #000000;
   --ui-radius: 0.5rem;

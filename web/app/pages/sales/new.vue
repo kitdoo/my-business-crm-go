@@ -10,9 +10,10 @@
 // only, the authoritative totalAmount comes back on success.
 //
 // Each line item picks Product -> Variant -> SKU in a lockstep chain (each
-// select disabled/empty until its parent is chosen — RelationSelect's
-// `filter` prop scopes Variant by productId and SKU by variantId, same
-// pattern used in ProductVariantsPanel.vue). Warehouse fulfillment is
+// select disabled/empty until its parent is chosen). Variant and SKU are
+// both scoped to Inventory as well as their parent (VariantStockSelect /
+// SkuStockSelect), so a seller can never pick a variant or SKU that has no
+// stock anywhere and dead-end further down the chain. Warehouse fulfillment is
 // per-item and has two modes, chosen per line (TD §12.3 update: warehouse
 // moved from sale-level to item-level so lines can be split across
 // warehouses):
@@ -43,6 +44,19 @@ const partnerId = ref(null)
 const selectedPartner = ref(null)
 const saving = ref(false)
 
+// Which of the three valid Sale shapes this page is building — chosen up
+// front so the page only shows the fields that shape actually needs,
+// instead of always rendering both the client and partner sections and
+// relying on an empty email to imply "partner-only" (TD §12.3).
+const saleCase = ref('client')
+const saleCaseOptions = computed(() => [
+  { value: 'client', label: t('entities.sales.caseClient') },
+  { value: 'client_partner', label: t('entities.sales.caseClientPartner') },
+  { value: 'partner', label: t('entities.sales.casePartner') },
+])
+const showClientSection = computed(() => saleCase.value !== 'partner')
+const showPartnerSection = computed(() => saleCase.value !== 'client')
+
 const clientEmail = ref('')
 const clientSearching = ref(false)
 const clientSearched = ref(false)
@@ -51,16 +65,28 @@ const newClientName = ref('')
 const newClientPhone = ref('')
 const newClientAddress = ref('')
 
-// A client section is only required once the seller starts typing an
-// email — leaving it blank means "sell directly to the partner"
-// (partnerId set, no clientId/newClient on Create), one of the three
-// valid Sale shapes alongside client-only and client-with-partner.
 const clientProvided = computed(() => !!clientEmail.value)
 // Partner-only sale: their Partner.discountPercentage is applied to every
 // item automatically server-side, overriding whatever's typed below — see
 // sale.Service.buildItems. Kept in sync here purely for the line-total
 // preview and to grey out the now-meaningless manual input.
 const partnerDiscountActive = computed(() => !clientProvided.value && !!selectedPartner.value)
+
+// Switching case clears whichever section just got hidden, so a value
+// typed/picked before switching away can never sneak into Create.
+watch(saleCase, (value) => {
+  if (value === 'partner') {
+    clientEmail.value = ''
+    clientSearched.value = false
+    foundClient.value = null
+    newClientName.value = ''
+    newClientPhone.value = ''
+    newClientAddress.value = ''
+  }
+  if (value === 'client') {
+    partnerId.value = null
+  }
+})
 
 watch(partnerId, async (id) => {
   if (!id) {
@@ -149,9 +175,14 @@ const itemsValid = computed(
       return item.allocations.length > 0 && item.allocations.every((a) => a.warehouseId && a.quantity > 0)
     }),
 )
-const formValid = computed(
-  () => itemsValid.value && clientValid.value && (clientProvided.value || !!partnerId.value),
-)
+const requireClient = computed(() => saleCase.value !== 'partner')
+const requirePartner = computed(() => saleCase.value !== 'client')
+const formValid = computed(() => {
+  if (!itemsValid.value) return false
+  if (requireClient.value && !(clientProvided.value && clientValid.value)) return false
+  if (requirePartner.value && !partnerId.value) return false
+  return true
+})
 
 function addItem() {
   items.value = [...items.value, blankItem()]
@@ -319,9 +350,12 @@ async function onSubmit() {
   <div class="space-y-6 max-w-4xl">
     <h1 class="text-xl font-semibold">{{ t('entities.sales.create') }}</h1>
 
-    <div class="space-y-4">
+    <UFormField :label="t('entities.sales.saleCase')">
+      <URadioGroup v-model="saleCase" orientation="horizontal" :items="saleCaseOptions" />
+    </UFormField>
+
+    <div v-if="showClientSection" class="space-y-4">
       <h2 class="font-medium">{{ t('fields.client') }}</h2>
-      <p class="text-sm text-neutral-500">{{ t('entities.sales.clientOptionalHint') }}</p>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <UFormField :label="t('fields.email')">
           <UInput
@@ -360,7 +394,7 @@ async function onSubmit() {
       <p v-if="clientSearched && !foundClient" class="text-sm text-neutral-500">{{ t('entities.sales.newClient') }}</p>
     </div>
 
-    <div class="space-y-4">
+    <div v-if="showPartnerSection" class="space-y-4">
       <h2 class="font-medium">{{ t('fields.partner') }}</h2>
       <FormGrid>
         <RelationSelect v-model="partnerId" relation="partners" :label="t('fields.partner')" searchable />
@@ -389,12 +423,10 @@ async function onSubmit() {
             searchable
             @update:model-value="(v) => onProductSelected(item, v)"
           />
-          <RelationSelect
+          <VariantStockSelect
             :model-value="item.variantId"
-            relation="productVariants"
+            :product-id="item.productId"
             :label="t('fields.variant')"
-            :filter="{ productIds: [item.productId] }"
-            :disabled="!item.productId"
             required
             @update:model-value="(v) => onVariantSelected(item, v)"
           />

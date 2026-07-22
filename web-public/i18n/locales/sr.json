@@ -145,7 +145,8 @@
     "whyText1": "Aktivno razvijamo mrežu distributera u Srbiji i regionu i nudimo proizvod sa preko 4000 dezena, brzom ugradnjom i dokazanom potražnjom na tržištu fasada i enterijera.",
     "whyText2": "Partneri dobijaju maloprodajnu i veleprodajnu podršku, marketinške materijale i pristup kompletnom PHOMI katalogu — pridružite se mreži koja već raste širom sveta.",
     "partnersTitle": "Naši trenutni partneri",
-    "partnersEmpty": "Lista partnera trenutno nije dostupna."
+    "partnersEmpty": "Trenutno nema partnera za prikaz.",
+    "partnersError": "Lista partnera trenutno nije dostupna."
   },
   "contact": {
     "thanks": "Hvala! Vaša poruka je poslata.",

@@ -218,6 +218,7 @@ function quantityMin(field) {
               :required="field.required"
               :error="fieldErrors[field.key]"
               :hint="field.hint ? t(field.hint) : undefined"
+              :class="field.fullWidth ? 'md:col-span-2' : undefined"
             >
               <UInputNumber
                 v-model="form[field.key]"

@@ -51,6 +51,7 @@ export default {
       { key: 'email', type: 'text', label: 'fields.email', required: true, inputType: 'email' },
       { key: 'address', type: 'text', label: 'fields.address', maxLength: 500 },
       { key: 'website', type: 'text', label: 'fields.website', maxLength: 255 },
+      { key: 'status', type: 'enum', enum: 'PartnerStatus', label: 'fields.status', editOnly: true },
       {
         key: 'discountPercentage',
         type: 'number',
@@ -59,6 +60,7 @@ export default {
         min: 0,
         max: 100,
         hint: 'fields.discountPercentageHint',
+        fullWidth: true,
       },
       {
         key: 'commissionPercentage',
@@ -68,12 +70,12 @@ export default {
         min: 0,
         max: 100,
         hint: 'fields.commissionPercentageHint',
+        fullWidth: true,
       },
-      { key: 'isPublic', type: 'boolean', label: 'fields.isPublic' },
       // multiline: the drawer is narrow (TD §8.3) — a single-line input
       // for a 1024-char comment clips almost everything typed into it.
       { key: 'note', type: 'text', label: 'fields.note', maxLength: 1024, multiline: true },
-      { key: 'status', type: 'enum', enum: 'PartnerStatus', label: 'fields.status', editOnly: true },
+      { key: 'isPublic', type: 'boolean', label: 'fields.isPublic' },
     ],
   },
 }

@@ -24,7 +24,7 @@ function nextImage() {
 const mapQuery = encodeURIComponent('Veselina Masleše 56, Novi Sad, Srbija')
 const mapEmbedSrc = `https://maps.google.com/maps?q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=&output=embed`
 
-const { data: partnersData } = await useAsyncData('public-partners', () => $fetch('/api/partners'))
+const { data: partnersData, error: partnersError } = await useAsyncData('public-partners', () => $fetch('/api/partners'))
 const partners = computed(() => partnersData.value?.items || [])
 </script>
 
@@ -111,7 +111,8 @@ const partners = computed(() => partnersData.value?.items || [])
 
     <div class="mt-14">
       <h2 class="text-lg font-bold uppercase tracking-wide mb-5">{{ t('dealer.partnersTitle') }}</h2>
-      <p v-if="!partners.length" class="text-black/50">{{ t('dealer.partnersEmpty') }}</p>
+      <p v-if="partnersError" class="text-black/50">{{ t('dealer.partnersError') }}</p>
+      <p v-else-if="!partners.length" class="text-black/50">{{ t('dealer.partnersEmpty') }}</p>
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="p in partners" :key="p.email" class="border border-black/10 rounded-sm p-4">
           <p class="font-medium">{{ p.name }}</p>

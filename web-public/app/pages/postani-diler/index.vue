@@ -4,7 +4,7 @@ const localeHead = useLocaleHead()
 const localePath = useLocalePath()
 const router = useRouter()
 
-const { data: partnersData } = await useAsyncData('public-partners', () => $fetch('/api/partners'))
+const { data: partnersData, error: partnersError } = await useAsyncData('public-partners', () => $fetch('/api/partners'))
 const partners = computed(() => partnersData.value?.items || [])
 
 useSeoMeta({
@@ -39,7 +39,8 @@ function onSubmitted() {
 
       <div class="lg:col-span-2">
         <h2 class="text-lg font-bold uppercase tracking-wide mb-4">{{ t('dealer.partnersTitle') }}</h2>
-        <p v-if="!partners.length" class="text-black/50">{{ t('dealer.partnersEmpty') }}</p>
+        <p v-if="partnersError" class="text-black/50">{{ t('dealer.partnersError') }}</p>
+        <p v-else-if="!partners.length" class="text-black/50">{{ t('dealer.partnersEmpty') }}</p>
         <ul v-else class="flex flex-col gap-4">
           <li v-for="p in partners" :key="p.email" class="border border-black/10 rounded-sm p-4">
             <p class="font-medium">{{ p.name }}</p>

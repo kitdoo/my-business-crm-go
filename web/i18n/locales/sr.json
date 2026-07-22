@@ -63,7 +63,10 @@
     "sales": {
       "label": "Prodaje",
       "create": "Nova prodaja",
-      "clientOptionalHint": "Opciono — ostavite email prazan da prodate direktno partneru",
+      "saleCase": "Tip prodaje",
+      "caseClient": "Klijent",
+      "caseClientPartner": "Klijent + partner",
+      "casePartner": "Partner",
       "newClient": "Klijent sa ovim email-om nije pronađen — unesite podatke, biće kreiran automatski",
       "partnerCommissionHint": "Partner će zaraditi proviziju od {rate}% na ovu prodaju",
       "partnerDiscountHint": "Prodaja direktno partneru sa popustom od {rate}%",

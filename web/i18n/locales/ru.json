@@ -63,7 +63,10 @@
     "sales": {
       "label": "Продажи",
       "create": "Новая продажа",
-      "clientOptionalHint": "Необязательно — оставьте email пустым, чтобы продать напрямую партнёру",
+      "saleCase": "Тип продажи",
+      "caseClient": "Клиент",
+      "caseClientPartner": "Клиент + партнёр",
+      "casePartner": "Партнёр",
       "newClient": "Клиент с таким email не найден — заполните данные, он будет создан автоматически",
       "partnerCommissionHint": "Партнёр получит комиссию {rate}% с этой продажи",
       "partnerDiscountHint": "Продажа напрямую партнёру со скидкой {rate}%",

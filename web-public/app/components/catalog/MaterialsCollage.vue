@@ -10,17 +10,22 @@
 // as a class from the caller) + auto-rows-fr, reaching the same bottom
 // edge as the gallery image instead of leaving whitespace under shorter
 // content. Below lg the gallery image stacks above this block at w-full
-// aspect-[4/3]; aspect-[8/3] here makes the whole collage exactly half
-// that image's height, whatever the tile count.
-defineProps({
+// aspect-[4/3]; aspect-[8/3] makes a single-row collage (1-2 materials)
+// exactly half that image's height. 3-4 materials wrap into a second row
+// (see grid-cols below), so that same aspect ratio would squeeze each row
+// to half the height and clip the name/color overlay — aspect-[4/3]
+// (double the height for the same width) keeps each row's height the same
+// as the single-row case instead.
+const props = defineProps({
   materials: { type: Array, required: true },
 })
+const rows = computed(() => (props.materials.length <= 2 ? 1 : 2))
 </script>
 
 <template>
   <div
-    class="grid gap-3 auto-rows-fr aspect-[8/3] lg:aspect-auto"
-    :class="materials.length === 1 ? 'grid-cols-1' : 'grid-cols-2'"
+    class="grid gap-3 auto-rows-fr lg:aspect-auto"
+    :class="[materials.length === 1 ? 'grid-cols-1' : 'grid-cols-2', rows === 1 ? 'aspect-[8/3]' : 'aspect-[4/3]']"
   >
     <div
       v-for="(m, i) in materials"

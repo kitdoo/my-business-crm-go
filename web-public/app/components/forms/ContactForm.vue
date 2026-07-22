@@ -36,7 +36,7 @@ async function onSubmit() {
 
 <template>
   <form class="relative space-y-4" @submit.prevent="onSubmit">
-    <div class="absolute -left-[9999px]" aria-hidden="true">
+    <div class="absolute left-0 top-0 h-0 w-0 overflow-hidden" aria-hidden="true">
       <label>Website<input v-model="state.website" type="text" tabindex="-1" autocomplete="off" /></label>
     </div>
 

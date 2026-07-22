@@ -63,7 +63,10 @@
     "sales": {
       "label": "Sales",
       "create": "New sale",
-      "clientOptionalHint": "Optional — leave the email blank to sell directly to a partner",
+      "saleCase": "Sale type",
+      "caseClient": "Client",
+      "caseClientPartner": "Client + partner",
+      "casePartner": "Partner",
       "newClient": "No client found with this email — fill in their details, they'll be created automatically",
       "partnerCommissionHint": "The partner will earn a {rate}% commission on this sale",
       "partnerDiscountHint": "Selling directly to the partner at a {rate}% discount",
