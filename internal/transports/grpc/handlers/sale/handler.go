@@ -3,6 +3,7 @@ package sale
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -12,6 +13,7 @@ import (
 	"github.com/altessa-s/go-atlas/domain/converter"
 	"github.com/altessa-s/go-atlas/domain/converter/codec/unixtime"
 	"github.com/altessa-s/go-atlas/domain/proto/fieldmask"
+	slogx "github.com/altessa-s/go-atlas/observability/slog"
 
 	coreslices "github.com/altessa-s/go-atlas/core/collections/slices"
 
@@ -34,11 +36,14 @@ var withProtoCodecs = converter.WithCodecs(unixtime.New())
 // Handler implements salesvcpb.SalesServiceServer.
 type Handler struct {
 	salesvcpb.UnimplementedSalesServiceServer
-	svc salesvc.Service
+	svc    salesvc.Service
+	logger *slog.Logger
 }
 
 // New builds a Handler.
-func New(svc salesvc.Service) *Handler { return &Handler{svc: svc} }
+func New(svc salesvc.Service) *Handler {
+	return &Handler{svc: svc, logger: slog.Default().With(slogx.Module("handler:sale"))}
+}
 
 // Register attaches the handler to gs.
 func (h *Handler) Register(gs *grpc.Server, _ <-chan struct{}) {
@@ -88,7 +93,7 @@ func (h *Handler) Create(ctx context.Context, in *salesvcpb.SaleCreateRequest) (
 
 	sl, err := h.svc.Create(ctx, create)
 	if err != nil {
-		return nil, MapError(err)
+		return nil, h.mapError(ctx, err)
 	}
 	out := toSalePB(sl)
 	applyReadMask(in.GetOptions().GetReadMask(), out)
@@ -98,7 +103,7 @@ func (h *Handler) Create(ctx context.Context, in *salesvcpb.SaleCreateRequest) (
 func (h *Handler) Get(ctx context.Context, in *salesvcpb.SaleGetRequest) (*salesvcpb.SaleGetResponse, error) {
 	sl, err := h.svc.Get(ctx, in.GetId())
 	if err != nil {
-		return nil, MapError(err)
+		return nil, h.mapError(ctx, err)
 	}
 	out := toSalePB(sl)
 	applyReadMask(in.GetOptions().GetReadMask(), out)
@@ -134,7 +139,7 @@ func (h *Handler) List(ctx context.Context, in *salesvcpb.SalesListRequest) (*sa
 
 	result, err := h.svc.List(ctx, listIn)
 	if err != nil {
-		return nil, MapError(err)
+		return nil, h.mapError(ctx, err)
 	}
 
 	readMask := in.GetOptions().GetReadMask()
@@ -162,7 +167,7 @@ func (h *Handler) UpdateStatus(ctx context.Context, in *salesvcpb.SaleUpdateStat
 	}
 	sl, err := h.svc.UpdateStatus(ctx, update)
 	if err != nil {
-		return nil, MapError(err)
+		return nil, h.mapError(ctx, err)
 	}
 	return &salesvcpb.SaleUpdateStatusResponse{Sale: toSalePB(sl)}, nil
 }
@@ -179,14 +184,20 @@ func (h *Handler) Cancel(ctx context.Context, in *salesvcpb.SaleCancelRequest) (
 
 	sl, err := h.svc.Cancel(ctx, cancel)
 	if err != nil {
-		return nil, MapError(err)
+		return nil, h.mapError(ctx, err)
 	}
 	return &salesvcpb.SaleCancelResponse{Sale: toSalePB(sl)}, nil
 }
 
-// MapError maps domain sentinels to gRPC status codes. Default is
-// codes.Internal with an opaque message.
-func MapError(err error) error {
+// mapError maps domain sentinels to gRPC status codes. Default is
+// codes.Internal with an opaque message to the caller — but the real
+// error is logged here first, since this is the only place an unclassified
+// failure from any of Create's dependencies (partners/clients/warehouses/
+// skus/prices/storage) still passes through before being discarded. Without
+// this, such failures were invisible: the services below only log via
+// DebugContext, which the default deployed log level (error, see
+// configs/logger.yaml) filters out entirely.
+func (h *Handler) mapError(ctx context.Context, err error) error {
 	switch {
 	case err == nil:
 		return nil
@@ -219,6 +230,7 @@ func MapError(err error) error {
 	case errors.Is(err, errs.ErrNotImplemented):
 		return status.Error(codes.Unimplemented, errs.ErrNotImplemented.Error())
 	default:
+		h.logger.ErrorContext(ctx, "unclassified sale error mapped to Internal", slog.String("error", err.Error()))
 		return status.Error(codes.Internal, "internal error")
 	}
 }

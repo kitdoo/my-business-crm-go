@@ -28,6 +28,8 @@
 // Either way, what actually reaches SaleCreate.Items is always a flat
 // list of {skuId, warehouseId, quantity, discountPercentage} — the
 // auto/manual split is purely a web-side convenience over that shape.
+import { resolveAutoAllocation } from '~/utils/autoAllocation.js'
+
 const router = useRouter()
 const { t } = useI18n()
 const saleApi = useSaleApi()
@@ -103,7 +105,11 @@ const clientValid = computed(() => {
 let nextItemId = 0
 let nextAllocationId = 0
 function blankAllocation() {
-  return { id: nextAllocationId++, warehouseId: null, quantity: 1 }
+  // available is this row's on-hand quantity for the currently picked
+  // warehouse (reported by WarehouseStockSelect) — null until a warehouse
+  // is chosen, used to cap the sibling quantity input at what's actually
+  // on the shelf there.
+  return { id: nextAllocationId++, warehouseId: null, quantity: 1, available: null }
 }
 function blankItem() {
   return {
@@ -119,6 +125,12 @@ function blankItem() {
     discountPercentage: 0,
     priceAmount: null,
     currency: null,
+    // Per-warehouse stock for the currently picked skuId (from
+    // SkuStockSelect's `update:stock`) — [] until a SKU is chosen. Caps
+    // the auto-mode quantity input and is shown as a hint for manual
+    // allocation.
+    stock: [],
+    totalStock: null,
   }
 }
 const items = ref([blankItem()])
@@ -161,6 +173,8 @@ function onProductSelected(item, productId) {
   item.skuId = null
   item.priceAmount = null
   item.currency = null
+  item.stock = []
+  item.totalStock = null
 }
 
 function onVariantSelected(item, variantId) {
@@ -168,6 +182,8 @@ function onVariantSelected(item, variantId) {
   item.skuId = null
   item.priceAmount = null
   item.currency = null
+  item.stock = []
+  item.totalStock = null
 }
 
 async function onSkuSelected(item, skuId) {
@@ -183,6 +199,17 @@ async function onSkuSelected(item, skuId) {
     // No price set for this SKU yet — preview just stays blank;
     // Create will still fail server-side if it truly requires one.
   }
+}
+
+// SkuStockSelect already looked up Inventory for this SKU (to filter the
+// dropdown to in-stock SKUs in the first place) — reuse that instead of a
+// second fetch. Clamp whatever quantity/allocations were already typed
+// down to the new total, since switching SKUs can only shrink what's
+// available.
+function onStockUpdated(item, { stock, totalStock }) {
+  item.stock = stock
+  item.totalStock = totalStock
+  if (totalStock != null && item.quantity > totalStock) item.quantity = totalStock || 1
 }
 
 function itemQuantity(item) {
@@ -201,27 +228,31 @@ function lineTotal(item) {
 
 const { formatMoney } = useFormatMoney()
 
-// Splits item.quantity across warehouses for one auto-mode line: reads
-// current stock per warehouse for the SKU and fills from the
-// best-stocked warehouse down until the requested quantity is covered.
-// Throws (caught by onSubmit) if total stock across all warehouses falls
-// short — surfaced as a plain validation error instead of a confusing
-// per-warehouse insufficient-stock error from Create.
+// Grand total across every line, grouped by currency (uniform in
+// practice, but items can in principle price out in different
+// currencies) — null lines (no price yet) are excluded rather than
+// forcing the whole total to null.
+const grandTotals = computed(() => {
+  const totals = new Map()
+  for (const item of items.value) {
+    const total = lineTotal(item)
+    if (total == null) continue
+    totals.set(item.currency, (totals.get(item.currency) || 0) + total)
+  }
+  return [...totals.entries()].map(([currency, amount]) => ({ currency, amount }))
+})
+
+// Splits item.quantity across warehouses for one auto-mode line, using the
+// stock already fetched by SkuStockSelect (re-fetched here instead of
+// trusting the cached copy, since time may have passed between picking the
+// SKU and submitting). Throws (caught by onSubmit) if total stock across
+// all warehouses falls short — surfaced as a plain validation error
+// instead of a confusing per-warehouse insufficient-stock error from
+// Create.
 async function resolveAutoAllocations(item) {
   const res = await inventoryApi.list({ filter: { skuId: item.skuId }, pagination: { limit: 200 } })
-  const stock = (res.items || [])
-    .filter((s) => s.quantity > 0)
-    .sort((a, b) => b.quantity - a.quantity)
-
-  let remaining = item.quantity
-  const allocations = []
-  for (const s of stock) {
-    if (remaining <= 0) break
-    const take = Math.min(remaining, s.quantity)
-    allocations.push({ warehouseId: s.warehouseId, quantity: take })
-    remaining -= take
-  }
-  if (remaining > 0) {
+  const { allocations, shortfall } = resolveAutoAllocation(item.quantity, res.items || [])
+  if (shortfall > 0) {
     throw new Error(t('entities.sales.warehouseAutoInsufficientStock'))
   }
   return allocations
@@ -369,14 +400,13 @@ async function onSubmit() {
           />
         </FormGrid>
         <FormGrid>
-          <RelationSelect
+          <SkuStockSelect
             :model-value="item.skuId"
-            relation="productSkus"
+            :variant-id="item.variantId"
             :label="t('fields.sku')"
-            :filter="{ variantIds: [item.variantId] }"
-            :disabled="!item.variantId"
             required
             @update:model-value="(v) => onSkuSelected(item, v)"
+            @update:stock="(v) => onStockUpdated(item, v)"
           />
           <UFormField
             :label="t('fields.discountPercentage')"
@@ -398,23 +428,43 @@ async function onSubmit() {
             <URadioGroup v-model="item.warehouseMode" orientation="horizontal" :items="warehouseModeOptions" />
           </UFormField>
 
-          <UFormField v-if="item.warehouseMode === 'auto'" :label="t('fields.quantity')">
-            <UInputNumber v-model="item.quantity" class="w-full max-w-40" :min="1" :disabled="!item.skuId" />
+          <UFormField
+            v-if="item.warehouseMode === 'auto'"
+            :label="t('fields.quantity')"
+            :hint="item.totalStock != null ? t('entities.sales.inStock', { count: item.totalStock }) : undefined"
+          >
+            <UInputNumber
+              v-model="item.quantity"
+              class="w-full max-w-40"
+              :min="1"
+              :max="item.totalStock ?? undefined"
+              :disabled="!item.skuId || !item.totalStock"
+            />
           </UFormField>
 
           <div v-else class="space-y-2">
             <div v-for="allocation in item.allocations" :key="allocation.id" class="flex items-end gap-2">
-              <RelationSelect
+              <WarehouseStockSelect
                 v-model="allocation.warehouseId"
-                relation="warehouses"
+                :sku-id="item.skuId"
                 :label="t('fields.warehouse')"
-                :disabled="!item.skuId"
                 required
-                searchable
+                only-in-stock
                 class="flex-1"
+                @update:available="(v) => (allocation.available = v)"
               />
-              <UFormField :label="t('fields.quantity')" class="w-32">
-                <UInputNumber v-model="allocation.quantity" class="w-full" :min="1" :disabled="!item.skuId" />
+              <UFormField
+                :label="t('fields.quantity')"
+                class="w-32"
+                :hint="allocation.available != null ? t('entities.sales.inStock', { count: allocation.available }) : undefined"
+              >
+                <UInputNumber
+                  v-model="allocation.quantity"
+                  class="w-full"
+                  :min="1"
+                  :max="allocation.available ?? undefined"
+                  :disabled="!allocation.warehouseId"
+                />
               </UFormField>
               <UButton
                 icon="i-lucide-x"
@@ -434,6 +484,14 @@ async function onSubmit() {
               {{ t('entities.sales.addWarehouse') }}
             </UButton>
           </div>
+
+          <!-- Per-warehouse breakdown for the picked SKU — mainly useful
+          while distributing a line manually across warehouses, but shown
+          in both modes since it's already fetched either way. -->
+          <p v-if="item.stock.length" class="text-xs text-neutral-500">
+            {{ t('entities.sales.availableByWarehouse') }}:
+            {{ item.stock.map((s) => `${s.warehouseLabel} — ${s.quantity}`).join(', ') }}
+          </p>
         </div>
 
         <p v-if="item.priceAmount != null" class="text-sm text-neutral-500">
@@ -446,7 +504,12 @@ async function onSubmit() {
 
     <p v-if="autoAllocationError" class="text-sm text-error">{{ autoAllocationError }}</p>
 
-    <div class="flex justify-end pt-2">
+    <div class="flex justify-between items-center pt-2">
+      <div v-if="grandTotals.length" class="text-lg font-semibold">
+        {{ t('entities.sales.grandTotal') }}:
+        <span v-for="gt in grandTotals" :key="gt.currency" class="ms-1">{{ formatMoney(gt.amount, gt.currency) }}</span>
+      </div>
+      <div v-else />
       <UButton :disabled="!formValid" :loading="saving" @click="onSubmit">{{ t('common.create') }}</UButton>
     </div>
   </div>

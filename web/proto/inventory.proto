@@ -38,6 +38,9 @@ message InventoryListRequest {
   message Filter {
     optional int64 minQuantity = 1;
     optional int64 maxQuantity = 2;
+    // Batch lookup across multiple SKUs in one call — leave skuId unset
+    // above when using this.
+    repeated string skuIds = 3;
   }
   optional Filter filter = 3;
   optional crm.types.common.Pagination pagination = 4;

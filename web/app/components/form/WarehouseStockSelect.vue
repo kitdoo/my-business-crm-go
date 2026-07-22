@@ -16,6 +16,11 @@ const props = defineProps({
   label: { type: String, default: '' },
   error: { type: String, default: '' },
   required: { type: Boolean, default: false },
+  // Hide warehouses whose current on-hand quantity for this SKU is zero —
+  // InventoryMovement (adjustments/write-offs) leaves this off since a
+  // warehouse can legitimately need a movement at zero stock; Sale (can
+  // only ever draw from stock that exists) turns it on.
+  onlyInStock: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue', 'update:available'])
 
@@ -50,8 +55,9 @@ async function load() {
       .map((i) => ({
         value: i.warehouseId,
         label: relationLabel(warehouseById.get(i.warehouseId), locale.value),
-        quantity: i.quantity,
+        quantity: Number(i.quantity),
       }))
+      .filter((r) => !props.onlyInStock || r.quantity > 0)
   } finally {
     loading.value = false
   }
