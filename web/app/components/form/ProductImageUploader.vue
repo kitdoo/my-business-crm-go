@@ -109,7 +109,7 @@ function moveImage(index, direction) {
         :key="id"
         class="relative w-24 h-24 rounded-md border border-default overflow-hidden group"
       >
-        <img :src="`/api/images/${id}`" class="w-full h-full object-cover" :alt="`image ${index + 1}`" />
+        <img :src="`/api/images/${id}?w=200`" class="w-full h-full object-cover" :alt="`image ${index + 1}`" />
         <div
           class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 transition-opacity"
         >

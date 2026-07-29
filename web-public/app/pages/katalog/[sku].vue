@@ -83,8 +83,14 @@ function decrement() {
 }
 
 const activeImage = ref(0)
+// Same image ids feed the big hero and the 64px thumbnail strip (see
+// template) at different widths — see internal/transports/http/handlers/image
+// for the fixed set of widths the backend will actually resize to.
 const imageUrls = computed(() => (activeVariant.value?.imageIds?.length
-  ? activeVariant.value.imageIds.map((id) => `/api/images/${id}`)
+  ? activeVariant.value.imageIds.map((id) => `/api/images/${id}?w=800`)
+  : ['/images/product-placeholder.svg']))
+const imageThumbUrls = computed(() => (activeVariant.value?.imageIds?.length
+  ? activeVariant.value.imageIds.map((id) => `/api/images/${id}?w=200`)
   : ['/images/product-placeholder.svg']))
 function prevImage() {
   activeImage.value = (activeImage.value - 1 + imageUrls.value.length) % imageUrls.value.length
@@ -96,7 +102,7 @@ function nextImage() {
 const detailsEntries = computed(() => Object.entries(product.value?.details || {}))
 
 function variantImageUrl(variant) {
-  return variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}` : '/images/product-placeholder.svg'
+  return variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}?w=200` : '/images/product-placeholder.svg'
 }
 
 const productName = computed(() => product.value?.name?.values?.[locale.value] || product.value?.name?.values?.sr || '')
@@ -147,7 +153,7 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
         </div>
         <div v-if="imageUrls.length > 1" class="flex gap-2 mb-3">
           <button
-            v-for="(url, i) in imageUrls"
+            v-for="(url, i) in imageThumbUrls"
             :key="url"
             class="w-16 h-16 rounded overflow-hidden border-2"
             :class="i === activeImage ? 'border-brand-500' : 'border-transparent'"

@@ -30,9 +30,12 @@ const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.va
 // value, so it must follow the active size selection, not stay fixed.
 const activeGeneration = computed(() => activeSku.value?.attributes?.generation)
 
+// w=400 matches this card's aspect-square hero image at typical grid
+// widths (~2x for retina) — see internal/transports/http/handlers/image
+// for the fixed set of widths the backend will actually resize to.
 const activeImages = computed(() => {
   const ids = activeVariant.value?.imageIds
-  return ids?.length ? ids.map((id) => `/api/images/${id}`) : ['/images/product-placeholder.svg']
+  return ids?.length ? ids.map((id) => `/api/images/${id}?w=400`) : ['/images/product-placeholder.svg']
 })
 function selectVariant(index) {
   selectedVariantIndex.value = index
@@ -136,7 +139,7 @@ function decrement() {
           @click.stop.prevent="selectVariant(i)"
         >
           <img
-            :src="variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}` : '/images/product-placeholder.svg'"
+            :src="variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}?w=200` : '/images/product-placeholder.svg'"
             alt=""
             class="w-full h-full object-cover"
           />

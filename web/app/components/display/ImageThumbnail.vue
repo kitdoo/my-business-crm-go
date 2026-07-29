@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <img v-if="value?.length" :src="`/api/images/${value[0]}`" class="size-8 rounded object-cover" alt="" />
+  <img v-if="value?.length" :src="`/api/images/${value[0]}?w=200`" class="size-8 rounded object-cover" alt="" />
   <div v-else class="size-8 rounded bg-neutral-100 flex items-center justify-center text-neutral-400">
     <UIcon name="i-lucide-image-off" class="size-4" />
   </div>

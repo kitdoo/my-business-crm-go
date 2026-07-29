@@ -1,9 +1,13 @@
 package image
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
+	_ "image/png" // registers the PNG decoder with image.Decode
 	"io"
 	"log/slog"
 	"net/http"
@@ -15,6 +19,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"golang.org/x/image/draw"
 
 	slogx "github.com/altessa-s/go-atlas/observability/slog"
 	httpserver "github.com/altessa-s/go-atlas/transport/http/server"
@@ -42,6 +47,14 @@ var allowedContentTypes = map[string]bool{
 	"image/webp": true,
 }
 
+// allowedThumbWidths caps ?w= to a fixed set of sizes matching the tiers
+// the frontends actually request (product-card/list thumbnails, detail-page
+// gallery) — an open-ended width would let a client force-generate and
+// cache an unbounded number of resized variants per image on disk.
+var allowedThumbWidths = map[int]bool{200: true, 400: true, 800: true}
+
+const thumbsSubdir = "thumbs"
+
 // Handler implements httpserver.Handler for the image upload/serve routes.
 // Upload requires the caller's role to hold grpcrbac.ImagesUploadPermission
 // (see requirePermission) — checked the same way as any gRPC method, just
@@ -67,6 +80,9 @@ func New(dir string, maxSize int64, users usersvc.Service, table rbac.Table, ima
 	}
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return nil, fmt.Errorf("create images directory: %w", err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, thumbsSubdir), 0o750); err != nil {
+		return nil, fmt.Errorf("create thumbnails directory: %w", err)
 	}
 	return &Handler{
 		dir:     dir,
@@ -179,12 +195,86 @@ func (h *Handler) serve(rw writer.ReadWriter) {
 		contentType = http.DetectContentType(data)
 	}
 
+	// Optional ?w= thumbnail. Only jpeg/png are resized (the stdlib decodes
+	// both without extra dependencies) and only when the original is
+	// actually larger than the requested width — gif/webp, unrecognized
+	// widths, and upscale requests all fall through to serving the
+	// original file untouched.
+	if width, ok := requestedThumbWidth(rw.Request()); ok && (contentType == "image/jpeg" || contentType == "image/png") {
+		if cfg, _, err := image.DecodeConfig(bytes.NewReader(data)); err == nil && cfg.Width > width {
+			thumb, err := h.getOrCreateThumbnail(id, width, data)
+			if err != nil {
+				h.logger.WarnContext(rw.Request().Context(), "thumbnail generation failed, serving original",
+					slog.String("id", id), slog.Int("width", width), slog.String("error", err.Error()))
+			} else {
+				data = thumb
+				contentType = "image/jpeg"
+			}
+		}
+	}
+
 	w := rw.ResponseWriter()
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
 	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
+}
+
+// requestedThumbWidth reads ?w= off r and reports whether it names one of
+// allowedThumbWidths.
+func requestedThumbWidth(r *http.Request) (int, bool) {
+	raw := r.URL.Query().Get("w")
+	if raw == "" {
+		return 0, false
+	}
+	width, err := strconv.Atoi(raw)
+	if err != nil || !allowedThumbWidths[width] {
+		return 0, false
+	}
+	return width, true
+}
+
+// getOrCreateThumbnail returns a JPEG-encoded, width-scaled copy of the
+// image in data (aspect ratio preserved), generating and caching it on
+// disk under thumbsSubdir on first request. Re-encoding as JPEG regardless
+// of the source format keeps this simple — thumbnails are for on-page
+// previews, not archival copies, and every browser renders JPEG.
+func (h *Handler) getOrCreateThumbnail(id string, width int, data []byte) ([]byte, error) {
+	path := h.thumbnailPath(id, width)
+	if cached, err := os.ReadFile(path); err == nil {
+		return cached, nil
+	}
+
+	src, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("decode source image: %w", err)
+	}
+	srcBounds := src.Bounds()
+	height := srcBounds.Dy() * width / srcBounds.Dx()
+	dst := image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.CatmullRom.Scale(dst, dst.Bounds(), src, srcBounds, draw.Over, nil)
+
+	var buf bytes.Buffer
+	if err := jpeg.Encode(&buf, dst, &jpeg.Options{Quality: 82}); err != nil {
+		return nil, fmt.Errorf("encode thumbnail: %w", err)
+	}
+
+	// Write-then-rename so a concurrent request for the same thumbnail
+	// never reads a partially written file.
+	tmp := fmt.Sprintf("%s.tmp-%d", path, time.Now().UnixNano())
+	if err := os.WriteFile(tmp, buf.Bytes(), 0o640); err != nil {
+		return nil, fmt.Errorf("write thumbnail: %w", err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return nil, fmt.Errorf("rename thumbnail: %w", err)
+	}
+	return buf.Bytes(), nil
+}
+
+func (h *Handler) thumbnailPath(id string, width int) string {
+	return filepath.Join(h.dir, thumbsSubdir, fmt.Sprintf("%s_w%d.jpg", id, width))
 }
 
 // requirePermission extracts the bearer token and confirms the caller's

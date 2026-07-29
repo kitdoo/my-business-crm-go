@@ -37,7 +37,9 @@ export default defineNuxtConfig({
 
   // /api/images/:id is same-origin already-proxied (server/api/images/[id].get.js);
   // the default ipx provider treats it as a local filesystem path (no protocol)
-  // and 404s (IPX_FILE_NOT_FOUND). No resizing/format modifiers are used anywhere,
+  // and 404s (IPX_FILE_NOT_FOUND). Resizing is done by the backend itself
+  // (?w= query param, see internal/transports/http/handlers/image), passed
+  // through as plain URL query strings rather than ipx/ image modifiers —
   // so skip the provider entirely rather than configuring ipx.http.domains.
   image: {
     provider: 'none',
