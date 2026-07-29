@@ -30,12 +30,13 @@ const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.va
 // value, so it must follow the active size selection, not stay fixed.
 const activeGeneration = computed(() => activeSku.value?.attributes?.generation)
 
-// w=400 matches this card's aspect-square hero image at typical grid
-// widths (~2x for retina) — see internal/transports/http/handlers/image
-// for the fixed set of widths the backend will actually resize to.
+// w=800: at the grid's 4-column breakpoint cards render ~300-350px wide,
+// so w=400 looked soft on retina (~2x) displays — see
+// internal/transports/http/handlers/image for the fixed set of widths the
+// backend will actually resize to.
 const activeImages = computed(() => {
   const ids = activeVariant.value?.imageIds
-  return ids?.length ? ids.map((id) => `/api/images/${id}?w=400`) : ['/images/product-placeholder.svg']
+  return ids?.length ? ids.map((id) => `/api/images/${id}?w=800`) : ['/images/product-placeholder.svg']
 })
 function selectVariant(index) {
   selectedVariantIndex.value = index
