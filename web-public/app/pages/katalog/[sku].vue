@@ -225,7 +225,14 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
             <button class="w-8 h-8 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="decrement">
               <UIcon name="i-lucide-minus" class="w-4 h-4" />
             </button>
-            <span class="text-base font-medium w-6 text-center">{{ qtyInCart }}</span>
+            <UInput
+              :model-value="qtyInCart"
+              type="number"
+              min="1"
+              class="w-16"
+              :ui="{ base: 'text-center px-1' }"
+              @update:model-value="(v) => setQty(activeSku.sku, Number(v))"
+            />
             <button class="w-8 h-8 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="increment">
               <UIcon name="i-lucide-plus" class="w-4 h-4" />
             </button>

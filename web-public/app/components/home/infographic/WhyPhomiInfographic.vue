@@ -71,8 +71,10 @@ const items = computed(() => [
 
 <template>
   <InfographicPanel
-    image="/images/animation/why_phomi.png"
+    image="/images/animation/why_phomi.webp"
     :image-alt="t('home.whyPhomi.infographic.titleLine2')"
+    :image-width="1920"
+    :image-height="1908"
     :view-box-w="1030"
     :view-box-h="1280"
     :title-line1="t('home.whyPhomi.infographic.titleLine1')"

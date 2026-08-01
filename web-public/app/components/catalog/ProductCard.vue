@@ -179,7 +179,14 @@ function decrement() {
             <button class="w-6 h-6 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="decrement">
               <UIcon name="i-lucide-minus" class="w-3 h-3" />
             </button>
-            <span class="text-sm font-medium w-4 text-center">{{ qtyInCart }}</span>
+            <UInput
+              :model-value="qtyInCart"
+              type="number"
+              min="1"
+              class="w-12"
+              :ui="{ base: 'text-center px-1' }"
+              @update:model-value="(v) => setQty(activeSku.sku, Number(v))"
+            />
             <button class="w-6 h-6 flex items-center justify-center rounded-full border border-brand-500 text-brand-700" @click="increment">
               <UIcon name="i-lucide-plus" class="w-3 h-3" />
             </button>

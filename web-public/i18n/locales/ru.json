@@ -168,7 +168,8 @@
     "phoneLabel": "Телефон",
     "emailLabel": "Email",
     "otherLocationsTitle": "Другие локации",
-    "becomeDealerCta": "Хотите стать дилером или партнёром? Узнайте как."
+    "becomeDealerCta": "Хотите стать дилером или партнёром? Узнайте как.",
+    "copy": "Копировать"
   },
   "cart": {
     "title": "Корзина",

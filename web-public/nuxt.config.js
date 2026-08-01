@@ -24,6 +24,12 @@ export default defineNuxtConfig({
       '/': { swr: 300 },
       '/katalog/**': { swr: 300 },
       '/projekti/**': { swr: 300 },
+      // public/images/** has no build-time content hashing, so a file can in
+      // principle be overwritten in place under the same name — avoid
+      // `immutable`/a multi-year max-age for that reason. 30 days still
+      // fixes the "missing cache lifetimes" PageSpeed finding for repeat
+      // visits without risking long-lived stale images.
+      '/images/**': { headers: { 'cache-control': 'public, max-age=2592000' } },
     },
   },
 
@@ -31,7 +37,24 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxt/image',
     '@nuxtjs/i18n',
+    'nuxt-gtag',
   ],
+
+  // GA4, client-side only. `enabled` is a build-time module option (a
+  // Nuxt module's setup() only runs once, while building) — reading
+  // process.env.NUXT_PUBLIC_GTAG_ID here would bake in whatever value is
+  // present at `npm run build` time, which is empty in the Docker image
+  // (built once via CI/Dockerfile, before any deploy-time env is known —
+  // see docker-compose.yml's web-public service), permanently disabling
+  // the plugin no matter what NUXT_PUBLIC_GTAG_ID is set to at container
+  // start. So `enabled` stays hardcoded true, and only `id` is left for
+  // Nuxt's own runtimeConfig mechanism to fill in from that same env var
+  // at container start (public.gtag.id <-> NUXT_PUBLIC_GTAG_ID) — an
+  // empty id makes the plugin a no-op (see nuxt-gtag's resolveTags), so
+  // local dev / previews without the var set still send nothing.
+  gtag: {
+    enabled: true,
+  },
 
   css: ['~/assets/css/main.css'],
 

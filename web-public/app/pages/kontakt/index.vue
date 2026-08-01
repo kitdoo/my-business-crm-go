@@ -44,21 +44,30 @@ const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER
             <UIcon name="i-lucide-map-pin" class="w-5 h-5 mt-0.5 text-brand-600 flex-shrink-0" />
             <span class="flex flex-col">
               <span class="font-bold uppercase tracking-wide">{{ t('contact.addressLabel') }}</span>
-              <span>{{ t('contact.address') }}</span>
+              <span class="inline-flex items-center gap-1.5">
+                {{ t('contact.address') }}
+                <CopyButton :value="t('contact.address')" />
+              </span>
             </span>
           </li>
           <li class="flex items-start gap-3">
             <UIcon name="i-lucide-phone" class="w-5 h-5 mt-0.5 text-brand-600 flex-shrink-0" />
             <span class="flex flex-col">
               <span class="font-bold uppercase tracking-wide">{{ t('contact.phoneLabel') }}</span>
-              <a href="tel:+381655632551">+381 65 563 2551</a>
+              <span class="inline-flex items-center gap-1.5">
+                <a href="tel:+381655632551">+381 65 563 2551</a>
+                <CopyButton value="+381 65 563 2551" />
+              </span>
             </span>
           </li>
           <li class="flex items-start gap-3">
             <UIcon name="i-lucide-mail" class="w-5 h-5 mt-0.5 text-brand-600 flex-shrink-0" />
             <span class="flex flex-col">
               <span class="font-bold uppercase tracking-wide">{{ t('contact.emailLabel') }}</span>
-              <a href="mailto:serbia@phomi.info">serbia@phomi.info</a>
+              <span class="inline-flex items-center gap-1.5">
+                <a href="mailto:serbia@phomi.info">serbia@phomi.info</a>
+                <CopyButton value="serbia@phomi.info" />
+              </span>
             </span>
           </li>
         </ul>
@@ -119,9 +128,18 @@ const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="p in dealers" :key="p.email" class="border border-black/10 rounded-sm p-4">
           <p class="font-medium">{{ p.name }}</p>
-          <p v-if="p.address" class="text-sm text-black/60 mt-1">{{ p.address }}</p>
-          <p v-if="p.phone" class="text-sm text-black/60 mt-1"><a :href="`tel:${p.phone}`">{{ p.phone }}</a></p>
-          <p v-if="p.email" class="text-sm text-black/60"><a :href="`mailto:${p.email}`">{{ p.email }}</a></p>
+          <p v-if="p.address" class="text-sm text-black/60 mt-1 inline-flex items-center gap-1.5">
+            {{ p.address }}
+            <CopyButton :value="p.address" />
+          </p>
+          <p v-if="p.phone" class="text-sm text-black/60 mt-1 inline-flex items-center gap-1.5">
+            <a :href="`tel:${p.phone}`">{{ p.phone }}</a>
+            <CopyButton :value="p.phone" />
+          </p>
+          <p v-if="p.email" class="text-sm text-black/60 inline-flex items-center gap-1.5">
+            <a :href="`mailto:${p.email}`">{{ p.email }}</a>
+            <CopyButton :value="p.email" />
+          </p>
         </div>
       </div>
     </div>
@@ -133,9 +151,18 @@ const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="p in partners" :key="p.email" class="border border-black/10 rounded-sm p-4">
           <p class="font-medium">{{ p.name }}</p>
-          <p v-if="p.address" class="text-sm text-black/60 mt-1">{{ p.address }}</p>
-          <p v-if="p.phone" class="text-sm text-black/60 mt-1"><a :href="`tel:${p.phone}`">{{ p.phone }}</a></p>
-          <p v-if="p.email" class="text-sm text-black/60"><a :href="`mailto:${p.email}`">{{ p.email }}</a></p>
+          <p v-if="p.address" class="text-sm text-black/60 mt-1 inline-flex items-center gap-1.5">
+            {{ p.address }}
+            <CopyButton :value="p.address" />
+          </p>
+          <p v-if="p.phone" class="text-sm text-black/60 mt-1 inline-flex items-center gap-1.5">
+            <a :href="`tel:${p.phone}`">{{ p.phone }}</a>
+            <CopyButton :value="p.phone" />
+          </p>
+          <p v-if="p.email" class="text-sm text-black/60 inline-flex items-center gap-1.5">
+            <a :href="`mailto:${p.email}`">{{ p.email }}</a>
+            <CopyButton :value="p.email" />
+          </p>
         </div>
       </div>
     </div>

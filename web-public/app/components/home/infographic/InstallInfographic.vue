@@ -69,8 +69,10 @@ const items = computed(() => [
 
 <template>
   <InfographicPanel
-    image="/images/animation/install.png"
+    image="/images/animation/install.webp"
     :image-alt="t('home.install.infographic.titleLine2')"
+    :image-width="1813"
+    :image-height="1109"
     :view-box-w="1280"
     :view-box-h="1280"
     :title-line1="t('home.install.infographic.titleLine1')"

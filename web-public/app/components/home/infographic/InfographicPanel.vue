@@ -7,6 +7,10 @@
 const props = defineProps({
   image: { type: String, required: true },
   imageAlt: { type: String, default: '' },
+  // Native pixel dimensions of `image`, set as width/height attrs so the
+  // browser can reserve layout space before the (lazy-loaded) file arrives.
+  imageWidth: { type: Number, required: true },
+  imageHeight: { type: Number, required: true },
   viewBoxW: { type: Number, required: true },
   viewBoxH: { type: Number, required: true },
   titleLine1: { type: String, required: true },
@@ -114,7 +118,7 @@ const clippedItems = computed(() =>
           height: imageBox.height + '%',
         }"
       >
-        <img :src="image" :alt="imageAlt" class="w-full h-full object-contain" loading="lazy" />
+        <img :src="image" :alt="imageAlt" :width="imageWidth" :height="imageHeight" class="w-full h-full object-contain" loading="lazy" />
       </div>
 
       <svg

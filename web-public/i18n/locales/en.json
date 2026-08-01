@@ -168,7 +168,8 @@
     "phoneLabel": "Phone",
     "emailLabel": "Email",
     "otherLocationsTitle": "Other locations",
-    "becomeDealerCta": "Want to become a dealer or partner? Find out how."
+    "becomeDealerCta": "Want to become a dealer or partner? Find out how.",
+    "copy": "Copy"
   },
   "cart": {
     "title": "Cart",

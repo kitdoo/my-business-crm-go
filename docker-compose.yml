@@ -161,6 +161,7 @@ services:
       NUXT_IMAGES_BASE_URL: ${NUXT_IMAGES_BASE_URL:-http://backend:9080}
       NUXT_PUBLIC_ADMIN_URL: ${NUXT_PUBLIC_ADMIN_URL:-http://localhost:3000/login}
       NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL:-http://localhost:3001}
+      NUXT_PUBLIC_GTAG_ID: ${NUXT_PUBLIC_GTAG_ID:-}
 
 volumes:
   mongo_data:
