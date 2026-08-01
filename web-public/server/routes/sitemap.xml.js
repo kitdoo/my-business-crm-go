@@ -1,4 +1,4 @@
-import { listActiveProducts } from '~~/server/utils/catalogClient.js'
+import { listActiveProducts, listActiveVariantsForProducts, listActiveSkusForVariants } from '~~/server/utils/catalogClient.js'
 
 const LOCALES = ['sr', 'en', 'ru'] // sr is unprefixed (defaultLocale), see nuxt.config.js i18n.strategy
 
@@ -26,7 +26,35 @@ export default defineEventHandler(async (event) => {
   let productSkus = []
   try {
     const { items } = await listActiveProducts({ limit: 200 })
-    productSkus = items.map((p) => p.sku)
+
+    // Product itself carries no sku (see catalogClient.js) — the catalog
+    // page URL is keyed on the "representative" SKU: the first active SKU
+    // of the first active variant, same rule as toCards() in
+    // server/api/catalog/products.get.js. A product with no active variant
+    // or SKU is simply left out of the sitemap.
+    const variants = await listActiveVariantsForProducts(items.map((p) => p.id))
+    const variantsByProduct = new Map()
+    for (const v of variants) {
+      const list = variantsByProduct.get(v.productId)
+      if (list) list.push(v)
+      else variantsByProduct.set(v.productId, [v])
+    }
+
+    const skus = await listActiveSkusForVariants(variants.map((v) => v.id))
+    const skusByVariant = new Map()
+    for (const s of skus) {
+      const list = skusByVariant.get(s.variantId)
+      if (list) list.push(s)
+      else skusByVariant.set(s.variantId, [s])
+    }
+
+    productSkus = items
+      .map((p) => {
+        const representativeVariant = (variantsByProduct.get(p.id) || [])[0]
+        const representativeSku = representativeVariant ? (skusByVariant.get(representativeVariant.id) || [])[0] : null
+        return representativeSku?.sku
+      })
+      .filter(Boolean)
   } catch {
     // Catalog unreachable (e.g. guest account not provisioned yet) — still
     // emit the static pages rather than failing the whole sitemap.
