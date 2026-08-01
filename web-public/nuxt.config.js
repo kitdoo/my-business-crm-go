@@ -8,6 +8,9 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/png', href: '/images/logos/logo_blue.png' },
       ],
+      meta: [
+        { name: 'google-site-verification', content: 'gYUYGB6P5gmYSi3WSCVRZUUw90BV1xoSeXF-kCdTMJ8' },
+      ],
     },
   },
 
