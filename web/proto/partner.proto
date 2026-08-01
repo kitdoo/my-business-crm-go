@@ -31,6 +31,9 @@ message Partner {
   // (PARTNER) from a store opening specifically as a PHOMI-branded outlet
   // under separate terms (DEALER).
   PartnerType type = 15;
+  string taxId = 16;
+  string registrationNumber = 17;
+  string code = 18;
   string etag = 101;
 }
 
@@ -111,6 +114,9 @@ message PartnerCreateRequest {
   int32 discountPercentage = 8;
   bool isPublic = 9;
   PartnerType type = 10;
+  string taxId = 11;
+  string registrationNumber = 12;
+  string code = 13;
   optional Options options = 99;
 }
 
@@ -135,6 +141,9 @@ message PartnerUpdateRequest {
   optional int32 discountPercentage = 10;
   optional bool isPublic = 11;
   optional PartnerType type = 12;
+  optional string taxId = 13;
+  optional string registrationNumber = 14;
+  optional string code = 15;
   optional Options options = 99;
 }
 

@@ -1,0 +1,30 @@
+package mongo
+
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+
+	migrate "github.com/xakep666/mongo-migrate"
+)
+
+// Inventory.Quantity switched from whole units to hundredths of a unit (the
+// same basis-points convention as ProductPrice.PriceAmount — see
+// entities.Inventory.Quantity) so fractional stock (e.g. 2.16 m²) can be
+// represented. Existing rows recorded whole units, so every stored value is
+// multiplied by 100 here to keep its real meaning under the new scale.
+func init() {
+	migrate.MustRegister(func(ctx context.Context, db *mongo.Database) error {
+		_, err := db.Collection(collectionName).UpdateMany(ctx, bson.M{},
+			bson.M{"$mul": bson.M{"quantity": 100}})
+		return err
+	}, func(ctx context.Context, db *mongo.Database) error {
+		_, err := db.Collection(collectionName).UpdateMany(ctx, bson.M{}, mongo.Pipeline{
+			bson.D{{Key: "$set", Value: bson.D{{Key: "quantity", Value: bson.D{{Key: "$toLong", Value: bson.D{
+				{Key: "$divide", Value: bson.A{"$quantity", 100}},
+			}}}}}}},
+		})
+		return err
+	})
+}

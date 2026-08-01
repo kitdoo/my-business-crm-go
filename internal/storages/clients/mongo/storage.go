@@ -36,17 +36,20 @@ const (
 const defaultListLimit = datamongo.DefaultListLimit
 
 type model struct {
-	ID        string        `bson:"_id"`
-	Name      string        `bson:"name"`
-	Phone     string        `bson:"phone"`
-	Email     string        `bson:"email"`
-	Address   string        `bson:"address"`
-	Note      string        `bson:"note"`
-	CreatedAt time.Time     `bson:"created_at,omitonupdate"`
-	UpdatedAt time.Time     `bson:"updated_at"`
-	DeletedAt *time.Time    `bson:"deleted_at,omitonupdate"`
-	Etag      string        `bson:"etag"`
-	CursorId  bson.ObjectID `bson:"cursor_id,omitonupdate"`
+	ID                 string        `bson:"_id"`
+	Name               string        `bson:"name"`
+	Phone              string        `bson:"phone"`
+	Email              string        `bson:"email"`
+	Address            string        `bson:"address"`
+	Note               string        `bson:"note"`
+	TaxID              string        `bson:"tax_id"`
+	RegistrationNumber string        `bson:"registration_number"`
+	Code               string        `bson:"code"`
+	CreatedAt          time.Time     `bson:"created_at,omitonupdate"`
+	UpdatedAt          time.Time     `bson:"updated_at"`
+	DeletedAt          *time.Time    `bson:"deleted_at,omitonupdate"`
+	Etag               string        `bson:"etag"`
+	CursorId           bson.ObjectID `bson:"cursor_id,omitonupdate"`
 }
 
 var _ clients.Storage = (*Storage)(nil)

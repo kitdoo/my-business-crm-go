@@ -8,6 +8,7 @@ package resend
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,12 +41,18 @@ func New(cfg *Config) *Service {
 	return &Service{cfg: cfg, client: &http.Client{}}
 }
 
+type sendAttachment struct {
+	Filename string `json:"filename"`
+	Content  string `json:"content"` // base64
+}
+
 type sendRequest struct {
-	From    string   `json:"from"`
-	To      []string `json:"to"`
-	Subject string   `json:"subject"`
-	Text    string   `json:"text"`
-	ReplyTo string   `json:"reply_to,omitempty"`
+	From        string           `json:"from"`
+	To          []string         `json:"to"`
+	Subject     string           `json:"subject"`
+	Text        string           `json:"text"`
+	ReplyTo     string           `json:"reply_to,omitempty"`
+	Attachments []sendAttachment `json:"attachments,omitempty"`
 }
 
 // Send delivers msg via a single POST to the Resend emails endpoint.
@@ -54,12 +61,26 @@ func (s *Service) Send(ctx context.Context, msg mailersvc.Message) error {
 		return errs.ErrMailerNotConfigured
 	}
 
+	attachments := make([]sendAttachment, 0, len(msg.Attachments))
+	for _, a := range msg.Attachments {
+		attachments = append(attachments, sendAttachment{
+			Filename: a.Filename,
+			Content:  base64.StdEncoding.EncodeToString(a.Data),
+		})
+	}
+
+	from := s.cfg.From
+	if msg.FromName != "" {
+		from = fmt.Sprintf("%s <%s>", msg.FromName, from)
+	}
+
 	body, err := json.Marshal(sendRequest{
-		From:    s.cfg.From,
-		To:      []string{msg.To},
-		Subject: msg.Subject,
-		Text:    msg.Body,
-		ReplyTo: msg.ReplyTo,
+		From:        from,
+		To:          []string{msg.To},
+		Subject:     msg.Subject,
+		Text:        msg.Body,
+		ReplyTo:     msg.ReplyTo,
+		Attachments: attachments,
 	})
 	if err != nil {
 		return fmt.Errorf("marshal resend request: %w", err)

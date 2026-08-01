@@ -18,11 +18,18 @@ export default {
     columns: [
       { key: 'skuId', label: 'fields.sku', component: 'RelationLabel', relation: 'productSkus' },
       { key: 'warehouseId', label: 'fields.warehouse', component: 'RelationLabel', relation: 'warehouses' },
-      { key: 'quantity', label: 'fields.quantity' },
+      { key: 'quantity', label: 'fields.quantity', component: 'QuantityAmountLabel' },
       { key: 'updatedAt', label: 'fields.updatedAt', component: 'DateLabel' },
     ],
     filters: [
-      { key: 'quantity', type: 'numberRange', label: 'fields.quantity', minKey: 'minQuantity', maxKey: 'maxQuantity' },
+      {
+        key: 'quantity',
+        type: 'numberRange',
+        label: 'fields.quantity',
+        minKey: 'minQuantity',
+        maxKey: 'maxQuantity',
+        scale: 100,
+      },
     ],
     // Quantity is the only sortable field — Inventory carries no product
     // name to sort by (would need a join against Products).

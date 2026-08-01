@@ -56,6 +56,12 @@ export default {
       { key: 'email', type: 'text', label: 'fields.email', required: true, inputType: 'email' },
       { key: 'address', type: 'text', label: 'fields.address', maxLength: 500 },
       { key: 'website', type: 'text', label: 'fields.website', maxLength: 255 },
+      // advanced: only needed for invoicing (internal/services/invoice) —
+      // tucked under EntityForm's "More information" disclosure so they
+      // don't add friction to the common create-a-partner flow.
+      { key: 'taxId', type: 'text', label: 'fields.taxId', maxLength: 64, advanced: true },
+      { key: 'registrationNumber', type: 'text', label: 'fields.registrationNumber', maxLength: 64, advanced: true },
+      { key: 'code', type: 'text', label: 'fields.code', maxLength: 32, advanced: true },
       { key: 'status', type: 'enum', enum: 'PartnerStatus', label: 'fields.status', editOnly: true },
       {
         key: 'discountPercentage',

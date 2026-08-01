@@ -34,7 +34,9 @@ type InventoryMovement struct {
 	SKUID       string
 	WarehouseID string
 	Type        MovementType
-	// Quantity is signed: positive for Receipt, negative for Sale/WriteOff.
+	// Quantity is signed (positive for Receipt, negative for Sale/WriteOff)
+	// and in hundredths of a unit — same basis-points convention as
+	// Inventory.Quantity/SaleItem.Quantity — 216 means 2.16.
 	Quantity int64
 	Comment  string
 	// SaleID links this movement to the Sale that caused it — always set
@@ -64,10 +66,11 @@ type InventoryMovementCreate struct {
 	SKUID       string `normalize:"trim"`
 	WarehouseID string `normalize:"trim"`
 	Type        MovementType
-	Quantity    int64
-	Comment     string  `normalize:"trim"`
-	SaleID      *string `normalize:"trim,nil_on_empty"`
-	CreatedBy   string  `normalize:"trim"`
+	// Quantity is in hundredths of a unit — see InventoryMovement.Quantity.
+	Quantity  int64
+	Comment   string  `normalize:"trim"`
+	SaleID    *string `normalize:"trim,nil_on_empty"`
+	CreatedBy string  `normalize:"trim"`
 }
 
 func (c *InventoryMovementCreate) Merge(dst *InventoryMovement) *InventoryMovement {

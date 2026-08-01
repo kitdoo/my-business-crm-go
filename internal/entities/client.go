@@ -13,11 +13,19 @@ import (
 type Client struct {
 	ID string
 	// Phone is unique across active clients.
-	Phone     string
-	Name      string
-	Email     string
-	Address   string
-	Note      string
+	Phone   string
+	Name    string
+	Email   string
+	Address string
+	Note    string
+	// TaxID (ПИБ) and RegistrationNumber (матични број) identify a client
+	// that is itself a legal entity/sole proprietor, e.g. for invoicing —
+	// both optional and blank for an ordinary retail client.
+	TaxID              string
+	RegistrationNumber string
+	// Code is a short, caller-assigned buyer reference (e.g. "0003") shown
+	// on invoices — free text, never auto-generated.
+	Code      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time // nil = active
@@ -53,11 +61,14 @@ func (c *Client) BeforeUpdate() {
 // ClientCreate is the Create input. Merge applies it onto a freshly
 // constructed Client via the converter.
 type ClientCreate struct {
-	Name    string `normalize:"trim"`
-	Phone   string `normalize:"trim"`
-	Email   string `normalize:"trim"`
-	Address string `normalize:"trim"`
-	Note    string `normalize:"trim"`
+	Name               string `normalize:"trim"`
+	Phone              string `normalize:"trim"`
+	Email              string `normalize:"trim"`
+	Address            string `normalize:"trim"`
+	Note               string `normalize:"trim"`
+	TaxID              string `normalize:"trim"`
+	RegistrationNumber string `normalize:"trim"`
+	Code               string `normalize:"trim"`
 }
 
 func (c *ClientCreate) Merge(dst *Client) *Client {
@@ -70,13 +81,16 @@ func (c *ClientCreate) Merge(dst *Client) *Client {
 
 // ClientUpdate is the Update input. Nil fields mean "leave unchanged".
 type ClientUpdate struct {
-	ID      string  `normalize:"trim"`
-	Name    *string `normalize:"trim,nil_on_empty"`
-	Phone   *string `normalize:"trim,nil_on_empty"`
-	Email   *string `normalize:"trim,nil_on_empty"`
-	Address *string `normalize:"trim,nil_on_empty"`
-	Note    *string `normalize:"trim,nil_on_empty"`
-	Etag    *string `normalize:"trim,nil_on_empty"` // client OCC precondition
+	ID                 string  `normalize:"trim"`
+	Name               *string `normalize:"trim,nil_on_empty"`
+	Phone              *string `normalize:"trim,nil_on_empty"`
+	Email              *string `normalize:"trim,nil_on_empty"`
+	Address            *string `normalize:"trim,nil_on_empty"`
+	Note               *string `normalize:"trim,nil_on_empty"`
+	TaxID              *string `normalize:"trim,nil_on_empty"`
+	RegistrationNumber *string `normalize:"trim,nil_on_empty"`
+	Code               *string `normalize:"trim,nil_on_empty"`
+	Etag               *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
 
 func (u *ClientUpdate) Merge(dst *Client) *Client {

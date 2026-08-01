@@ -32,6 +32,13 @@ message Partner {
   // under separate terms (DEALER). Purely descriptive — does not change how
   // commissionPercentage/discountPercentage are applied.
   PartnerType type = 15;
+  // ПИБ and матични број — identify this partner's legal entity, e.g. for
+  // invoicing. Optional.
+  string taxId = 16;
+  string registrationNumber = 17;
+  // Short, caller-assigned buyer reference (e.g. "0003") shown on
+  // invoices — free text, never auto-generated.
+  string code = 18;
   string etag = 101;
 }
 

@@ -104,6 +104,13 @@ type CRMConfig struct {
 	// rejected; an absent/empty map denies every caller (fail closed),
 	// same as an absent/empty RBAC table.
 	NotificationClients map[string]redacted.RedactedString `yaml:"notificationClients"`
+
+	// Invoice configures the seller letterhead, commercial terms, and VAT
+	// rate used by InvoicesService (internal/services/invoice) to render a
+	// Sale as a PDF — see internal/transports/http/handlers/invoice.
+	// Optional: when absent, invoice generation fails with an explicit
+	// "not configured" error instead of rendering a blank letterhead.
+	Invoice *InvoiceConfig `yaml:"invoice" default:"-"`
 }
 
 // Validate enforces that, when the crm section is present, auth is too
@@ -119,6 +126,7 @@ func (c *CRMConfig) Validate() error {
 		validation.Field(&c.Smtp, validation.NilOrNotEmpty),
 		validation.Field(&c.Resend, validation.NilOrNotEmpty),
 		validation.Field(&c.NotificationClients, validation.By(validateNotificationClients)),
+		validation.Field(&c.Invoice, validation.NilOrNotEmpty),
 	)
 }
 
@@ -242,6 +250,90 @@ type ImagesConfig struct {
 func (i *ImagesConfig) Validate() error {
 	return config.ValidateStruct(i,
 		validation.Field(&i.MaxSizeBytes, validation.Min(int64(1))),
+	)
+}
+
+// InvoiceCompanyConfig is the seller letterhead printed on every generated
+// invoice — TOM STUDIO's own business details, never per-Sale data.
+type InvoiceCompanyConfig struct {
+	Name string `yaml:"name"`
+	// City is the "Mesto izdavanja" (place of issue) printed on every
+	// invoice — appended after Name in the letterhead and repeated in the
+	// document-info box.
+	City               string `yaml:"city"`
+	Address            string `yaml:"address"`
+	Phone              string `yaml:"phone"`
+	Email              string `yaml:"email"`
+	TaxID              string `yaml:"taxId"`
+	RegistrationNumber string `yaml:"registrationNumber"`
+	// ActivityCode is the "šifra delatnosti" printed on the letterhead.
+	ActivityCode      string `yaml:"activityCode"`
+	BankName          string `yaml:"bankName"`
+	BankAccount       string `yaml:"bankAccount"`
+	ResponsiblePerson string `yaml:"responsiblePerson"`
+}
+
+// Validate requires Name, Address, and BankAccount — the minimum a
+// letterhead needs to not render visibly broken; every other field is
+// optional and simply left blank on the PDF when unset.
+func (c *InvoiceCompanyConfig) Validate() error {
+	return config.ValidateStruct(c,
+		validation.Field(&c.Name, validation.Required),
+		validation.Field(&c.Address, validation.Required),
+		validation.Field(&c.BankAccount, validation.Required),
+	)
+}
+
+// InvoiceTermsConfig is the commercial-terms boilerplate printed on every
+// invoice (payment/delivery conditions) — free text, not computed from the
+// Sale.
+type InvoiceTermsConfig struct {
+	AdvancePercentage int `yaml:"advancePercentage" default:"100"`
+	// DeliveryLeadTime is free text, e.g. "5-6 radnih dana od datuma
+	// prihvatanja ponude i uplate avansa."
+	DeliveryLeadTime  string `yaml:"deliveryLeadTime"`
+	OfferValidityDays int    `yaml:"offerValidityDays" default:"5"`
+}
+
+// InvoiceVATConfig is the single system-wide VAT rate InvoicesService
+// applies when a Generate request has includeVat=true — see
+// entities.InvoiceGenerate.IncludeVAT. There is no per-invoice custom rate.
+type InvoiceVATConfig struct {
+	Percentage int `yaml:"percentage" default:"20"`
+}
+
+// Validate rejects a nonsensical percentage — a partially configured or
+// mistyped rate would otherwise silently produce wrong VAT amounts on
+// every invoice that requests it.
+func (v *InvoiceVATConfig) Validate() error {
+	return config.ValidateStruct(v,
+		validation.Field(&v.Percentage, validation.Min(0), validation.Max(100)),
+	)
+}
+
+// InvoiceConfig configures InvoicesService's PDF rendering — see
+// CRMConfig.Invoice.
+type InvoiceConfig struct {
+	Company InvoiceCompanyConfig `yaml:"company"`
+	// NumberPrefix prepends the Sale's own Number to build the printed
+	// Offer number, e.g. prefix "POKU" + sale number 4 + issue date ->
+	// "POKU_004-13-07-26".
+	NumberPrefix string `yaml:"numberPrefix"`
+	// ReceiptNumberPrefix is NumberPrefix's counterpart for the Receipt
+	// (entities.InvoiceDocumentTypeReceipt). Falls back to NumberPrefix
+	// when unset, since NumberPrefix's own default ("POKU" = Serbian
+	// "Ponuda Kupca") wouldn't otherwise fit a Receipt's number.
+	ReceiptNumberPrefix string             `yaml:"receiptNumberPrefix"`
+	Terms               InvoiceTermsConfig `yaml:"terms"`
+	VAT                 InvoiceVATConfig   `yaml:"vat"`
+}
+
+// Validate cascades into Company/VAT — Terms has no invalid shape (both its
+// fields are plain, unconstrained numbers/text).
+func (i *InvoiceConfig) Validate() error {
+	return config.ValidateStruct(i,
+		validation.Field(&i.Company, validation.Required),
+		validation.Field(&i.VAT),
 	)
 }
 

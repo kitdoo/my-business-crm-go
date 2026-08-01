@@ -222,10 +222,12 @@ func (x *Sale) GetEtag() string {
 }
 
 type SaleItem struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	SkuId       string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
-	Quantity    int64                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	PriceAmount int64                  `protobuf:"varint,3,opt,name=priceAmount,proto3" json:"priceAmount,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	SkuId string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
+	// Hundredths of a unit (basis-points convention, same as priceAmount) —
+	// 216 means 2.16.
+	Quantity    int64 `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	PriceAmount int64 `protobuf:"varint,3,opt,name=priceAmount,proto3" json:"priceAmount,omitempty"`
 	// Always 0-100, never a fixed amount.
 	DiscountPercentage int32 `protobuf:"varint,4,opt,name=discountPercentage,proto3" json:"discountPercentage,omitempty"`
 	// Each item is fulfilled from its own warehouse.

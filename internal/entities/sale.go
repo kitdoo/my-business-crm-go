@@ -22,7 +22,10 @@ const (
 
 // SaleItem is immutable once the Sale is created — see Sale.
 type SaleItem struct {
-	SKUID    string
+	SKUID string
+	// Quantity is in hundredths of a unit (e.g. m² or piece), same "basis
+	// points" convention as PriceAmount — 216 means 2.16. See
+	// Inventory.Quantity/InventoryMovement.Quantity, which share this scale.
 	Quantity int64
 	// PriceAmount is captured from the sku's current ProductPrice at
 	// creation time (basis points), so later price changes never affect an
@@ -88,7 +91,8 @@ func (s *Sale) BeforeUpdate() {
 // SaleCreateItem is one requested line; PriceAmount is not part of it — the
 // service looks up the sku's current price.
 type SaleCreateItem struct {
-	SKUID              string `normalize:"trim"`
+	SKUID string `normalize:"trim"`
+	// Quantity is in hundredths of a unit — see SaleItem.Quantity.
 	Quantity           int64
 	DiscountPercentage int32
 	WarehouseID        string `normalize:"trim"`

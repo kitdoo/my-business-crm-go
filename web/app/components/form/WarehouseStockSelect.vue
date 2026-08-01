@@ -9,6 +9,7 @@
 // `update:available`, so the sibling quantity field can cap how much can
 // be taken out.
 import { relationLabel } from '~/utils/relationLabel.js'
+import { toQuantity } from '~/utils/quantityAmount.js'
 
 const props = defineProps({
   modelValue: { type: String, default: null },
@@ -55,7 +56,7 @@ async function load() {
       .map((i) => ({
         value: i.warehouseId,
         label: relationLabel(warehouseById.get(i.warehouseId), locale.value),
-        quantity: Number(i.quantity),
+        quantity: toQuantity(Number(i.quantity)),
       }))
       .filter((r) => !props.onlyInStock || r.quantity > 0)
   } finally {

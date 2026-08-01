@@ -10,6 +10,8 @@ message Inventory {
   int64 updatedAt = 2;
   string skuId = 3;
   string warehouseId = 4;
+  // Hundredths of a unit (basis-points convention, same as
+  // ProductPrice.priceAmount) — 216 means 2.16 units in stock.
   int64 quantity = 5;
   string etag = 101;
 }

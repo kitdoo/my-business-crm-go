@@ -1,4 +1,6 @@
 <script setup>
+import { toQuantity } from '~/utils/quantityAmount.js'
+
 const props = defineProps({ period: { type: Object, required: true } })
 const { t } = useI18n()
 const reportApi = useReportApi()
@@ -30,7 +32,7 @@ watch(() => props.period, load, { immediate: true })
       <tbody>
         <tr v-for="row in rows" :key="row.skuId" class="border-b border-neutral-100 last:border-0">
           <td class="py-1 pr-2"><RelationLabel :value="row.skuId" relation="productSkus" /></td>
-          <td class="py-1 pr-2 text-right text-neutral-500">{{ row.quantitySold }}</td>
+          <td class="py-1 pr-2 text-right text-neutral-500">{{ toQuantity(row.quantitySold) }}</td>
           <td class="py-1 text-right font-medium"><MoneyAmountLabel :value="row.totalAmount" /></td>
         </tr>
       </tbody>

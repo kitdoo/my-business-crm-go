@@ -30,6 +30,7 @@
 // list of {skuId, warehouseId, quantity, discountPercentage} — the
 // auto/manual split is purely a web-side convenience over that shape.
 import { resolveAutoAllocation } from '~/utils/autoAllocation.js'
+import { toQuantity, toBasisQuantity } from '~/utils/quantityAmount.js'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -282,7 +283,10 @@ const grandTotals = computed(() => {
 // Create.
 async function resolveAutoAllocations(item) {
   const res = await inventoryApi.list({ filter: { skuId: item.skuId }, pagination: { limit: 200 } })
-  const { allocations, shortfall } = resolveAutoAllocation(item.quantity, res.items || [])
+  // Inventory.quantity arrives in hundredths of a unit — convert to the
+  // same display unit item.quantity is entered in before splitting.
+  const stock = (res.items || []).map((s) => ({ ...s, quantity: toQuantity(Number(s.quantity)) }))
+  const { allocations, shortfall } = resolveAutoAllocation(item.quantity, stock)
   if (shortfall > 0) {
     throw new Error(t('entities.sales.warehouseAutoInsufficientStock'))
   }
@@ -308,7 +312,7 @@ async function onSubmit() {
         flatItems.push({
           skuId: item.skuId,
           warehouseId: a.warehouseId,
-          quantity: a.quantity,
+          quantity: toBasisQuantity(a.quantity),
           discountPercentage: effectiveDiscount(item),
         })
       }
@@ -468,7 +472,8 @@ async function onSubmit() {
             <UInputNumber
               v-model="item.quantity"
               class="w-full max-w-40"
-              :min="1"
+              :min="0.01"
+              :step="0.01"
               :max="item.totalStock ?? undefined"
               :disabled="!item.skuId || !item.totalStock"
             />
@@ -493,7 +498,8 @@ async function onSubmit() {
                 <UInputNumber
                   v-model="allocation.quantity"
                   class="w-full"
-                  :min="1"
+                  :min="0.01"
+                  :step="0.01"
                   :max="allocation.available ?? undefined"
                   :disabled="!allocation.warehouseId"
                 />

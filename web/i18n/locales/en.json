@@ -88,7 +88,18 @@
       "cancel": "Cancel sale",
       "cancelConfirmTitle": "Cancel sale",
       "cancelConfirmBody": "Stock will be returned to the warehouse automatically.",
-      "cancelReason": "Reason"
+      "cancelReason": "Reason",
+      "generateInvoice": "Generate offer",
+      "generateReceipt": "Generate receipt",
+      "invoiceIncludeVat": "Include VAT",
+      "invoiceSendEmail": "Email to buyer",
+      "report": "Report",
+      "reportPeriod1m": "Last 1 month",
+      "reportPeriod3m": "Last 3 months",
+      "reportPeriod6m": "Last 6 months",
+      "reportPeriod1y": "Last 1 year",
+      "reportGenerating": "Generating report…",
+      "reportError": "Failed to generate the report"
     }
   },
   "fields": {
@@ -101,6 +112,9 @@
     "email": "Email",
     "address": "Address",
     "website": "Website",
+    "taxId": "Tax ID",
+    "registrationNumber": "Registration number",
+    "code": "Code",
     "note": "Note",
     "commissionPercentage": "Commission, %",
     "lastName": "Last name",
@@ -223,7 +237,8 @@
     "addCharacteristic": "Add characteristic",
     "next": "Next",
     "back": "Back",
-    "retry": "Retry"
+    "retry": "Retry",
+    "moreInformation": "More information"
   },
   "dashboard": {
     "salesAmount": "Sales amount for period",

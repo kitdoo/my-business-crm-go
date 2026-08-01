@@ -20,7 +20,7 @@ export default {
       { key: 'skuId', label: 'fields.sku', component: 'RelationLabel', relation: 'productSkus' },
       { key: 'warehouseId', label: 'fields.warehouse', component: 'RelationLabel', relation: 'warehouses' },
       { key: 'type', label: 'fields.movementType', component: 'EnumLabel' },
-      { key: 'quantity', label: 'fields.quantity' },
+      { key: 'quantity', label: 'fields.quantity', component: 'QuantityAmountLabel' },
       { key: 'comment', label: 'fields.comment' },
       { key: 'saleId', label: 'fields.sale', component: 'SaleLink' },
       { key: 'createdAt', label: 'fields.createdAt', component: 'DateLabel' },
@@ -61,6 +61,10 @@ export default {
         required: true,
         capByStock: true,
         requiresFields: ['skuId', 'warehouseId'],
+        // Wire value is hundredths of a unit (see
+        // entities.InventoryMovement.Quantity) — EntityForm shows/accepts
+        // the plain scaled-down number the operator types.
+        scale: 100,
       },
       { key: 'comment', type: 'text', label: 'fields.comment', maxLength: 1024 },
       { key: 'saleId', type: 'relation', relation: 'sales', label: 'fields.sale' },

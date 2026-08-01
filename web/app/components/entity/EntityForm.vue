@@ -1,9 +1,7 @@
 <script setup>
 // Generic create/edit form driven entirely by entity.form.fields (TD
 // §9.1/§9.3): validation, FieldMask, and etag handling all come from
-// useEntityForm — this component only renders inputs per field type.
-import { getEnumOptions } from '~/config/enums.js'
-
+// useEntityForm — per-field rendering lives in EntityFormField.vue.
 const props = defineProps({
   entity: { type: String, required: true },
   id: { type: String, default: null },
@@ -142,23 +140,25 @@ async function onDelete() {
   }
 }
 
-function fieldsToRender() {
+function visibleFields() {
   // editOnly: hidden while creating (e.g. Brand.status — not settable on
   // Create). createOnly: hidden while editing (e.g. User.password — set
   // once at Create, changed only through the separate ChangePassword flow).
   return config.form.fields.filter((f) => (!f.editOnly || !isCreate) && (!f.createOnly || isCreate))
 }
+// advanced (e.g. Partner/Client's invoicing-only legal fields) fields sit
+// behind a closed-by-default "more information" disclosure so they don't
+// add friction to the common create flow — see EntityFormField.vue.
+const mainFields = computed(() => visibleFields().filter((f) => !f.advanced))
+const advancedFields = computed(() => visibleFields().filter((f) => f.advanced))
+const advancedOpen = ref(false)
 
 // On-hand quantity for the currently picked skuId/warehouseId pair,
 // reported by WarehouseStockSelect — only meaningful for InventoryMovement
 // (its `quantity` field is the only one with capByStock set), but kept
-// here rather than inside that component since it needs to reach a
-// sibling field's UInputNumber min, not just its own.
+// here rather than inside that field since it needs to reach a sibling
+// field's UInputNumber min, not just its own.
 const stockAvailable = ref(null)
-function quantityMin(field) {
-  if (!field.capByStock || stockAvailable.value == null) return field.min
-  return -stockAvailable.value
-}
 </script>
 
 <template>
@@ -167,107 +167,45 @@ function quantityMin(field) {
     <template v-else>
       <form class="space-y-6" @submit.prevent="onSubmit">
         <FormGrid>
-          <template v-for="field in fieldsToRender()" :key="field.key">
-            <LocalizedStringInput
-              v-if="field.type === 'localizedString'"
-              v-model="form[field.key]"
-              :locales="runtimeConfig.public.supportedLocales"
-              :required-locale="'sr'"
-              :label="t(field.label)"
-              :error="fieldErrors[field.key]"
-              :required="field.required"
-            />
-            <UFormField v-else-if="field.type === 'enum'" :label="t(field.label)" :error="fieldErrors[field.key]">
-              <USelect
-                v-model="form[field.key]"
-                :items="
-                  getEnumOptions(field.enum)
-                    .filter((v) => !field.excludeOptions?.includes(v))
-                    .map((v) => ({ label: t(`enums.status.${v}`), value: v }))
-                "
-                class="w-full"
-              />
-            </UFormField>
-            <UFormField
-              v-else-if="field.type === 'text'"
-              :label="t(field.label)"
-              :required="field.required"
-              :error="fieldErrors[field.key]"
-              :class="field.multiline ? 'md:col-span-2' : undefined"
-            >
-              <UTextarea
-                v-if="field.multiline"
-                v-model="form[field.key]"
-                class="w-full"
-                :required="field.required"
-                :maxlength="field.maxLength"
-              />
-              <UInput
-                v-else
-                v-model="form[field.key]"
-                class="w-full"
-                :type="field.inputType || 'text'"
-                :required="field.required"
-                :maxlength="field.maxLength"
-                :readonly="field.immutableOnEdit && !isCreate"
-              />
-            </UFormField>
-            <UFormField
-              v-else-if="field.type === 'number'"
-              :label="t(field.label)"
-              :required="field.required"
-              :error="fieldErrors[field.key]"
-              :hint="field.hint ? t(field.hint) : undefined"
-              :class="field.fullWidth ? 'md:col-span-2' : undefined"
-            >
-              <UInputNumber
-                v-model="form[field.key]"
-                class="w-full"
-                :min="quantityMin(field)"
-                :max="field.max"
-                :disabled="field.requiresFields?.some((k) => !form[k])"
-              />
-            </UFormField>
-            <SkuCascadeSelect
-              v-else-if="field.type === 'skuCascade'"
-              v-model="form[field.key]"
-              :label="t(field.label)"
-              :error="fieldErrors[field.key]"
-              :required="field.required"
-            />
-            <WarehouseStockSelect
-              v-else-if="field.type === 'warehouseStock'"
-              v-model="form[field.key]"
-              :sku-id="form.skuId"
-              :label="t(field.label)"
-              :error="fieldErrors[field.key]"
-              :required="field.required"
-              @update:available="stockAvailable = $event"
-            />
-            <RelationSelect
-              v-else-if="field.type === 'relation'"
-              v-model="form[field.key]"
-              :relation="field.relation"
-              :label="t(field.label)"
-              :error="fieldErrors[field.key]"
-              :required="field.required"
-              :searchable="field.searchable"
-            />
-            <RelationMultiSelect
-              v-else-if="field.type === 'relationMulti'"
-              v-model="form[field.key]"
-              :relation="field.relation"
-              :label="t(field.label)"
-              :error="fieldErrors[field.key]"
-            />
-            <UFormField v-else-if="field.type === 'images'" :label="t(field.label)" class="md:col-span-2">
-              <ProductImageUploader v-model="form[field.key]" />
-            </UFormField>
-            <UFormField v-else-if="field.type === 'boolean'" :error="fieldErrors[field.key]">
-              <UCheckbox v-model="form[field.key]" :label="t(field.label)" />
-            </UFormField>
-          </template>
+          <EntityFormField
+            v-for="field in mainFields"
+            :key="field.key"
+            :field="field"
+            :form="form"
+            :error="fieldErrors[field.key]"
+            :is-create="isCreate"
+            :locales="runtimeConfig.public.supportedLocales"
+            :stock-available="stockAvailable"
+            @update:available="stockAvailable = $event"
+          />
         </FormGrid>
+
+        <UCollapsible v-if="advancedFields.length" v-model:open="advancedOpen">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            :icon="advancedOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+            trailing
+          >
+            {{ t('common.moreInformation') }}
+          </UButton>
+          <template #content>
+            <FormGrid class="pt-4">
+              <EntityFormField
+                v-for="field in advancedFields"
+                :key="field.key"
+                :field="field"
+                :form="form"
+                :error="fieldErrors[field.key]"
+                :is-create="isCreate"
+                :locales="runtimeConfig.public.supportedLocales"
+                :stock-available="stockAvailable"
+                @update:available="stockAvailable = $event"
+              />
+            </FormGrid>
+          </template>
+        </UCollapsible>
 
         <slot name="extra-fields" />
 

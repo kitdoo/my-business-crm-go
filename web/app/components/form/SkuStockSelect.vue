@@ -10,6 +10,7 @@
 // auto-mode quantity input and list per-warehouse availability for manual
 // allocation, without a second inventory fetch.
 import { relationLabel } from '~/utils/relationLabel.js'
+import { toQuantity } from '~/utils/quantityAmount.js'
 
 const props = defineProps({
   modelValue: { type: String, default: null },
@@ -67,7 +68,7 @@ async function load() {
       list.push({
         warehouseId: inv.warehouseId,
         warehouseLabel: warehouse ? relationLabel(warehouse, locale.value) : inv.warehouseId,
-        quantity: Number(inv.quantity),
+        quantity: toQuantity(Number(inv.quantity)),
       })
       stockBySku.set(inv.skuId, list)
     }

@@ -14,5 +14,13 @@ message Client {
   string email = 7;
   string address = 8;
   string note = 9;
+  // ПИБ and матични број — identify a client that is itself a legal
+  // entity/sole proprietor, e.g. for invoicing. Both optional and blank
+  // for an ordinary retail client.
+  string taxId = 10;
+  string registrationNumber = 11;
+  // Short, caller-assigned buyer reference (e.g. "0003") shown on
+  // invoices — free text, never auto-generated.
+  string code = 12;
   string etag = 101;
 }

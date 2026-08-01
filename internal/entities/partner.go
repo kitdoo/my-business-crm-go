@@ -54,7 +54,14 @@ type Partner struct {
 	// Type distinguishes an existing store carrying PHOMI as one of several
 	// brands (Partner) from a store opening specifically as a PHOMI-branded
 	// outlet under separate terms (Dealer).
-	Type      PartnerType
+	Type PartnerType
+	// TaxID (ПИБ) and RegistrationNumber (матични број) identify this
+	// partner's legal entity, e.g. for invoicing — optional.
+	TaxID              string
+	RegistrationNumber string
+	// Code is a short, caller-assigned buyer reference (e.g. "0003") shown
+	// on invoices — free text, never auto-generated.
+	Code      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time // nil = active
@@ -103,6 +110,9 @@ type PartnerCreate struct {
 	DiscountPercentage   int32
 	IsPublic             bool
 	Type                 PartnerType
+	TaxID                string `normalize:"trim"`
+	RegistrationNumber   string `normalize:"trim"`
+	Code                 string `normalize:"trim"`
 }
 
 func (c *PartnerCreate) Merge(dst *Partner) *Partner {
@@ -127,6 +137,9 @@ type PartnerUpdate struct {
 	DiscountPercentage   *int32
 	IsPublic             *bool
 	Type                 *PartnerType
+	TaxID                *string `normalize:"trim,nil_on_empty"`
+	RegistrationNumber   *string `normalize:"trim,nil_on_empty"`
+	Code                 *string `normalize:"trim,nil_on_empty"`
 	Etag                 *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
 

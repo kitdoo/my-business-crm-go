@@ -19,6 +19,9 @@ message Client {
   string email = 7;
   string address = 8;
   string note = 9;
+  string taxId = 10;
+  string registrationNumber = 11;
+  string code = 12;
   string etag = 101;
 }
 
@@ -83,6 +86,9 @@ message ClientCreateRequest {
   string email = 3;
   string address = 4;
   string note = 5;
+  string taxId = 6;
+  string registrationNumber = 7;
+  string code = 8;
   optional Options options = 99;
 }
 
@@ -101,6 +107,9 @@ message ClientUpdateRequest {
   optional string email = 4;
   optional string address = 5;
   optional string note = 6;
+  optional string taxId = 7;
+  optional string registrationNumber = 8;
+  optional string code = 9;
   optional Options options = 99;
 }
 

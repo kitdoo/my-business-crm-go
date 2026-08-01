@@ -50,6 +50,9 @@ type model struct {
 	DiscountPercentage   int32                  `bson:"discount_percentage"`
 	IsPublic             bool                   `bson:"is_public"`
 	Type                 entities.PartnerType   `bson:"type"`
+	TaxID                string                 `bson:"tax_id"`
+	RegistrationNumber   string                 `bson:"registration_number"`
+	Code                 string                 `bson:"code"`
 	CreatedAt            time.Time              `bson:"created_at,omitonupdate"`
 	UpdatedAt            time.Time              `bson:"updated_at"`
 	DeletedAt            *time.Time             `bson:"deleted_at,omitonupdate"`

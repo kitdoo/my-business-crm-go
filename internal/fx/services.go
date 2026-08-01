@@ -20,6 +20,8 @@ import (
 	invservice "github.com/kitdoo/my-business-crm-go/internal/services/inventory/inventory"
 	invmovementsvc "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement"
 	invmovementservice "github.com/kitdoo/my-business-crm-go/internal/services/inventorymovement/inventorymovement"
+	invoicesvc "github.com/kitdoo/my-business-crm-go/internal/services/invoice"
+	invoiceservice "github.com/kitdoo/my-business-crm-go/internal/services/invoice/invoice"
 	"github.com/kitdoo/my-business-crm-go/internal/services/notification"
 	notificationservice "github.com/kitdoo/my-business-crm-go/internal/services/notification/notification"
 	"github.com/kitdoo/my-business-crm-go/internal/services/partner"
@@ -38,6 +40,8 @@ import (
 	reportservice "github.com/kitdoo/my-business-crm-go/internal/services/report/report"
 	salesvc "github.com/kitdoo/my-business-crm-go/internal/services/sale"
 	saleservice "github.com/kitdoo/my-business-crm-go/internal/services/sale/sale"
+	salesreportsvc "github.com/kitdoo/my-business-crm-go/internal/services/salesreport"
+	salesreportservice "github.com/kitdoo/my-business-crm-go/internal/services/salesreport/salesreport"
 	"github.com/kitdoo/my-business-crm-go/internal/services/user"
 	userservice "github.com/kitdoo/my-business-crm-go/internal/services/user/user"
 	"github.com/kitdoo/my-business-crm-go/internal/services/warehouse"
@@ -159,6 +163,12 @@ func ServicesModule() fx.Option {
 		fx.Provide(fx.Annotate(newMailerService, fx.As(new(mailer.Service)))),
 		fx.Provide(fx.Annotate(newNotificationService, fx.As(new(notification.Service)))),
 		fx.Provide(AsGRPCHandler(notificationhandler.New)),
+
+		fx.Provide(fx.Annotate(invoiceservice.New, fx.As(new(invoicesvc.Service)))),
+		invoicesModule(),
+
+		fx.Provide(fx.Annotate(salesreportservice.New, fx.As(new(salesreportsvc.Service)))),
+		salesReportModule(),
 	)
 }
 

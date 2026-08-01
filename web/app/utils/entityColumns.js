@@ -5,6 +5,7 @@ import RelationLabel from '~/components/display/RelationLabel.vue'
 import RelationListLabel from '~/components/display/RelationListLabel.vue'
 import EnumLabel from '~/components/display/EnumLabel.vue'
 import MoneyAmountLabel from '~/components/display/MoneyAmountLabel.vue'
+import QuantityAmountLabel from '~/components/display/QuantityAmountLabel.vue'
 import SaleLink from '~/components/display/SaleLink.vue'
 import SaleWarehousesLabel from '~/components/display/SaleWarehousesLabel.vue'
 import ImageThumbnail from '~/components/display/ImageThumbnail.vue'
@@ -21,6 +22,7 @@ export const COLUMN_COMPONENTS = {
   RelationListLabel,
   EnumLabel,
   MoneyAmountLabel,
+  QuantityAmountLabel,
   SaleLink,
   SaleWarehousesLabel,
   ImageThumbnail,
@@ -38,6 +40,7 @@ export function columnProps(col, item) {
   if (col.component === 'RelationListLabel') return { value: item[col.key], relation: col.relation }
   if (col.component === 'EnumLabel') return { value: item[col.key] }
   if (col.component === 'MoneyAmountLabel') return { value: item[col.key] }
+  if (col.component === 'QuantityAmountLabel') return { value: item[col.key] }
   if (col.component === 'SaleLink') return { value: item[col.key] }
   if (col.component === 'SaleWarehousesLabel') return { value: item[col.key] }
   if (col.component === 'ImageThumbnail') return { value: item[col.key] }

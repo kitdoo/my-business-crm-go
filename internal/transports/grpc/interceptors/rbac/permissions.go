@@ -159,6 +159,20 @@ var permissions = map[string]string{
 // checks directly via rbac.Table.Allowed.
 const ImagesUploadPermission = "images:upload"
 
+// InvoicesGeneratePermission gates POST /invoices/{saleId} (internal/
+// transports/http/handlers/invoice), the plain-HTTP invoice-PDF-generation
+// endpoint. Same story as ImagesUploadPermission: no gRPC method, so no
+// entry in `permissions` above, but still a known, grantable permission
+// string for CRMConfig.RBAC / configs/crm.yaml.
+const InvoicesGeneratePermission = "invoices:generate"
+
+// SalesReportGeneratePermission gates POST /sales-report (internal/
+// transports/http/handlers/salesreport), the plain-HTTP sales-report-
+// generation endpoint. Same story as InvoicesGeneratePermission: no gRPC
+// method, so no entry in `permissions` above, but still a known,
+// grantable permission string for CRMConfig.RBAC / configs/crm.yaml.
+const SalesReportGeneratePermission = "salesreport:generate"
+
 // KnownPermissions returns every distinct non-wildcard, non-self-service
 // permission string a role can be granted (i.e. every value that can
 // legally appear under a role in CRMConfig.RBAC / configs/crm.yaml,
@@ -175,5 +189,7 @@ func KnownPermissions() map[string]bool {
 		}
 	}
 	known[ImagesUploadPermission] = true
+	known[InvoicesGeneratePermission] = true
+	known[SalesReportGeneratePermission] = true
 	return known
 }

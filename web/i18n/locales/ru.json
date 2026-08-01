@@ -88,7 +88,18 @@
       "cancel": "Отменить продажу",
       "cancelConfirmTitle": "Отмена продажи",
       "cancelConfirmBody": "Остаток будет возвращён на склад автоматически.",
-      "cancelReason": "Причина"
+      "cancelReason": "Причина",
+      "generateInvoice": "Сформировать понуду",
+      "generateReceipt": "Сформировать чек",
+      "invoiceIncludeVat": "Включить НДС",
+      "invoiceSendEmail": "Отправить покупателю на email",
+      "report": "Отчёт",
+      "reportPeriod1m": "За 1 месяц",
+      "reportPeriod3m": "За 3 месяца",
+      "reportPeriod6m": "За 6 месяцев",
+      "reportPeriod1y": "За 1 год",
+      "reportGenerating": "Формирование отчёта…",
+      "reportError": "Не удалось сформировать отчёт"
     }
   },
   "fields": {
@@ -101,6 +112,9 @@
     "email": "Email",
     "address": "Адрес",
     "website": "Веб-сайт",
+    "taxId": "ИНН/ПИБ",
+    "registrationNumber": "Регистрационный номер",
+    "code": "Код",
     "note": "Заметка",
     "commissionPercentage": "Комиссия, %",
     "lastName": "Фамилия",
@@ -223,7 +237,8 @@
     "addCharacteristic": "Добавить характеристику",
     "next": "Далее",
     "back": "Назад",
-    "retry": "Повторить"
+    "retry": "Повторить",
+    "moreInformation": "Дополнительная информация"
   },
   "dashboard": {
     "salesAmount": "Сумма продаж за период",

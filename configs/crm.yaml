@@ -57,6 +57,8 @@
 #      - "sales:read"
 #      - "sales:create"
 #      - "sales:update"
+#      - "invoices:generate"
+#      - "salesreport:generate"
 #      - "warehouses:read"
 #    guest:
 #      - "brands:read"
@@ -119,3 +121,49 @@
 #  # and rotated without affecting the others.
 #  notificationClients:
 #    web-public: "change-me-before-boot"
+#
+#  # <object> Seller letterhead, commercial terms, and VAT rate used to
+#  # render a Sale as an invoice PDF (POST /invoices/{saleId} — see
+#  # internal/transports/http/handlers/invoice). Optional: when absent,
+#  # invoice generation fails with an explicit error instead of rendering a
+#  # blank letterhead.
+#  invoice:
+#    company:
+#      name: "Your Company DOO"
+#      # <string> "Mesto izdavanja" (place of issue) — printed after name
+#      # on the letterhead and in the document-info box.
+#      city: "Novi Sad"
+#      address: "Street 1, 21000 Novi Sad"
+#      phone: "+381 60 000 0000"
+#      email: "info@example.com"
+#      taxId: "000000000"
+#      registrationNumber: "00000000"
+#      # <string> "Šifra delatnosti" printed on the letterhead.
+#      activityCode: "0000"
+#      bankName: "Your Bank"
+#      bankAccount: "000000000000000000"
+#      responsiblePerson: "Responsible Person"
+#
+#    # <string> Prepended to the Sale's own number to build the printed
+#    # offer number, e.g. prefix "POKU" + sale number 4 + issue date ->
+#    # "POKU_004-13-07-26".
+#    numberPrefix: "POKU"
+#
+#    # <string> Same as numberPrefix, but for the receipt (post-payment
+#    # document) — falls back to numberPrefix when unset.
+#    receiptNumberPrefix: "RAC"
+#
+#    terms:
+#      # <int> Default value: 100
+#      advancePercentage: 100
+#      # <string> Free text, e.g. "5-6 radnih dana od datuma prihvatanja
+#      # ponude i uplate avansa."
+#      deliveryLeadTime: "5-6 radnih dana od datuma prihvatanja ponude i uplate avansa."
+#      # <int> Default value: 5
+#      offerValidityDays: 5
+#
+#    # <object> Single system-wide VAT rate applied when an invoice
+#    # request sets includeVat=true — there is no per-invoice custom rate.
+#    vat:
+#      # <int> Default value: 20
+#      percentage: 20

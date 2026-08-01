@@ -85,6 +85,9 @@ message PartnerCreateRequest {
   int32 discountPercentage = 8 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   bool isPublic = 9;
   crm.types.partner.PartnerType type = 10 [(buf.validate.field).required = true, (buf.validate.field).enum.defined_only = true];
+  string taxId = 11 [(buf.validate.field).string.max_len = 64];
+  string registrationNumber = 12 [(buf.validate.field).string.max_len = 64];
+  string code = 13 [(buf.validate.field).string.max_len = 32];
   optional Options options = 99;
 }
 
@@ -109,6 +112,9 @@ message PartnerUpdateRequest {
   optional int32 discountPercentage = 10 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   optional bool isPublic = 11;
   optional crm.types.partner.PartnerType type = 12 [(buf.validate.field).enum.defined_only = true];
+  optional string taxId = 13 [(buf.validate.field).string.max_len = 64];
+  optional string registrationNumber = 14 [(buf.validate.field).string.max_len = 64];
+  optional string code = 15 [(buf.validate.field).string.max_len = 32];
   optional Options options = 99;
 }
 

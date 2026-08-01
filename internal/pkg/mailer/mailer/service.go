@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"net/smtp"
 	"strings"
@@ -66,10 +67,17 @@ func (s *Service) Send(_ context.Context, msg mailersvc.Message) error {
 // required by most receiving servers' spam filters — without them,
 // net/smtp.SendMail can succeed (SMTP accepts the message) while the
 // message is silently dropped or spam-boxed downstream, with no error
-// surfacing on our end.
+// surfacing on our end. With Attachments present, the body switches from a
+// plain text/plain message to a multipart/mixed one (text part + one
+// application/octet-stream part per attachment, base64-encoded).
 func buildMessage(from string, msg mailersvc.Message) []byte {
+	displayFrom := from
+	if msg.FromName != "" {
+		displayFrom = fmt.Sprintf("%s <%s>", msg.FromName, from)
+	}
+
 	var b strings.Builder
-	fmt.Fprintf(&b, "From: %s\r\n", from)
+	fmt.Fprintf(&b, "From: %s\r\n", displayFrom)
 	fmt.Fprintf(&b, "To: %s\r\n", msg.To)
 	fmt.Fprintf(&b, "Subject: %s\r\n", msg.Subject)
 	fmt.Fprintf(&b, "Date: %s\r\n", time.Now().Format(time.RFC1123Z))
@@ -78,10 +86,43 @@ func buildMessage(from string, msg mailersvc.Message) []byte {
 		fmt.Fprintf(&b, "Reply-To: %s\r\n", msg.ReplyTo)
 	}
 	b.WriteString("MIME-Version: 1.0\r\n")
-	b.WriteString("Content-Type: text/plain; charset=\"utf-8\"\r\n")
-	b.WriteString("\r\n")
+
+	if len(msg.Attachments) == 0 {
+		b.WriteString("Content-Type: text/plain; charset=\"utf-8\"\r\n")
+		b.WriteString("\r\n")
+		b.WriteString(msg.Body)
+		return []byte(b.String())
+	}
+
+	boundary := newBoundary()
+	fmt.Fprintf(&b, "Content-Type: multipart/mixed; boundary=\"%s\"\r\n\r\n", boundary)
+
+	fmt.Fprintf(&b, "--%s\r\n", boundary)
+	b.WriteString("Content-Type: text/plain; charset=\"utf-8\"\r\n\r\n")
 	b.WriteString(msg.Body)
+	b.WriteString("\r\n")
+
+	for _, a := range msg.Attachments {
+		contentType := a.ContentType
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
+		fmt.Fprintf(&b, "--%s\r\n", boundary)
+		fmt.Fprintf(&b, "Content-Type: %s\r\n", contentType)
+		fmt.Fprintf(&b, "Content-Disposition: attachment; filename=\"%s\"\r\n", a.Filename)
+		b.WriteString("Content-Transfer-Encoding: base64\r\n\r\n")
+		b.WriteString(base64.StdEncoding.EncodeToString(a.Data))
+		b.WriteString("\r\n")
+	}
+	fmt.Fprintf(&b, "--%s--\r\n", boundary)
+
 	return []byte(b.String())
+}
+
+func newBoundary() string {
+	var raw [16]byte
+	_, _ = rand.Read(raw[:])
+	return fmt.Sprintf("boundary-%x", raw)
 }
 
 // newMessageID builds a unique Message-ID, using the domain part of from

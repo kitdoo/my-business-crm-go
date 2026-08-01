@@ -87,9 +87,12 @@ type InventoryMovement struct {
 	SkuId       string                 `protobuf:"bytes,3,opt,name=skuId,proto3" json:"skuId,omitempty"`
 	WarehouseId string                 `protobuf:"bytes,4,opt,name=warehouseId,proto3" json:"warehouseId,omitempty"`
 	Type        MovementType           `protobuf:"varint,5,opt,name=type,proto3,enum=crm.types.inventory_movement.MovementType" json:"type,omitempty"`
-	Quantity    int64                  `protobuf:"varint,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	Comment     string                 `protobuf:"bytes,7,opt,name=comment,proto3" json:"comment,omitempty"`
-	CreatedBy   string                 `protobuf:"bytes,8,opt,name=createdBy,proto3" json:"createdBy,omitempty"`
+	// Signed (positive for Receipt, negative for Sale/WriteOff) and in
+	// hundredths of a unit — same basis-points convention as
+	// Inventory.quantity — 216 means 2.16.
+	Quantity  int64  `protobuf:"varint,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Comment   string `protobuf:"bytes,7,opt,name=comment,proto3" json:"comment,omitempty"`
+	CreatedBy string `protobuf:"bytes,8,opt,name=createdBy,proto3" json:"createdBy,omitempty"`
 	// Set on every Type=Sale movement (SalesService.Create sets it
 	// directly); optional on a manual Create for any other type an
 	// operator wants to associate with a sale by hand.

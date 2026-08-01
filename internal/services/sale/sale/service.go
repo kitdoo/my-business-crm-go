@@ -198,7 +198,9 @@ func (s *Service) buildItems(ctx context.Context, in []entities.SaleCreateItem, 
 			discount = *forcedDiscount
 		}
 
-		line := price.PriceAmount * req.Quantity * int64(100-discount) / 100
+		// req.Quantity is in hundredths of a unit (see SaleItem.Quantity),
+		// hence the extra /100 versus a plain price*quantity*discount calc.
+		line := price.PriceAmount * req.Quantity * int64(100-discount) / 100 / 100
 		total += line
 
 		items = append(items, entities.SaleItem{

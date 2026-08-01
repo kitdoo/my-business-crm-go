@@ -10,6 +10,9 @@ message InventoryMovement {
   string skuId = 3;
   string warehouseId = 4;
   MovementType type = 5;
+  // Signed (positive for Receipt, negative for Sale/WriteOff) and in
+  // hundredths of a unit — same basis-points convention as
+  // Inventory.quantity — 216 means 2.16.
   int64 quantity = 6;
   string comment = 7;
   string createdBy = 8;

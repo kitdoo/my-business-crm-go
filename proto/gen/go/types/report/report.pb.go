@@ -217,10 +217,11 @@ func (x *SalesByPartnerRow) GetCommissionAmount() int64 {
 }
 
 type PopularProductRow struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SkuId         string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
-	QuantitySold  int64                  `protobuf:"varint,2,opt,name=quantitySold,proto3" json:"quantitySold,omitempty"`
-	TotalAmount   int64                  `protobuf:"varint,3,opt,name=totalAmount,proto3" json:"totalAmount,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	SkuId string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
+	// Hundredths of a unit — see SaleItem.quantity.
+	QuantitySold  int64 `protobuf:"varint,2,opt,name=quantitySold,proto3" json:"quantitySold,omitempty"`
+	TotalAmount   int64 `protobuf:"varint,3,opt,name=totalAmount,proto3" json:"totalAmount,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -337,10 +338,11 @@ func (x *TurnoverRow) GetTotalAmount() int64 {
 }
 
 type StockLevelRow struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SkuId         string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
-	WarehouseId   string                 `protobuf:"bytes,2,opt,name=warehouseId,proto3" json:"warehouseId,omitempty"`
-	Quantity      int64                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	SkuId       string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
+	WarehouseId string                 `protobuf:"bytes,2,opt,name=warehouseId,proto3" json:"warehouseId,omitempty"`
+	// Hundredths of a unit — see Inventory.quantity.
+	Quantity      int64 `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

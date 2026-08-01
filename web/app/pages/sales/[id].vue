@@ -6,6 +6,8 @@
 // a separate action from UpdateStatus, with a reason.
 import { ENUMS } from '~/config/enums.js'
 import { STATUS_COLOR_MAP } from '~/design/tokens.js'
+import { toQuantity } from '~/utils/quantityAmount.js'
+import { SALE_TERMINAL_STATUSES, isSaleTerminal } from '~/utils/saleStatus.js'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -18,17 +20,16 @@ const { handle } = useApiErrorHandler()
 const loading = ref(true)
 const sale = ref(null)
 
-const TERMINAL_STATUSES = ['SALE_STATUS_CANCELLED', 'SALE_STATUS_REFUNDED']
 const canUpdate = computed(() => can('sales:update'))
-const isTerminal = computed(() => sale.value && TERMINAL_STATUSES.includes(sale.value.status))
+const isTerminal = computed(() => sale.value && isSaleTerminal(sale.value.status))
 
 // ENUMS.SaleStatus.values is already declared in flow order (Draft ->
 // Paid -> Shipped -> Completed), with Cancelled/Refunded as terminal
 // side-branches reachable from any non-terminal status — shown as a
 // tooltip next to the status badge instead of a separate diagram.
 const statusFlowText = computed(() => {
-  const forward = ENUMS.SaleStatus.values.filter((v) => !TERMINAL_STATUSES.includes(v)).map((v) => t(`enums.status.${v}`))
-  const terminal = TERMINAL_STATUSES.map((v) => t(`enums.status.${v}`))
+  const forward = ENUMS.SaleStatus.values.filter((v) => !isSaleTerminal(v)).map((v) => t(`enums.status.${v}`))
+  const terminal = SALE_TERMINAL_STATUSES.map((v) => t(`enums.status.${v}`))
   return `${forward.join(' → ')}\n${t('entities.sales.statusFlowTerminalNote')}: ${terminal.join(', ')}`
 })
 
@@ -38,10 +39,6 @@ const statusOptions = computed(() =>
   ENUMS.SaleStatus.values.filter((v) => v !== sale.value?.status).map((v) => ({ label: t(`enums.status.${v}`), value: v })),
 )
 const changingStatus = ref(false)
-
-const cancelModalOpen = ref(false)
-const cancelReason = ref('')
-const cancelling = ref(false)
 
 async function load() {
   loading.value = true
@@ -68,18 +65,18 @@ async function onChangeStatus() {
   }
 }
 
-async function onCancelConfirm() {
-  cancelling.value = true
-  try {
-    sale.value = await saleApi.cancel(sale.value.id, cancelReason.value, sale.value.etag)
-    cancelModalOpen.value = false
-    cancelReason.value = ''
-  } catch (err) {
-    handle(err)
-  } finally {
-    cancelling.value = false
-  }
+const cancelModal = ref(null)
+function onSaleCancelled(updated) {
+  sale.value = updated
 }
+
+const canGenerateInvoice = computed(() => can('invoices:generate'))
+// A receipt documents a payment already received — the backend
+// (InvoicesService.Generate) rejects it outright while the sale is still
+// Draft, so this mirrors that one rule rather than re-deriving a wider
+// notion of "paid" client-side.
+const canGenerateReceipt = computed(() => canGenerateInvoice.value && sale.value?.status !== 'SALE_STATUS_DRAFT')
+const invoiceModal = ref(null)
 
 onMounted(load)
 </script>
@@ -131,7 +128,7 @@ onMounted(load)
           <tbody>
             <tr v-for="(item, index) in sale.items" :key="index" class="border-b border-neutral-100">
               <td class="py-2 px-3"><RelationLabel :value="item.skuId" relation="productSkus" /></td>
-              <td class="py-2 px-3">{{ item.quantity }}</td>
+              <td class="py-2 px-3">{{ toQuantity(item.quantity) }}</td>
               <td class="py-2 px-3"><MoneyAmountLabel :value="item.priceAmount" /></td>
               <td class="py-2 px-3">{{ item.discountPercentage }}%</td>
             </tr>
@@ -142,9 +139,17 @@ onMounted(load)
         </p>
       </div>
 
-      <div v-if="canUpdate && !isTerminal" class="flex gap-2">
-        <UButton variant="soft" @click="statusModalOpen = true">{{ t('entities.sales.changeStatus') }}</UButton>
-        <UButton color="error" variant="soft" @click="cancelModalOpen = true">{{ t('entities.sales.cancel') }}</UButton>
+      <div class="flex gap-2">
+        <UButton v-if="canGenerateInvoice" variant="soft" icon="i-lucide-file-text" @click="invoiceModal.open(sale, 'offer')">
+          {{ t('entities.sales.generateInvoice') }}
+        </UButton>
+        <UButton v-if="canGenerateReceipt" variant="soft" icon="i-lucide-receipt" @click="invoiceModal.open(sale, 'receipt')">
+          {{ t('entities.sales.generateReceipt') }}
+        </UButton>
+        <template v-if="canUpdate && !isTerminal">
+          <UButton variant="soft" @click="statusModalOpen = true">{{ t('entities.sales.changeStatus') }}</UButton>
+          <UButton color="error" variant="soft" @click="cancelModal.open(sale)">{{ t('entities.sales.cancel') }}</UButton>
+        </template>
       </div>
     </template>
 
@@ -165,20 +170,7 @@ onMounted(load)
       </template>
     </UModal>
 
-    <UModal v-model:open="cancelModalOpen">
-      <template #content>
-        <div class="p-6 space-y-4">
-          <h3 class="text-lg font-semibold">{{ t('entities.sales.cancelConfirmTitle') }}</h3>
-          <p class="text-sm text-neutral-600">{{ t('entities.sales.cancelConfirmBody') }}</p>
-          <UFormField :label="t('entities.sales.cancelReason')">
-            <UTextarea v-model="cancelReason" class="w-full" />
-          </UFormField>
-          <div class="flex justify-end gap-2">
-            <UButton color="neutral" variant="soft" @click="cancelModalOpen = false">{{ t('common.back') }}</UButton>
-            <UButton color="error" :loading="cancelling" @click="onCancelConfirm">{{ t('entities.sales.cancel') }}</UButton>
-          </div>
-        </div>
-      </template>
-    </UModal>
+    <SaleCancelModal ref="cancelModal" @cancelled="onSaleCancelled" />
+    <SaleInvoiceModal ref="invoiceModal" />
   </div>
 </template>

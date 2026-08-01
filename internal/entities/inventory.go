@@ -11,9 +11,12 @@ type Inventory struct {
 	ID          string
 	SKUID       string
 	WarehouseID string
-	Quantity    int64
-	UpdatedAt   time.Time
-	Etag        string // OCC token; rolled on every ApplyMovement
+	// Quantity is in hundredths of a unit (basis-points convention, same as
+	// ProductPrice.PriceAmount) — 216 means 2.16 units in stock. See
+	// SaleItem.Quantity/InventoryMovement.Quantity, which share this scale.
+	Quantity  int64
+	UpdatedAt time.Time
+	Etag      string // OCC token; rolled on every ApplyMovement
 }
 
 // InventoryListSortField is int32-aligned with

@@ -18,6 +18,7 @@ const props = defineProps({
   rowTo: { type: Function, default: null }, // (item) => route path
 })
 const emit = defineEmits(['view', 'edit'])
+const slots = useSlots()
 
 const { t } = useI18n()
 const config = getEntityConfig(props.entity)
@@ -40,7 +41,11 @@ const pendingDelete = ref(null)
 // permission, so the pencil never renders.
 const canUpdate = computed(() => !props.rowTo && can(config.permissions.update))
 const canDelete = computed(() => can(config.permissions.delete))
-const showActions = computed(() => canUpdate.value || canDelete.value)
+// #row-actions (e.g. Sale's edit/invoice/cancel icon shortcuts, none of
+// which are the generic update/delete this component otherwise renders)
+// lets a host add its own per-row action icons without this component
+// knowing anything sale-specific.
+const showActions = computed(() => canUpdate.value || canDelete.value || !!slots['row-actions'])
 
 function plainValue(col, item) {
   return item[col.key]
@@ -63,8 +68,9 @@ function filterPayload() {
     }
     if (filterDef.type === 'numberRange') {
       delete payload[filterDef.key]
-      if (value?.min != null) payload[filterDef.minKey] = value.min
-      if (value?.max != null) payload[filterDef.maxKey] = value.max
+      const scale = filterDef.scale || 1
+      if (value?.min != null) payload[filterDef.minKey] = Math.round(value.min * scale)
+      if (value?.max != null) payload[filterDef.maxKey] = Math.round(value.max * scale)
       continue
     }
     if (value == null || (Array.isArray(value) && value.length === 0)) {
@@ -228,6 +234,7 @@ onMounted(() => load(true))
                   :aria-label="t('common.delete')"
                   @click="onDeleteClick(item)"
                 />
+                <slot name="row-actions" :item="item" />
               </div>
             </td>
           </tr>
@@ -266,6 +273,7 @@ onMounted(() => load(true))
               :aria-label="t('common.delete')"
               @click="onDeleteClick(item)"
             />
+            <slot name="row-actions" :item="item" />
           </div>
         </div>
       </div>

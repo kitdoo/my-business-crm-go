@@ -898,10 +898,12 @@ func (x *SalesListRequest_Options) GetIncludeTotalCount() bool {
 }
 
 type SaleCreateRequest_Item struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	SkuId              string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
-	Quantity           int64                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	DiscountPercentage int32                  `protobuf:"varint,3,opt,name=discountPercentage,proto3" json:"discountPercentage,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	SkuId string                 `protobuf:"bytes,1,opt,name=skuId,proto3" json:"skuId,omitempty"`
+	// Hundredths of a unit — e.g. 216 for 2.16 m². See
+	// crm.types.sale.SaleItem.quantity.
+	Quantity           int64 `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	DiscountPercentage int32 `protobuf:"varint,3,opt,name=discountPercentage,proto3" json:"discountPercentage,omitempty"`
 	// Each item is fulfilled from its own warehouse — a sale can draw
 	// different lines from different warehouses.
 	WarehouseId   string `protobuf:"bytes,4,opt,name=warehouseId,proto3" json:"warehouseId,omitempty"`

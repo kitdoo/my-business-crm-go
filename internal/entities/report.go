@@ -31,7 +31,8 @@ type SalesByPartnerRow struct {
 
 // PopularProductRow ranks a SKU by quantity sold over the period.
 type PopularProductRow struct {
-	SKUID        string
+	SKUID string
+	// QuantitySold is in hundredths of a unit — see SaleItem.Quantity.
 	QuantitySold int64
 	TotalAmount  int64
 }
@@ -47,5 +48,6 @@ type TurnoverRow struct {
 type StockLevelRow struct {
 	SKUID       string
 	WarehouseID string
-	Quantity    int64
+	// Quantity is in hundredths of a unit — see Inventory.Quantity.
+	Quantity int64
 }

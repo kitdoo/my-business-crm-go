@@ -189,4 +189,20 @@ var (
 	// ErrImageNotFound is returned when an uploaded-image metadata lookup
 	// finds no row for the given id.
 	ErrImageNotFound = errors.New("image not found")
+
+	// ErrInvoiceNotConfigured is returned by InvoicesService.Generate when
+	// CRMConfig.Invoice is unset — there is no seller letterhead/terms/VAT
+	// rate to render an invoice with.
+	ErrInvoiceNotConfigured = errors.New("invoice not configured")
+
+	// ErrInvoiceSaleHasNoBuyer is returned when the Sale being invoiced has
+	// neither a ClientID nor a PartnerID to address the invoice to — should
+	// never happen in practice (SalesService.Create requires one), but
+	// Generate checks explicitly rather than rendering a blank buyer block.
+	ErrInvoiceSaleHasNoBuyer = errors.New("sale has no client or partner to invoice")
+
+	// ErrInvoiceReceiptRequiresPayment is returned by InvoicesService.Generate
+	// when DocumentType is Receipt but the Sale is still SaleStatusDraft —
+	// nothing has been paid yet to receipt.
+	ErrInvoiceReceiptRequiresPayment = errors.New("receipt requires a paid sale")
 )

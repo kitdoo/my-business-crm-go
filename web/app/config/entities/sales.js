@@ -31,9 +31,6 @@ export default {
       { key: 'statuses', type: 'multiselect', label: 'fields.status', optionsFrom: 'enum:SaleStatus' },
       { key: 'createdAt', type: 'periodFilter', label: 'fields.createdAt' },
     ],
-    // Draft sales are the ones still needing attention, so that's what a
-    // seller/manager should land on — not the whole history.
-    defaultFilter: { statuses: ['SALE_STATUS_DRAFT'] },
     sort: [{ field: 'FIELD_CREATED_AT', label: 'sort.createdAt' }],
     defaultSort: { field: 'FIELD_CREATED_AT', direction: 'SORT_DIRECTION_DESC' },
   },

@@ -23,13 +23,15 @@ const (
 // Read-only — see InventoryMovementsService for writes.
 // Unique per (skuId, warehouseId).
 type Inventory struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,2,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
-	SkuId         string                 `protobuf:"bytes,3,opt,name=skuId,proto3" json:"skuId,omitempty"`
-	WarehouseId   string                 `protobuf:"bytes,4,opt,name=warehouseId,proto3" json:"warehouseId,omitempty"`
-	Quantity      int64                  `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	Etag          string                 `protobuf:"bytes,101,opt,name=etag,proto3" json:"etag,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Id          string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UpdatedAt   int64                  `protobuf:"varint,2,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
+	SkuId       string                 `protobuf:"bytes,3,opt,name=skuId,proto3" json:"skuId,omitempty"`
+	WarehouseId string                 `protobuf:"bytes,4,opt,name=warehouseId,proto3" json:"warehouseId,omitempty"`
+	// Hundredths of a unit (basis-points convention, same as
+	// ProductPrice.priceAmount) — 216 means 2.16 units in stock.
+	Quantity      int64  `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Etag          string `protobuf:"bytes,101,opt,name=etag,proto3" json:"etag,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

@@ -33,7 +33,13 @@ export const ROLE_PERMISSIONS = {
   // these read-visible entities show up as menu items (config/navigation.js
   // ROLE_MENU_KEYS) — the extra reads here back relation lookups (brand
   // name on a product card, etc), not menu entries.
-  employee: [...ALL_READ.filter((p) => p !== 'users:read'), 'sales:create', 'sales:update'],
+  employee: [
+    ...ALL_READ.filter((p) => p !== 'users:read'),
+    'sales:create',
+    'sales:update',
+    'invoices:generate',
+    'salesreport:generate',
+  ],
   // Full read access, no mutations at all — every create/update/delete
   // control in the UI is gated through can() and stays hidden.
   guest: ALL_READ,

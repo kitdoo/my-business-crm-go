@@ -30,6 +30,8 @@ message Sale {
 
 message SaleItem {
   string skuId = 1;
+  // Hundredths of a unit (basis-points convention, same as priceAmount) —
+  // 216 means 2.16.
   int64 quantity = 2;
   int64 priceAmount = 3;
   // Always 0-100, never a fixed amount.

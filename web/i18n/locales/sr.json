@@ -88,7 +88,18 @@
       "cancel": "Otkaži prodaju",
       "cancelConfirmTitle": "Otkazivanje prodaje",
       "cancelConfirmBody": "Zaliha će automatski biti vraćena u magacin.",
-      "cancelReason": "Razlog"
+      "cancelReason": "Razlog",
+      "generateInvoice": "Generiši ponudu",
+      "generateReceipt": "Generiši račun",
+      "invoiceIncludeVat": "Uključi PDV",
+      "invoiceSendEmail": "Pošalji kupcu na email",
+      "report": "Izveštaj",
+      "reportPeriod1m": "Poslednji 1 mesec",
+      "reportPeriod3m": "Poslednja 3 meseca",
+      "reportPeriod6m": "Poslednjih 6 meseci",
+      "reportPeriod1y": "Poslednja 1 godina",
+      "reportGenerating": "Generisanje izveštaja…",
+      "reportError": "Neuspešno generisanje izveštaja"
     }
   },
   "fields": {
@@ -101,6 +112,9 @@
     "email": "Email",
     "address": "Adresa",
     "website": "Veb-sajt",
+    "taxId": "PIB",
+    "registrationNumber": "Matični broj",
+    "code": "Šifra kupca",
     "note": "Napomena",
     "commissionPercentage": "Provizija, %",
     "lastName": "Prezime",
@@ -223,7 +237,8 @@
     "addCharacteristic": "Dodaj karakteristiku",
     "next": "Dalje",
     "back": "Nazad",
-    "retry": "Pokušaj ponovo"
+    "retry": "Pokušaj ponovo",
+    "moreInformation": "Više informacija"
   },
   "dashboard": {
     "salesAmount": "Iznos prodaje za period",

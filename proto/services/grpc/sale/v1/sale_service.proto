@@ -68,6 +68,8 @@ message SalesListResponse {
 message SaleCreateRequest {
   message Item {
     string skuId = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+    // Hundredths of a unit — e.g. 216 for 2.16 m². See
+    // crm.types.sale.SaleItem.quantity.
     int64 quantity = 2 [(buf.validate.field).required = true, (buf.validate.field).int64.gt = 0];
     int32 discountPercentage = 3 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
     // Each item is fulfilled from its own warehouse — a sale can draw
