@@ -10,6 +10,10 @@ export const ENUMS = {
     values: ['PARTNER_STATUS_ACTIVE', 'PARTNER_STATUS_INACTIVE'],
     labelKey: (value) => `enums.partnerStatus.${value}`,
   },
+  PartnerType: {
+    values: ['PARTNER_TYPE_PARTNER', 'PARTNER_TYPE_DEALER'],
+    labelKey: (value) => `enums.partnerType.${value}`,
+  },
   CategoryStatus: {
     values: ['CATEGORY_STATUS_ACTIVE', 'CATEGORY_STATUS_INACTIVE'],
     labelKey: (value) => `enums.categoryStatus.${value}`,
@@ -25,6 +29,10 @@ export const ENUMS = {
   ProductStatus: {
     values: ['PRODUCT_STATUS_DRAFT', 'PRODUCT_STATUS_ACTIVE', 'PRODUCT_STATUS_INACTIVE'],
     labelKey: (value) => `enums.productStatus.${value}`,
+  },
+  PriceUnit: {
+    values: ['PRICE_UNIT_PIECE', 'PRICE_UNIT_SQUARE_METER'],
+    labelKey: (value) => `enums.priceUnit.${value}`,
   },
   ProductVariantStatus: {
     values: ['PRODUCT_VARIANT_STATUS_DRAFT', 'PRODUCT_VARIANT_STATUS_ACTIVE', 'PRODUCT_VARIANT_STATUS_INACTIVE'],

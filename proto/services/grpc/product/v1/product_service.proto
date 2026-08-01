@@ -88,6 +88,7 @@ message ProductCreateRequest {
   string brandId = 4 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   repeated string categoryIds = 5 [(buf.validate.field).repeated.items.string.uuid = true];
   map<string, crm.types.common.LocalizedString> details = 6;
+  crm.types.product.PriceUnit priceUnit = 7 [(buf.validate.field).required = true, (buf.validate.field).enum.defined_only = true];
   optional Options options = 99;
 }
 
@@ -110,6 +111,7 @@ message ProductUpdateRequest {
   reserved 7;
   reserved "imageIds";
   optional crm.types.product.ProductStatus status = 8 [(buf.validate.field).enum.defined_only = true];
+  optional crm.types.product.PriceUnit priceUnit = 9 [(buf.validate.field).enum.defined_only = true];
   optional Options options = 99;
 }
 

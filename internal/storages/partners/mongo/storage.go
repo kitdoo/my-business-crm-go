@@ -26,6 +26,7 @@ const (
 	FieldName      = "name"
 	FieldPhone     = "phone"
 	FieldStatus    = "status"
+	FieldType      = "type"
 	FieldIsPublic  = "is_public"
 	FieldCreatedAt = "created_at"
 	FieldUpdatedAt = "updated_at"
@@ -48,6 +49,7 @@ type model struct {
 	Website              string                 `bson:"website"`
 	DiscountPercentage   int32                  `bson:"discount_percentage"`
 	IsPublic             bool                   `bson:"is_public"`
+	Type                 entities.PartnerType   `bson:"type"`
 	CreatedAt            time.Time              `bson:"created_at,omitonupdate"`
 	UpdatedAt            time.Time              `bson:"updated_at"`
 	DeletedAt            *time.Time             `bson:"deleted_at,omitonupdate"`
@@ -187,6 +189,9 @@ func (s *Storage) List(ctx context.Context, in *entities.PartnersList) (*entitie
 	filter := activeOnly(bson.M{})
 	if len(in.Statuses) > 0 {
 		filter[FieldStatus] = bson.M{"$in": in.Statuses}
+	}
+	if len(in.Types) > 0 {
+		filter[FieldType] = bson.M{"$in": in.Types}
 	}
 	if in.IsPublic != nil {
 		filter[FieldIsPublic] = *in.IsPublic

@@ -186,7 +186,13 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
           <LocalizedText :value="product.name" />
           <span v-if="activeGeneration" class="text-sm font-normal text-black/40"><LocalizedText :value="activeGeneration" /></span>
         </h1>
-        <MoneyLabel v-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="text-xl font-semibold text-brand-700 block mb-3" />
+        <MoneyLabel
+          v-if="activeSku.price"
+          :amount="activeSku.price.amount"
+          :currency="activeSku.price.currency"
+          :unit="product.priceUnit"
+          class="text-xl font-semibold text-brand-700 block mb-3"
+        />
         <StatusBadge :available="activeSku.inStock" class="mb-6 inline-block" />
 
         <p class="text-black/70 leading-relaxed mb-6"><LocalizedText :value="product.description" /></p>

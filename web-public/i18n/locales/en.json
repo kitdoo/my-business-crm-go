@@ -124,6 +124,10 @@
     "otherVariants": "Other options",
     "moreVariants": "+{n}",
     "skuOptions": "Size",
+    "priceUnit": {
+      "piece": "pc",
+      "squareMeter": "m²"
+    },
     "intro": "PHOMI offers a wide range of materials — stone, wood, brick and concrete looks, as well as solar and display panels — all in one lightweight, flexible system. Equally suited to facades and interiors, delivering a modern look with fast, easy installation.",
     "sort": {
       "label": "Sort by",
@@ -137,15 +141,24 @@
     "pageOf": "Page {page} of {total}"
   },
   "dealer": {
-    "intro": "Fill in the form and our team will contact you about partnership.",
+    "intro": "Fill in the form and our team will contact you about collaboration — let us know which type interests you.",
     "thanksTitle": "Thank you for applying!",
     "thanksText": "Your request has been received. We will contact you soon.",
-    "whyTitle": "Why become a PHOMI partner?",
-    "whyText1": "We are actively growing our distributor network in Serbia and the region, offering a product with over 4,000 designs, fast installation and proven demand in the facade and interior market.",
-    "whyText2": "Partners get retail and wholesale support, marketing materials and access to the full PHOMI catalog — join a network that is already growing worldwide.",
+    "whyTitle": "Why join the PHOMI network?",
+    "whyText1": "We are actively growing our network of partners and dealers in Serbia and the region, offering a product with over 4,000 designs, fast installation and proven demand in the facade and interior market.",
+    "whyText2": "We're open to different forms of collaboration — whether you already run a store or are planning to open a new one, the PHOMI network is growing worldwide and has room for you.",
+    "compareTitle": "Which type of collaboration fits you?",
+    "partnerCardTitle": "Partner",
+    "partnerCardText": "Already run a store and want to expand your range? As a partner you get PHOMI material samples and a partner discount — no investment or extra commitments, PHOMI simply becomes part of your existing offer.",
+    "dealerCardTitle": "Dealer",
+    "dealerCardText": "Planning to open a space dedicated to the PHOMI brand? Dealers get special supply terms, marketing support and, depending on the region, exclusivity — in return we expect commitment to the brand and to the agreed terms of collaboration.",
     "partnersTitle": "Our current partners",
-    "partnersEmpty": "No partners to show yet.",
-    "partnersError": "The partner list is currently unavailable."
+    "partnersEmpty": "We don't have any partners in this region yet — be the first.",
+    "partnersError": "The partner list is currently unavailable.",
+    "dealersTitle": "Our dealers",
+    "dealersEmpty": "We don't have any dealers in this region yet — be the first.",
+    "dealersError": "The dealer list is currently unavailable.",
+    "becomeCta": "Apply here."
   },
   "contact": {
     "thanks": "Thank you! Your message has been sent.",

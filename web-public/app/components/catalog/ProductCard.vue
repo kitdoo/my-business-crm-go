@@ -163,7 +163,13 @@ function decrement() {
 
       <div class="mt-auto pt-2">
         <div v-if="!stockKnown" class="h-5 w-16 rounded bg-black/5 animate-pulse" />
-        <MoneyLabel v-else-if="activeSku.price" :amount="activeSku.price.amount" :currency="activeSku.price.currency" class="font-semibold text-brand-700" />
+        <MoneyLabel
+          v-else-if="activeSku.price"
+          :amount="activeSku.price.amount"
+          :currency="activeSku.price.currency"
+          :unit="product.priceUnit"
+          class="font-semibold text-brand-700"
+        />
 
         <div class="mt-2 flex items-center justify-between gap-2">
           <div v-if="!stockKnown" class="h-5 w-20 rounded-full bg-black/5 animate-pulse" />

@@ -98,6 +98,7 @@ export default defineEventHandler(async (event) => {
     sku: currentSku.sku,
     name: product.name,
     description: product.description,
+    priceUnit: product.priceUnit,
     details,
     imageIds: currentVariant.imageIds,
     price: currentSkuCard?.price ?? null,

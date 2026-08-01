@@ -21,15 +21,19 @@ export default {
     idsFilterKey: 'ids',
     columns: [
       { key: 'name', label: 'fields.name' },
+      { key: 'type', label: 'fields.type', component: 'StatusBadge', statusMap: 'partnerType' },
       { key: 'phone', label: 'fields.phone' },
       { key: 'email', label: 'fields.email' },
       { key: 'discountPercentage', label: 'fields.discountPercentage' },
       { key: 'commissionPercentage', label: 'fields.commissionPercentage' },
       { key: 'status', label: 'fields.status', component: 'StatusBadge', statusMap: 'partner' },
     ],
-    filters: [{ key: 'statuses', type: 'select', label: 'fields.status', optionsFrom: 'enum:PartnerStatus' }],
+    filters: [
+      { key: 'statuses', type: 'select', label: 'fields.status', optionsFrom: 'enum:PartnerStatus' },
+      { key: 'types', type: 'select', label: 'fields.type', optionsFrom: 'enum:PartnerType' },
+    ],
     // Scalar — the `select` filter type is single-choice; filterPayload()
-    // wraps it into the repeated `statuses` wire field.
+    // wraps it into the repeated `statuses`/`types` wire fields.
     defaultFilter: { statuses: 'PARTNER_STATUS_ACTIVE' },
     sort: [
       { field: 'FIELD_CREATED_AT', label: 'sort.createdAt' },
@@ -47,6 +51,7 @@ export default {
   form: {
     fields: [
       { key: 'name', type: 'text', label: 'fields.name', required: true, maxLength: 255 },
+      { key: 'type', type: 'enum', enum: 'PartnerType', label: 'fields.type', required: true },
       { key: 'phone', type: 'text', label: 'fields.phone', required: true, maxLength: 32 },
       { key: 'email', type: 'text', label: 'fields.email', required: true, inputType: 'email' },
       { key: 'address', type: 'text', label: 'fields.address', maxLength: 500 },

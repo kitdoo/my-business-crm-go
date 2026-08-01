@@ -27,6 +27,11 @@ message Partner {
   // public website's dealer-network listing). false hides it there while
   // remaining fully visible/usable in the admin.
   bool isPublic = 14;
+  // Distinguishes an existing store carrying PHOMI as one of several brands
+  // (PARTNER) from a store opening specifically as a PHOMI-branded outlet
+  // under separate terms (DEALER). Purely descriptive — does not change how
+  // commissionPercentage/discountPercentage are applied.
+  PartnerType type = 15;
   string etag = 101;
 }
 
@@ -34,4 +39,10 @@ enum PartnerStatus {
   PARTNER_STATUS_UNSPECIFIED = 0;
   PARTNER_STATUS_ACTIVE = 1;
   PARTNER_STATUS_INACTIVE = 2;
+}
+
+enum PartnerType {
+  PARTNER_TYPE_UNSPECIFIED = 0;
+  PARTNER_TYPE_PARTNER = 1;
+  PARTNER_TYPE_DEALER = 2;
 }

@@ -26,6 +26,12 @@ message Product {
   // (color, size, ...) live on ProductVariant.attributes instead.
   map<string, crm.types.common.LocalizedString> details = 10;
   ProductStatus status = 12;
+  // Unit the SKU price is quoted per (piece/board vs square meter) — shown
+  // next to the price on the public site. Almost every product is priced
+  // per piece; a few (e.g. facing brick) are priced per m² instead, which
+  // used to be a source of confusion since ProductPrice itself carries no
+  // unit of its own.
+  PriceUnit priceUnit = 13;
   string etag = 101;
 }
 
@@ -34,4 +40,10 @@ enum ProductStatus {
   PRODUCT_STATUS_DRAFT = 1;
   PRODUCT_STATUS_ACTIVE = 2;
   PRODUCT_STATUS_INACTIVE = 3;
+}
+
+enum PriceUnit {
+  PRICE_UNIT_UNSPECIFIED = 0;
+  PRICE_UNIT_PIECE = 1;
+  PRICE_UNIT_SQUARE_METER = 2;
 }

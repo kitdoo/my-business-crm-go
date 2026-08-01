@@ -96,6 +96,9 @@ func (h *Handler) List(ctx context.Context, in *partnersvcpb.PartnersListRequest
 		listIn.Statuses = coreslices.To(f.GetStatuses(), func(s partnerpb.PartnerStatus) entities.PartnerStatus {
 			return entities.PartnerStatus(s)
 		})
+		listIn.Types = coreslices.To(f.GetTypes(), func(t partnerpb.PartnerType) entities.PartnerType {
+			return entities.PartnerType(t)
+		})
 		listIn.IDs = f.GetIds()
 		if p := f.GetCreatedAt(); p != nil {
 			listIn.CreatedAt = converter.Convert(p, &entities.PeriodFilter{}, withUnixTimeCodec)
@@ -146,6 +149,7 @@ func (h *Handler) ListPublic(ctx context.Context, _ *partnersvcpb.PartnersListPu
 				Phone:   p.Phone,
 				Email:   p.Email,
 				Address: p.Address,
+				Type:    partnerpb.PartnerType(p.Type),
 			}
 		}),
 	}, nil

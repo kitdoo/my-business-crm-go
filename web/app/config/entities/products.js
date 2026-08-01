@@ -42,6 +42,7 @@ export default {
       { key: 'name', label: 'fields.name', component: 'LocalizedText' },
       { key: 'brandId', label: 'fields.brand', component: 'RelationLabel', relation: 'brands' },
       { key: 'categoryIds', label: 'fields.categories', component: 'RelationListLabel', relation: 'categories' },
+      { key: 'priceUnit', label: 'fields.priceUnit', component: 'StatusBadge', statusMap: 'priceUnit' },
       { key: 'status', label: 'fields.status', component: 'StatusBadge', statusMap: 'product' },
     ],
     filters: [
@@ -68,6 +69,7 @@ export default {
       { key: 'categoryIds', type: 'relationMulti', relation: 'categories', label: 'fields.categories' },
       { key: 'name', type: 'localizedString', label: 'fields.name', required: true },
       { key: 'description', type: 'localizedString', label: 'fields.description' },
+      { key: 'priceUnit', type: 'enum', enum: 'PriceUnit', label: 'fields.priceUnit', required: true },
       { key: 'details', type: 'attributeDetails', label: 'fields.details' },
       { key: 'status', type: 'enum', enum: 'ProductStatus', label: 'fields.status', editOnly: true },
     ],

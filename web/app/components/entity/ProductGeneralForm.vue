@@ -31,8 +31,11 @@ const { can } = usePermission()
 const api = useEntityApi('products')
 const { handle } = useApiErrorHandler()
 
+// priceUnit defaults to Piece — almost every product is priced per piece,
+// only a few (e.g. facing brick) per m² — so a new product doesn't fail
+// Create's required validation just because the field was left untouched.
 const { form, etag, loading, saving, fieldErrors, etagConflict, isCreate, load, save, reloadAfterConflict } =
-  useEntityForm('products', props.id, {})
+  useEntityForm('products', props.id, { priceUnit: 'PRICE_UNIT_PIECE' })
 
 const locked = ref(!isCreate)
 const confirmDeleteOpen = ref(false)
@@ -144,6 +147,15 @@ async function onDelete() {
             :disabled="locked"
           />
         </div>
+
+        <UFormField :label="t('fields.priceUnit')" :error="fieldErrors.priceUnit" class="max-w-xs">
+          <USelect
+            v-model="form.priceUnit"
+            :items="getEnumOptions('PriceUnit').map((v) => ({ label: t(`enums.status.${v}`), value: v }))"
+            :disabled="locked"
+            class="w-full"
+          />
+        </UFormField>
 
         <UFormField v-if="!isCreate" :label="t('fields.status')" :error="fieldErrors.status" class="max-w-xs">
           <USelect

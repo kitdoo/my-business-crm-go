@@ -118,6 +118,7 @@ async function toCards(products, publicKeys, { includePriceStock }) {
         id: product.id,
         sku: representativeSku.sku,
         name: product.name,
+        priceUnit: product.priceUnit,
         imageIds: representativeVariant.imageIds,
         price: representativeSku.price,
         // The representative SKU's own stock (used for its own card badge

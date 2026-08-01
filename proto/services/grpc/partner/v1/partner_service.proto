@@ -55,6 +55,7 @@ message PartnersListRequest {
     // Batch lookup by id — lets callers resolve several known partners in
     // one List call instead of one Get per id (e.g. RelationLabel).
     repeated string ids = 4 [(buf.validate.field).repeated.items.string.uuid = true];
+    repeated crm.types.partner.PartnerType types = 5 [(buf.validate.field).repeated.unique = true];
   }
   optional Filter filter = 3;
   message Options {
@@ -83,6 +84,7 @@ message PartnerCreateRequest {
   string website = 7 [(buf.validate.field).string.max_len = 255];
   int32 discountPercentage = 8 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   bool isPublic = 9;
+  crm.types.partner.PartnerType type = 10 [(buf.validate.field).required = true, (buf.validate.field).enum.defined_only = true];
   optional Options options = 99;
 }
 
@@ -106,6 +108,7 @@ message PartnerUpdateRequest {
   optional string website = 9 [(buf.validate.field).string.max_len = 255];
   optional int32 discountPercentage = 10 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 100];
   optional bool isPublic = 11;
+  optional crm.types.partner.PartnerType type = 12 [(buf.validate.field).enum.defined_only = true];
   optional Options options = 99;
 }
 
@@ -130,6 +133,7 @@ message PartnerPublic {
   string phone = 2;
   string email = 3;
   string address = 4;
+  crm.types.partner.PartnerType type = 5;
 }
 
 message PartnersListPublicRequest {}

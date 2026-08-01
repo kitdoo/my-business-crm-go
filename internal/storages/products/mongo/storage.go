@@ -31,6 +31,7 @@ const (
 	FieldBrandID    = "brand_id"
 	FieldCategoryID = "category_ids"
 	FieldStatus     = "status"
+	FieldPriceUnit  = "price_unit"
 	FieldHasStock   = "has_stock"
 	FieldCreatedAt  = "created_at"
 	FieldUpdatedAt  = "updated_at"
@@ -49,6 +50,7 @@ type model struct {
 	CategoryIDs []string                            `bson:"category_ids"`
 	Details     map[string]entities.LocalizedString `bson:"details"`
 	Status      entities.ProductStatus              `bson:"status"`
+	PriceUnit   entities.PriceUnit                  `bson:"price_unit"`
 	HasStock    bool                                `bson:"has_stock"`
 	CreatedAt   time.Time                           `bson:"created_at,omitonupdate"`
 	UpdatedAt   time.Time                           `bson:"updated_at"`

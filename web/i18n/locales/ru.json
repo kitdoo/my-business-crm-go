@@ -94,6 +94,7 @@
   "fields": {
     "name": "Название",
     "description": "Описание",
+    "priceUnit": "Единица цены",
     "status": "Статус",
     "createdAt": "Создан",
     "phone": "Телефон",
@@ -135,7 +136,8 @@
     "discountPercentage": "Скидка, %",
     "discountPercentageHint": "Применяется автоматически, когда партнёр покупает сам (без клиента)",
     "commissionPercentageHint": "Начисляется партнёру, когда он привёл продажу клиенту",
-    "isPublic": "Публичный (виден на сайте)"
+    "isPublic": "Публичный (виден на сайте)",
+    "type": "Тип"
   },
   "sort": {
     "createdAt": "По дате создания",
@@ -170,6 +172,9 @@
       "PRODUCT_STATUS_ACTIVE": "Активен",
       "PRODUCT_STATUS_INACTIVE": "Неактивен",
       "PRODUCT_STATUS_UNSPECIFIED": "Не указано",
+      "PRICE_UNIT_PIECE": "За штуку",
+      "PRICE_UNIT_SQUARE_METER": "За м²",
+      "PRICE_UNIT_UNSPECIFIED": "Не указано",
       "PRODUCT_VARIANT_STATUS_DRAFT": "Черновик",
       "PRODUCT_VARIANT_STATUS_ACTIVE": "Активен",
       "PRODUCT_VARIANT_STATUS_INACTIVE": "Неактивен",
@@ -190,7 +195,10 @@
       "SALE_STATUS_COMPLETED": "Завершён",
       "SALE_STATUS_CANCELLED": "Отменён",
       "SALE_STATUS_REFUNDED": "Возврат",
-      "SALE_STATUS_UNSPECIFIED": "Не указано"
+      "SALE_STATUS_UNSPECIFIED": "Не указано",
+      "PARTNER_TYPE_PARTNER": "Партнёр",
+      "PARTNER_TYPE_DEALER": "Дилер",
+      "PARTNER_TYPE_UNSPECIFIED": "Не указано"
     }
   },
   "common": {

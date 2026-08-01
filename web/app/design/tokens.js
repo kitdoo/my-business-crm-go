@@ -57,6 +57,11 @@ export const STATUS_COLOR_MAP = {
     PARTNER_STATUS_INACTIVE: 'inactive',
     PARTNER_STATUS_UNSPECIFIED: 'inactive',
   },
+  partnerType: {
+    PARTNER_TYPE_PARTNER: 'info',
+    PARTNER_TYPE_DEALER: 'warning',
+    PARTNER_TYPE_UNSPECIFIED: 'inactive',
+  },
   category: {
     CATEGORY_STATUS_ACTIVE: 'active',
     CATEGORY_STATUS_INACTIVE: 'inactive',
@@ -77,6 +82,11 @@ export const STATUS_COLOR_MAP = {
     PRODUCT_STATUS_ACTIVE: 'active',
     PRODUCT_STATUS_INACTIVE: 'inactive',
     PRODUCT_STATUS_UNSPECIFIED: 'inactive',
+  },
+  priceUnit: {
+    PRICE_UNIT_PIECE: 'info',
+    PRICE_UNIT_SQUARE_METER: 'warning',
+    PRICE_UNIT_UNSPECIFIED: 'inactive',
   },
   productVariant: {
     PRODUCT_VARIANT_STATUS_DRAFT: 'warning',

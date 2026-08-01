@@ -13,11 +13,18 @@ service PartnersService {
   rpc ListPublic (PartnersListPublicRequest) returns (PartnersListPublicResponse) {}
 }
 
+enum PartnerType {
+  PARTNER_TYPE_UNSPECIFIED = 0;
+  PARTNER_TYPE_PARTNER = 1;
+  PARTNER_TYPE_DEALER = 2;
+}
+
 message PartnerPublic {
   string name = 1;
   string phone = 2;
   string email = 3;
   string address = 4;
+  PartnerType type = 5;
 }
 
 message PartnersListPublicRequest {}

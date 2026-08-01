@@ -18,6 +18,16 @@ const (
 	PartnerStatusInactive
 )
 
+// PartnerType is int32-aligned with crm.types.partner.PartnerType so
+// converter.Convert maps it both ways as a plain scalar.
+type PartnerType int32
+
+const (
+	PartnerTypeUnspecified PartnerType = iota
+	PartnerTypePartner
+	PartnerTypeDealer
+)
+
 // Partner is a reseller who earns a commission on sales made under their
 // account. Name/Phone/Note are factual data, not localized.
 type Partner struct {
@@ -40,7 +50,11 @@ type Partner struct {
 	DiscountPercentage int32
 	// IsPublic controls visibility in PartnersService.ListPublic (the
 	// public website's dealer-network listing).
-	IsPublic  bool
+	IsPublic bool
+	// Type distinguishes an existing store carrying PHOMI as one of several
+	// brands (Partner) from a store opening specifically as a PHOMI-branded
+	// outlet under separate terms (Dealer).
+	Type      PartnerType
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time // nil = active
@@ -49,9 +63,10 @@ type Partner struct {
 
 // PartnerNew creates a Partner with a fresh ID, timestamps, and etag.
 // Status defaults to Active — Create has no status field on the wire, so
-// this is the only place a newly created partner's status is set.
+// this is the only place a newly created partner's status is set. Type
+// defaults to Partner, the more common case.
 func PartnerNew(init ...func(*Partner)) *Partner {
-	p := &Partner{ID: uuid.NewString(), Status: PartnerStatusActive}
+	p := &Partner{ID: uuid.NewString(), Status: PartnerStatusActive, Type: PartnerTypePartner}
 	if len(init) > 0 {
 		init[0](p)
 	}
@@ -87,6 +102,7 @@ type PartnerCreate struct {
 	Website              string `normalize:"trim"`
 	DiscountPercentage   int32
 	IsPublic             bool
+	Type                 PartnerType
 }
 
 func (c *PartnerCreate) Merge(dst *Partner) *Partner {
@@ -110,6 +126,7 @@ type PartnerUpdate struct {
 	Website              *string `normalize:"trim,nil_on_empty"`
 	DiscountPercentage   *int32
 	IsPublic             *bool
+	Type                 *PartnerType
 	Etag                 *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
 
@@ -144,6 +161,7 @@ type PartnersListSort struct {
 // live inside it, per the List(ctx, in *XxxList) convention.
 type PartnersList struct {
 	Statuses          []PartnerStatus
+	Types             []PartnerType
 	IsPublic          *bool
 	IDs               []string
 	CreatedAt         *PeriodFilter

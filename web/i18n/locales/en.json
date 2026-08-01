@@ -94,6 +94,7 @@
   "fields": {
     "name": "Name",
     "description": "Description",
+    "priceUnit": "Price unit",
     "status": "Status",
     "createdAt": "Created",
     "phone": "Phone",
@@ -135,7 +136,8 @@
     "discountPercentage": "Discount, %",
     "discountPercentageHint": "Applied automatically when the partner buys directly (no client)",
     "commissionPercentageHint": "Paid to the partner when they refer a client's sale",
-    "isPublic": "Public (shown on the website)"
+    "isPublic": "Public (shown on the website)",
+    "type": "Type"
   },
   "sort": {
     "createdAt": "By creation date",
@@ -170,6 +172,9 @@
       "PRODUCT_STATUS_ACTIVE": "Active",
       "PRODUCT_STATUS_INACTIVE": "Inactive",
       "PRODUCT_STATUS_UNSPECIFIED": "Unspecified",
+      "PRICE_UNIT_PIECE": "Per piece",
+      "PRICE_UNIT_SQUARE_METER": "Per m²",
+      "PRICE_UNIT_UNSPECIFIED": "Unspecified",
       "PRODUCT_VARIANT_STATUS_DRAFT": "Draft",
       "PRODUCT_VARIANT_STATUS_ACTIVE": "Active",
       "PRODUCT_VARIANT_STATUS_INACTIVE": "Inactive",
@@ -190,7 +195,10 @@
       "SALE_STATUS_COMPLETED": "Completed",
       "SALE_STATUS_CANCELLED": "Cancelled",
       "SALE_STATUS_REFUNDED": "Refunded",
-      "SALE_STATUS_UNSPECIFIED": "Unspecified"
+      "SALE_STATUS_UNSPECIFIED": "Unspecified",
+      "PARTNER_TYPE_PARTNER": "Partner",
+      "PARTNER_TYPE_DEALER": "Dealer",
+      "PARTNER_TYPE_UNSPECIFIED": "Unspecified"
     }
   },
   "common": {

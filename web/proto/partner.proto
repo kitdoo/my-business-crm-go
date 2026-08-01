@@ -27,6 +27,10 @@ message Partner {
   int32 discountPercentage = 13;
   // Whether this partner appears in the public dealer-network listing.
   bool isPublic = 14;
+  // Distinguishes an existing store carrying PHOMI as one of several brands
+  // (PARTNER) from a store opening specifically as a PHOMI-branded outlet
+  // under separate terms (DEALER).
+  PartnerType type = 15;
   string etag = 101;
 }
 
@@ -34,6 +38,12 @@ enum PartnerStatus {
   PARTNER_STATUS_UNSPECIFIED = 0;
   PARTNER_STATUS_ACTIVE = 1;
   PARTNER_STATUS_INACTIVE = 2;
+}
+
+enum PartnerType {
+  PARTNER_TYPE_UNSPECIFIED = 0;
+  PARTNER_TYPE_PARTNER = 1;
+  PARTNER_TYPE_DEALER = 2;
 }
 
 service PartnersService {
@@ -71,6 +81,7 @@ message PartnersListRequest {
     repeated PartnerStatus statuses = 1;
     optional string searchQuery = 2;
     optional crm.types.common.PeriodFilter createdAt = 3;
+    repeated PartnerType types = 5;
   }
   optional Filter filter = 3;
   message Options {
@@ -99,6 +110,7 @@ message PartnerCreateRequest {
   string website = 7;
   int32 discountPercentage = 8;
   bool isPublic = 9;
+  PartnerType type = 10;
   optional Options options = 99;
 }
 
@@ -122,6 +134,7 @@ message PartnerUpdateRequest {
   optional string website = 9;
   optional int32 discountPercentage = 10;
   optional bool isPublic = 11;
+  optional PartnerType type = 12;
   optional Options options = 99;
 }
 

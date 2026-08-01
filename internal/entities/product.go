@@ -20,6 +20,16 @@ const (
 	ProductStatusInactive
 )
 
+// PriceUnit is int32-aligned with crm.types.product.PriceUnit so
+// converter.Convert maps it both ways as a plain scalar.
+type PriceUnit int32
+
+const (
+	PriceUnitUnspecified PriceUnit = iota
+	PriceUnitPiece
+	PriceUnitSquareMeter
+)
+
 // Product is a catalog card grouping one or more ProductVariant — it
 // carries no sku, images, price, or stock; those live on ProductVariant
 // (SKU, ImageIDs) and, per variant, on ProductPrice and Inventory. A
@@ -35,6 +45,9 @@ type Product struct {
 	// characteristics (color, size, …) live on ProductVariant.Attributes.
 	Details   map[string]LocalizedString
 	Status    ProductStatus
+	// PriceUnit is the unit each SKU's price is quoted per (piece vs square
+	// meter) — shown next to the price on the public site.
+	PriceUnit PriceUnit
 	// HasStock is true when any active ProductVariant of this product has
 	// an active ProductSKU with positive Inventory quantity in any
 	// warehouse. It is system-maintained — recomputed by
@@ -85,6 +98,7 @@ type ProductCreate struct {
 	BrandID     string `normalize:"trim"`
 	CategoryIDs []string
 	Details     map[string]LocalizedString
+	PriceUnit   PriceUnit
 }
 
 func (c *ProductCreate) Merge(dst *Product) *Product {
@@ -118,6 +132,7 @@ type ProductUpdate struct {
 	CategoryIDs []string
 	Details     map[string]LocalizedString
 	Status      *ProductStatus
+	PriceUnit   *PriceUnit
 	Etag        *string `normalize:"trim,nil_on_empty"` // client OCC precondition
 }
 

@@ -10,6 +10,7 @@ export default defineEventHandler(async () => {
       phone: p.phone,
       email: p.email,
       address: p.address,
+      type: p.type,
     })),
   }
 })

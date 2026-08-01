@@ -5,7 +5,9 @@ const localePath = useLocalePath()
 const router = useRouter()
 
 const { data: partnersData, error: partnersError } = await useAsyncData('public-partners', () => $fetch('/api/partners'))
-const partners = computed(() => partnersData.value?.items || [])
+const allItems = computed(() => partnersData.value?.items || [])
+const dealers = computed(() => allItems.value.filter((p) => p.type === 'PARTNER_TYPE_DEALER'))
+const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER_TYPE_DEALER'))
 
 useSeoMeta({
   title: t('seo.dealer.title'),
@@ -31,24 +33,58 @@ function onSubmitted() {
         <p class="text-black/70 leading-relaxed mb-2">{{ t('dealer.whyText1') }}</p>
         <p class="text-black/70 leading-relaxed mb-8">{{ t('dealer.whyText2') }}</p>
 
+        <h2 class="text-lg font-bold uppercase tracking-wide mb-4">{{ t('dealer.compareTitle') }}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <div class="border border-black/10 rounded-sm p-5">
+            <p class="font-bold uppercase tracking-wide text-sm mb-2">{{ t('dealer.dealerCardTitle') }}</p>
+            <p class="text-black/70 text-sm leading-relaxed">{{ t('dealer.dealerCardText') }}</p>
+          </div>
+          <div class="border border-black/10 rounded-sm p-5">
+            <p class="font-bold uppercase tracking-wide text-sm mb-2">{{ t('dealer.partnerCardTitle') }}</p>
+            <p class="text-black/70 text-sm leading-relaxed">{{ t('dealer.partnerCardText') }}</p>
+          </div>
+        </div>
+
         <p class="text-black/70 mb-6">{{ t('dealer.intro') }}</p>
-        <div class="w-full bg-gray-100 rounded-sm p-6 lg:p-8">
+        <div id="dealer-form" class="w-full bg-gray-100 rounded-sm p-6 lg:p-8">
           <DealerForm @submitted="onSubmitted" />
         </div>
       </div>
 
-      <div class="lg:col-span-2">
-        <h2 class="text-lg font-bold uppercase tracking-wide mb-4">{{ t('dealer.partnersTitle') }}</h2>
-        <p v-if="partnersError" class="text-black/50">{{ t('dealer.partnersError') }}</p>
-        <p v-else-if="!partners.length" class="text-black/50">{{ t('dealer.partnersEmpty') }}</p>
-        <ul v-else class="flex flex-col gap-4">
-          <li v-for="p in partners" :key="p.email" class="border border-black/10 rounded-sm p-4">
-            <p class="font-medium">{{ p.name }}</p>
-            <p v-if="p.address" class="text-sm text-black/60 mt-1">{{ p.address }}</p>
-            <p v-if="p.phone" class="text-sm text-black/60 mt-1"><a :href="`tel:${p.phone}`">{{ p.phone }}</a></p>
-            <p v-if="p.email" class="text-sm text-black/60"><a :href="`mailto:${p.email}`">{{ p.email }}</a></p>
-          </li>
-        </ul>
+      <div class="lg:col-span-2 flex flex-col gap-10">
+        <div>
+          <h2 class="text-lg font-bold uppercase tracking-wide mb-4">{{ t('dealer.dealersTitle') }}</h2>
+          <p v-if="partnersError" class="text-black/50">{{ t('dealer.dealersError') }}</p>
+          <p v-else-if="!dealers.length" class="text-black/70">
+            {{ t('dealer.dealersEmpty') }}
+            <a href="#dealer-form" class="underline font-medium">{{ t('dealer.becomeCta') }}</a>
+          </p>
+          <ul v-else class="flex flex-col gap-4">
+            <li v-for="p in dealers" :key="p.email" class="border border-black/10 rounded-sm p-4">
+              <p class="font-medium">{{ p.name }}</p>
+              <p v-if="p.address" class="text-sm text-black/60 mt-1">{{ p.address }}</p>
+              <p v-if="p.phone" class="text-sm text-black/60 mt-1"><a :href="`tel:${p.phone}`">{{ p.phone }}</a></p>
+              <p v-if="p.email" class="text-sm text-black/60"><a :href="`mailto:${p.email}`">{{ p.email }}</a></p>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-lg font-bold uppercase tracking-wide mb-4">{{ t('dealer.partnersTitle') }}</h2>
+          <p v-if="partnersError" class="text-black/50">{{ t('dealer.partnersError') }}</p>
+          <p v-else-if="!partners.length" class="text-black/70">
+            {{ t('dealer.partnersEmpty') }}
+            <a href="#dealer-form" class="underline font-medium">{{ t('dealer.becomeCta') }}</a>
+          </p>
+          <ul v-else class="flex flex-col gap-4">
+            <li v-for="p in partners" :key="p.email" class="border border-black/10 rounded-sm p-4">
+              <p class="font-medium">{{ p.name }}</p>
+              <p v-if="p.address" class="text-sm text-black/60 mt-1">{{ p.address }}</p>
+              <p v-if="p.phone" class="text-sm text-black/60 mt-1"><a :href="`tel:${p.phone}`">{{ p.phone }}</a></p>
+              <p v-if="p.email" class="text-sm text-black/60"><a :href="`mailto:${p.email}`">{{ p.email }}</a></p>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

@@ -22,6 +22,8 @@ message Product {
   // (material, collection, ...).
   map<string, crm.types.common.LocalizedString> details = 10;
   ProductStatus status = 12;
+  // Unit each SKU's price is quoted per (piece vs square meter).
+  PriceUnit priceUnit = 13;
   string etag = 101;
 }
 
@@ -30,6 +32,12 @@ enum ProductStatus {
   PRODUCT_STATUS_DRAFT = 1;
   PRODUCT_STATUS_ACTIVE = 2;
   PRODUCT_STATUS_INACTIVE = 3;
+}
+
+enum PriceUnit {
+  PRICE_UNIT_UNSPECIFIED = 0;
+  PRICE_UNIT_PIECE = 1;
+  PRICE_UNIT_SQUARE_METER = 2;
 }
 
 service ProductsService {

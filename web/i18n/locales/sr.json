@@ -94,6 +94,7 @@
   "fields": {
     "name": "Naziv",
     "description": "Opis",
+    "priceUnit": "Jedinica cene",
     "status": "Status",
     "createdAt": "Kreirano",
     "phone": "Telefon",
@@ -135,7 +136,8 @@
     "discountPercentage": "Popust, %",
     "discountPercentageHint": "Primenjuje se automatski kada partner kupuje direktno (bez klijenta)",
     "commissionPercentageHint": "Isplaćuje se partneru kada dovede prodaju klijentu",
-    "isPublic": "Javno (prikazano na sajtu)"
+    "isPublic": "Javno (prikazano na sajtu)",
+    "type": "Tip"
   },
   "sort": {
     "createdAt": "Po datumu kreiranja",
@@ -170,6 +172,9 @@
       "PRODUCT_STATUS_ACTIVE": "Aktivan",
       "PRODUCT_STATUS_INACTIVE": "Neaktivan",
       "PRODUCT_STATUS_UNSPECIFIED": "Nepoznato",
+      "PRICE_UNIT_PIECE": "Po komadu",
+      "PRICE_UNIT_SQUARE_METER": "Po m²",
+      "PRICE_UNIT_UNSPECIFIED": "Nepoznato",
       "PRODUCT_VARIANT_STATUS_DRAFT": "Nacrt",
       "PRODUCT_VARIANT_STATUS_ACTIVE": "Aktivan",
       "PRODUCT_VARIANT_STATUS_INACTIVE": "Neaktivan",
@@ -190,7 +195,10 @@
       "SALE_STATUS_COMPLETED": "Završeno",
       "SALE_STATUS_CANCELLED": "Otkazano",
       "SALE_STATUS_REFUNDED": "Refundirano",
-      "SALE_STATUS_UNSPECIFIED": "Nepoznato"
+      "SALE_STATUS_UNSPECIFIED": "Nepoznato",
+      "PARTNER_TYPE_PARTNER": "Partner",
+      "PARTNER_TYPE_DEALER": "Diler",
+      "PARTNER_TYPE_UNSPECIFIED": "Nepoznato"
     }
   },
   "common": {
