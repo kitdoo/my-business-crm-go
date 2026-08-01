@@ -1,6 +1,7 @@
 <script setup>
 const { t } = useI18n()
 const localeHead = useLocaleHead()
+const localePath = useLocalePath()
 
 useSeoMeta({
   title: t('seo.contact.title'),
@@ -25,7 +26,9 @@ const mapQuery = encodeURIComponent('Veselina Masleše 56, Novi Sad, Srbija')
 const mapEmbedSrc = `https://maps.google.com/maps?q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=&output=embed`
 
 const { data: partnersData, error: partnersError } = await useAsyncData('public-partners', () => $fetch('/api/partners'))
-const partners = computed(() => partnersData.value?.items || [])
+const allItems = computed(() => partnersData.value?.items || [])
+const dealers = computed(() => allItems.value.filter((p) => p.type === 'PARTNER_TYPE_DEALER'))
+const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER_TYPE_DEALER'))
 </script>
 
 <template>
@@ -110,6 +113,20 @@ const partners = computed(() => partnersData.value?.items || [])
     />
 
     <div class="mt-14">
+      <h2 class="text-lg font-bold uppercase tracking-wide mb-5">{{ t('contact.otherLocationsTitle') }}</h2>
+      <p v-if="partnersError" class="text-black/50">{{ t('dealer.dealersError') }}</p>
+      <p v-else-if="!dealers.length" class="text-black/50">{{ t('dealer.dealersEmpty') }}</p>
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="p in dealers" :key="p.email" class="border border-black/10 rounded-sm p-4">
+          <p class="font-medium">{{ p.name }}</p>
+          <p v-if="p.address" class="text-sm text-black/60 mt-1">{{ p.address }}</p>
+          <p v-if="p.phone" class="text-sm text-black/60 mt-1"><a :href="`tel:${p.phone}`">{{ p.phone }}</a></p>
+          <p v-if="p.email" class="text-sm text-black/60"><a :href="`mailto:${p.email}`">{{ p.email }}</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-14">
       <h2 class="text-lg font-bold uppercase tracking-wide mb-5">{{ t('dealer.partnersTitle') }}</h2>
       <p v-if="partnersError" class="text-black/50">{{ t('dealer.partnersError') }}</p>
       <p v-else-if="!partners.length" class="text-black/50">{{ t('dealer.partnersEmpty') }}</p>
@@ -121,6 +138,12 @@ const partners = computed(() => partnersData.value?.items || [])
           <p v-if="p.email" class="text-sm text-black/60"><a :href="`mailto:${p.email}`">{{ p.email }}</a></p>
         </div>
       </div>
+    </div>
+
+    <div class="mt-10 text-center">
+      <NuxtLink :to="localePath('/postani-diler')" class="text-brand-700 font-medium underline underline-offset-4">
+        {{ t('contact.becomeDealerCta') }}
+      </NuxtLink>
     </div>
   </div>
 </template>

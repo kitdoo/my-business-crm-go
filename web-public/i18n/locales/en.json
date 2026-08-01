@@ -145,11 +145,11 @@
     "thanksTitle": "Thank you for applying!",
     "thanksText": "Your request has been received. We will contact you soon.",
     "whyTitle": "Why join the PHOMI network?",
-    "whyText1": "We are actively growing our network of partners and dealers in Serbia and the region, offering a product with over 4,000 designs, fast installation and proven demand in the facade and interior market.",
-    "whyText2": "We're open to different forms of collaboration — whether you already run a store or are planning to open a new one, the PHOMI network is growing worldwide and has room for you.",
+    "whyText1": "We are actively growing our network of partners and dealers in Serbia and the region, offering a product with over 4,000 designs, fast delivery and proven demand in the facade and interior market.",
+    "whyText2": "We're open to different forms of collaboration — whether you're an architect, a contractor, a seller, or want to start a new line of sales, the PHOMI network is growing worldwide and has room for you.",
     "compareTitle": "Which type of collaboration fits you?",
     "partnerCardTitle": "Partner",
-    "partnerCardText": "Already run a store and want to expand your range? As a partner you get PHOMI material samples and a partner discount — no investment or extra commitments, PHOMI simply becomes part of your existing offer.",
+    "partnerCardText": "Already run a showroom and want to expand your range? As a partner you get PHOMI material samples and a partner discount — no investment or extra commitments, PHOMI simply becomes part of your existing offer.",
     "dealerCardTitle": "Dealer",
     "dealerCardText": "Planning to open a space dedicated to the PHOMI brand? Dealers get special supply terms, marketing support and, depending on the region, exclusivity — in return we expect commitment to the brand and to the agreed terms of collaboration.",
     "partnersTitle": "Our current partners",
@@ -166,7 +166,9 @@
     "showroomLabel": "Main showroom",
     "addressLabel": "Address",
     "phoneLabel": "Phone",
-    "emailLabel": "Email"
+    "emailLabel": "Email",
+    "otherLocationsTitle": "Other locations",
+    "becomeDealerCta": "Want to become a dealer or partner? Find out how."
   },
   "cart": {
     "title": "Cart",

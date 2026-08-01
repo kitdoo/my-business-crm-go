@@ -146,11 +146,11 @@
     "thanksText": "Vaš zahtev je primljen. Kontaktiraćemo vas uskoro.",
     "form": {},
     "whyTitle": "Zašto se pridružiti PHOMI mreži?",
-    "whyText1": "Aktivno razvijamo mrežu partnera i dilera u Srbiji i regionu i nudimo proizvod sa preko 4000 dezena, brzom ugradnjom i dokazanom potražnjom na tržištu fasada i enterijera.",
-    "whyText2": "Otvoreni smo za različite oblike saradnje — bilo da već imate prodavnicu ili planirate da otvorite novu, PHOMI mreža raste širom sveta i ima mesta za vas.",
+    "whyText1": "Aktivno razvijamo mrežu partnera i dilera u Srbiji i regionu i nudimo proizvod sa preko 4000 dezena, brzom isporukom i dokazanom potražnjom na tržištu fasada i enterijera.",
+    "whyText2": "Otvoreni smo za različite oblike saradnje — bilo da ste arhitekta, izvođač, prodavac ili želite da započnete novu prodaju, PHOMI mreža raste širom sveta i ima mesta za vas.",
     "compareTitle": "Koji oblik saradnje vam odgovara?",
     "partnerCardTitle": "Partner",
-    "partnerCardText": "Već imate prodavnicu i želite da proširite ponudu? Kao partner dobijate uzorke PHOMI materijala i partnersku popust — bez ulaganja i dodatnih obaveza, PHOMI jednostavno postaje deo vaše postojeće ponude.",
+    "partnerCardText": "Već imate salon i želite da proširite ponudu? Kao partner dobijate uzorke PHOMI materijala i partnersku popust — bez ulaganja i dodatnih obaveza, PHOMI jednostavno postaje deo vaše postojeće ponude.",
     "dealerCardTitle": "Diler",
     "dealerCardText": "Planirate da otvorite prostor posvećen PHOMI brendu? Dilerima nudimo posebne uslove nabavke, marketinšku podršku i, u zavisnosti od regiona, ekskluzivnost — zauzvrat očekujemo posvećenost brendu i ispunjavanje dogovorenih uslova saradnje.",
     "partnersTitle": "Naši trenutni partneri",
@@ -167,7 +167,9 @@
     "showroomLabel": "Glavni izložbeni salon",
     "addressLabel": "Adresa",
     "phoneLabel": "Telefon",
-    "emailLabel": "Email"
+    "emailLabel": "Email",
+    "otherLocationsTitle": "Druge lokacije",
+    "becomeDealerCta": "Želite da postanete diler ili partner? Saznajte kako."
   },
   "cart": {
     "title": "Korpa",
