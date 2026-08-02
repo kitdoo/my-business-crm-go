@@ -115,7 +115,32 @@ useSeoMeta({
   ogDescription: () => productDescription.value,
   ogImage: () => useAbsoluteUrl(imageUrls.value[0]),
 })
-useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
+
+// Product structured data (schema.org) — price/currency come as basis
+// points (see useFormat.js), hence the /100. Google's rich-result Product
+// snippet and AI answer engines alike read this instead of the rendered
+// price/stock text.
+const productJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: productName.value,
+  description: productDescription.value,
+  image: imageUrls.value.map((url) => useAbsoluteUrl(url)),
+  sku: activeSku.value?.sku,
+  brand: { '@type': 'Brand', name: 'PHOMI' },
+  offers: activeSku.value?.price ? {
+    '@type': 'Offer',
+    url: useAbsoluteUrl(route.fullPath),
+    priceCurrency: activeSku.value.price.currency,
+    price: (activeSku.value.price.amount / 100).toFixed(2),
+    availability: activeSku.value.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+  } : undefined,
+}))
+useHead(() => ({
+  link: localeHead.value.link,
+  meta: localeHead.value.meta,
+  script: [{ type: 'application/ld+json', innerHTML: JSON.stringify(productJsonLd.value) }],
+}))
 
 const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeURIComponent(t('catalog.contactPrefill', { sku: activeSku.value?.sku, name: productName.value }))}`)
 </script>
