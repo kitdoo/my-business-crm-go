@@ -1,5 +1,7 @@
 # my-business-crm-go
 
+This is a purely applied product built for a real, operating business — powers [phomi-rs.com](https://phomi-rs.com).
+
 A production-oriented CRM backend for small-business retail operations —
 built in Go, exposed over gRPC/HTTP, backed by MongoDB and Redis, and paired
 with two Nuxt 3 frontends (an admin panel and a public storefront site).
