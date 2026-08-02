@@ -113,7 +113,7 @@ useSeoMeta({
   description: () => productDescription.value,
   ogTitle: () => productName.value,
   ogDescription: () => productDescription.value,
-  ogImage: () => imageUrls.value[0],
+  ogImage: () => useAbsoluteUrl(imageUrls.value[0]),
 })
 useHead(() => ({ link: localeHead.value.link, meta: localeHead.value.meta }))
 
