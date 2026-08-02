@@ -150,7 +150,7 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
       <div>
         <div class="relative aspect-square rounded-lg overflow-hidden bg-gray-50 mb-3 group">
-          <NuxtImg :src="imageUrls[activeImage]" alt="" class="w-full h-full object-cover" />
+          <NuxtImg :src="imageUrls[activeImage]" :alt="productName" class="w-full h-full object-cover" />
           <template v-if="imageUrls.length > 1">
             <button
               class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -184,7 +184,7 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
             :class="i === activeImage ? 'border-brand-500' : 'border-transparent'"
             @click="activeImage = i"
           >
-            <img :src="url" alt="" class="w-full h-full object-cover" />
+            <img :src="url" :alt="productName" class="w-full h-full object-cover" />
           </button>
         </div>
 
@@ -199,7 +199,7 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
               :class="i === selectedVariantIndex ? 'border-brand-500' : 'border-black/10 hover:border-brand-500'"
               @click="selectVariant(i)"
             >
-              <img :src="variantImageUrl(variant)" alt="" class="w-full h-full object-cover" />
+              <img :src="variantImageUrl(variant)" :alt="productName" class="w-full h-full object-cover" />
             </button>
           </div>
         </div>

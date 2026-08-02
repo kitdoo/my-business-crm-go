@@ -95,7 +95,7 @@ function decrement() {
 <template>
   <div class="rounded-lg border border-black/10 overflow-hidden group flex flex-col h-full">
     <NuxtLink :to="localePath(`/katalog/${activeSku.sku}`)" class="block relative aspect-square overflow-hidden bg-gray-50">
-      <NuxtImg :src="activeImages[activeImageIndex]" alt="" loading="lazy" class="w-full h-full object-cover" />
+      <NuxtImg :src="activeImages[activeImageIndex]" :alt="localizedText(product.name, locale)" loading="lazy" class="w-full h-full object-cover" />
       <template v-if="activeImages.length > 1">
         <button
           class="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -141,7 +141,7 @@ function decrement() {
         >
           <img
             :src="variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}?w=200` : '/images/product-placeholder.svg'"
-            alt=""
+            :alt="localizedText(product.name, locale)"
             class="w-full h-full object-cover"
           />
         </button>
