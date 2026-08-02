@@ -87,17 +87,19 @@ export default defineNuxtConfig({
     langDir: 'locales',
     // sr (default) has no URL prefix, en/ru are prefixed — TZ §6.1.
     strategy: 'prefix_except_default',
-    // Left empty here on purpose — reading process.env.NUXT_PUBLIC_SITE_URL
-    // at this point bakes in whatever's present at `npm run build` time,
-    // which is empty in the Docker image (same build-time-vs-runtime trap
-    // as gtag.id above). This module option becomes runtimeConfig.public
-    // .i18n.baseUrl, which server/plugins/i18n-base-url.js overwrites at
-    // container start from runtimeConfig.public.siteUrl — the one value
-    // Nuxt's own runtimeConfig mechanism resolves correctly at runtime.
-    // Without a real baseUrl, useLocaleHead()'s canonical/hreflang tags
-    // (app.vue) come out relative/wrong, which is why Search Console was
-    // reporting pages as "Duplicate without user-selected canonical".
-    baseUrl: '',
+    // A function, not a string: @nuxtjs/i18n calls this per-request
+    // (see node_modules/@nuxtjs/i18n/dist/runtime/utils.js) rather than
+    // resolving it once at `npm run build` time, so process.env here sees
+    // the container's real env instead of the empty one Docker's build
+    // stage has (same build-time-vs-runtime trap as gtag.id above).
+    // Reading process.env.NUXT_PUBLIC_SITE_URL directly as a plain string
+    // baked in an empty baseUrl, so useLocaleHead()'s canonical/hreflang
+    // tags (app.vue) came out relative/wrong — this is why Search Console
+    // was reporting pages as "Duplicate without user-selected canonical".
+    // (A Nitro plugin copying runtimeConfig.public.siteUrl into
+    // .i18n.baseUrl was tried instead and crashed the server — Nuxt
+    // deep-freezes public runtimeConfig in production builds.)
+    baseUrl: () => process.env.NUXT_PUBLIC_SITE_URL || '',
     bundle: { optimizeTranslationDirective: false },
     // Module default reads per-page path overrides from definePageMeta —
     // 'config' makes it read the centralized `pages` map below instead.
