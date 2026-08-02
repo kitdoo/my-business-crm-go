@@ -87,7 +87,17 @@ export default defineNuxtConfig({
     langDir: 'locales',
     // sr (default) has no URL prefix, en/ru are prefixed — TZ §6.1.
     strategy: 'prefix_except_default',
-    baseUrl: process.env.NUXT_PUBLIC_SITE_URL || '',
+    // Left empty here on purpose — reading process.env.NUXT_PUBLIC_SITE_URL
+    // at this point bakes in whatever's present at `npm run build` time,
+    // which is empty in the Docker image (same build-time-vs-runtime trap
+    // as gtag.id above). This module option becomes runtimeConfig.public
+    // .i18n.baseUrl, which server/plugins/i18n-base-url.js overwrites at
+    // container start from runtimeConfig.public.siteUrl — the one value
+    // Nuxt's own runtimeConfig mechanism resolves correctly at runtime.
+    // Without a real baseUrl, useLocaleHead()'s canonical/hreflang tags
+    // (app.vue) come out relative/wrong, which is why Search Console was
+    // reporting pages as "Duplicate without user-selected canonical".
+    baseUrl: '',
     bundle: { optimizeTranslationDirective: false },
     // Module default reads per-page path overrides from definePageMeta —
     // 'config' makes it read the centralized `pages` map below instead.
