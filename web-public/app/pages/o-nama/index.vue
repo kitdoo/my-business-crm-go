@@ -1,6 +1,6 @@
 <script setup>
 const { t } = useI18n()
-const localeHead = useLocaleHead()
+const localeHead = useSeoHead()
 useSeoMeta({
   title: t('seo.about.title'),
   description: t('seo.about.description'),

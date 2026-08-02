@@ -2,7 +2,7 @@
 import { localizedText } from '~/utils/localizedText.js'
 
 const { t, locale } = useI18n()
-const localeHead = useLocaleHead()
+const localeHead = useSeoHead()
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()

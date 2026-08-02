@@ -1,7 +1,7 @@
 <script setup>
 const { t } = useI18n()
 const localePath = useLocalePath()
-const localeHead = useLocaleHead()
+const localeHead = useSeoHead()
 // Reached only post-submit, no unique content of its own — kept out of the
 // sitemap (see server/routes/sitemap.xml.js STATIC_PATHS) and out of the
 // index for the same reason.

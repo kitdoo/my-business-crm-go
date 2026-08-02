@@ -1,6 +1,6 @@
 <script setup>
 const { t } = useI18n()
-const localeHead = useLocaleHead()
+const localeHead = useSeoHead()
 const localePath = useLocalePath()
 
 useSeoMeta({

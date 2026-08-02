@@ -2,7 +2,7 @@
 import { projects } from '~/config/projects.js'
 
 const { t } = useI18n()
-const localeHead = useLocaleHead()
+const localeHead = useSeoHead()
 
 useSeoMeta({
   title: t('seo.projects.title'),

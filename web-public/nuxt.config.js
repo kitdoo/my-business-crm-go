@@ -87,19 +87,21 @@ export default defineNuxtConfig({
     langDir: 'locales',
     // sr (default) has no URL prefix, en/ru are prefixed — TZ §6.1.
     strategy: 'prefix_except_default',
-    // A function, not a string: @nuxtjs/i18n calls this per-request
-    // (see node_modules/@nuxtjs/i18n/dist/runtime/utils.js) rather than
-    // resolving it once at `npm run build` time, so process.env here sees
-    // the container's real env instead of the empty one Docker's build
-    // stage has (same build-time-vs-runtime trap as gtag.id above).
-    // Reading process.env.NUXT_PUBLIC_SITE_URL directly as a plain string
-    // baked in an empty baseUrl, so useLocaleHead()'s canonical/hreflang
-    // tags (app.vue) came out relative/wrong — this is why Search Console
-    // was reporting pages as "Duplicate without user-selected canonical".
-    // (A Nitro plugin copying runtimeConfig.public.siteUrl into
-    // .i18n.baseUrl was tried instead and crashed the server — Nuxt
-    // deep-freezes public runtimeConfig in production builds.)
-    baseUrl: () => process.env.NUXT_PUBLIC_SITE_URL || '',
+    // Left at the module default. @nuxtjs/i18n's own canonical/hreflang
+    // generation (useLocaleHead()) needs this, but it can only be a build
+    // -time string or a function — and a function doesn't survive Nuxt's
+    // public runtimeConfig (which gets serialized for the client and
+    // frozen in production; Nuxt even warns "may not be able to be
+    // serialized" at build time), so it silently came back empty at
+    // runtime and canonical/hreflang links came out missing or relative
+    // — this is why Search Console was reporting pages as "Duplicate
+    // without user-selected canonical", including the homepage. Fixed by
+    // not using useLocaleHead() at all: app.vue and every page build
+    // their own canonical/hreflang/og tags via useSeoHead() from
+    // runtimeConfig.public.siteUrl instead, which is a plain string and
+    // resolves correctly from NUXT_PUBLIC_SITE_URL at runtime (see
+    // useSeoHead.js).
+    baseUrl: '',
     bundle: { optimizeTranslationDirective: false },
     // Module default reads per-page path overrides from definePageMeta —
     // 'config' makes it read the centralized `pages` map below instead.
