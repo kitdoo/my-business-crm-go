@@ -17,7 +17,8 @@
     "solarniPaneli": "Solarni fasadni paneli",
     "displejPaneli": "Displej paneli",
     "usefulLinks": "Korisni linkovi",
-    "scrollTop": "Nazad na vrh"
+    "scrollTop": "Nazad na vrh",
+    "faq": "Česta pitanja"
   },
   "home": {
     "hero": {
@@ -25,10 +26,10 @@
       "subtitle": "Ekološki prihvatljive, lake i izdržljive obloge za svaki objekat."
     },
     "about": {
-      "title": "Nova generacija fasadnih i zidnih obloga PHOMI",
-      "text": "Fleksibilni i ekološki paneli koji objedinjuju fasadne, solarne i digitalne sisteme.",
-      "text2": "Rešenje za savremene fasade, enterijere i projekte renoviranja gde su brzina ugradnje, mala težina i dugotrajnost ključni faktori.",
-      "text3": "Omogućava moderan izgled objekta uz jednostavniju realizaciju u odnosu na tradicionalne materijale."
+      "title": "Fleksibilna keramika za savremenu arhitekturu",
+      "text": "PHOMI je globalni proizvođač fleksibilne keramike — tankog i savitljivog materijala od modifikovane gline koji verno prenosi teksturu kamena, drveta, opeke i betona.",
+      "text2": "Dostupno je preko 4000 dezena, a paneli se lepe direktno na podlogu, bez podkonstrukcije i specijalizovanih alata.",
+      "text3": "Isti sistem se koristi za fasade, enterijere i renovacije, a solarne i displej varijante dodatno proširuju mogućnosti primene."
     },
     "worldPresence": {
       "title": "PHOMI u svetu",
@@ -128,7 +129,7 @@
       "piece": "kom",
       "squareMeter": "m²"
     },
-    "intro": "PHOMI nudi širok izbor materijala — dezene kamena, drveta, opeke i betona, kao i solarne i displej panele — objedinjene u jednom lakom i fleksibilnom sistemu. Podjednako su pogodni za fasade i enterijere, uz moderan izgled i brzu, jednostavnu ugradnju.",
+    "intro": "PHOMI katalog obuhvata fasadne ploče i zidne obloge za ventilisanu fasadu — lagane, vatrootporne i UV otporne, savremen materijal za arhitektonske obloge. Za enterijer nudimo dekorativne i teksturirane zidne obloge u dezenima kamena, drveta, opeke i betona. Cena i dostupnost prikazani su uz svaki proizvod, a artikli koji trenutno nisu na stanju mogu se naručiti po porudžbini.",
     "sort": {
       "label": "Sortiranje",
       "inStock": "Prvo na stanju",
@@ -146,11 +147,11 @@
     "thanksText": "Vaš zahtev je primljen. Kontaktiraćemo vas uskoro.",
     "form": {},
     "whyTitle": "Zašto se pridružiti PHOMI mreži?",
-    "whyText1": "Aktivno razvijamo mrežu partnera i dilera u Srbiji i regionu i nudimo proizvod sa preko 4000 dezena, brzom isporukom i dokazanom potražnjom na tržištu fasada i enterijera.",
+    "whyText1": "PHOMI Srbija, kao ekskluzivni zvanični diler PHOMI brenda za Srbiju, aktivno razvija mrežu partnera i dilera u Srbiji i regionu i nudi proizvod sa preko 4000 dezena, brzom isporukom i dokazanom potražnjom na tržištu fasada i enterijera.",
     "whyText2": "Otvoreni smo za različite oblike saradnje — bilo da ste arhitekta, izvođač, prodavac ili želite da započnete novu prodaju, PHOMI mreža raste širom sveta i ima mesta za vas.",
     "compareTitle": "Koji oblik saradnje vam odgovara?",
     "partnerCardTitle": "Partner",
-    "partnerCardText": "Već imate salon i želite da proširite ponudu? Kao partner dobijate uzorke PHOMI materijala i partnersku popust — bez ulaganja i dodatnih obaveza, PHOMI jednostavno postaje deo vaše postojeće ponude.",
+    "partnerCardText": "Već imate salon i želite da proširite ponudu? Kao partner dobijate uzorke PHOMI materijala i partnerski popust — bez ulaganja i dodatnih obaveza, PHOMI jednostavno postaje deo vaše postojeće ponude.",
     "dealerCardTitle": "Diler",
     "dealerCardText": "Planirate da otvorite prostor posvećen PHOMI brendu? Dilerima nudimo posebne uslove nabavke, marketinšku podršku i, u zavisnosti od regiona, ekskluzivnost — zauzvrat očekujemo posvećenost brendu i ispunjavanje dogovorenih uslova saradnje.",
     "partnersTitle": "Naši trenutni partneri",
@@ -162,6 +163,7 @@
     "becomeCta": "Prijavite se ovde."
   },
   "contact": {
+    "intro": "PHOMI Srbija je ekskluzivni zvanični diler PHOMI brenda za Srbiju, sa glavnim izložbenim salonom u Novom Sadu, i aktivno razvija tržište u Srbiji i regionu.",
     "thanks": "Hvala! Vaša poruka je poslata.",
     "address": "Veselina Masleše 56, Novi Sad, Srbija",
     "showroomLabel": "Glavni izložbeni salon",
@@ -169,6 +171,7 @@
     "phoneLabel": "Telefon",
     "emailLabel": "Email",
     "otherLocationsTitle": "Druge lokacije",
+    "openInMaps": "Otvori u Google mapama",
     "becomeDealerCta": "Želite da postanete diler ili partner? Saznajte kako.",
     "copy": "Kopiraj"
   },
@@ -204,15 +207,29 @@
       "message": "Poruka"
     }
   },
-  "about": {
-    "title": "O nama",
-    "phomiText": "[Zamenite ovaj tekst opisom PHOMI kompanije.]",
-    "tomStudioText": "[Zamenite ovaj tekst opisom Tom Studio 021 doo.]"
-  },
   "common": {
     "backHome": "Nazad na početnu",
     "prev": "Prethodna",
     "next": "Sledeća"
+  },
+  "faq": {
+    "title": "Česta pitanja",
+    "q1": "Koliko traje isporuka?",
+    "a1": "Za proizvode koji su na stanju isporuka na teritoriji Srbije traje do 5 radnih dana. Za proizvode po porudžbini rok isporuke je do 3 meseca, u zavisnosti od dezena i količine.",
+    "q2": "Da li postoji popust za veće količine?",
+    "a2": "Za porudžbine preko 100 m² moguć je popust — kontaktirajte nas radi ponude prilagođene vašem projektu.",
+    "q3": "Da li je cena sa uračunatim PDV-om?",
+    "a3": "Da, sve cene prikazane u katalogu su sa uračunatim PDV-om.",
+    "q4": "Da li možete preporučiti izvođače za ugradnju?",
+    "a4": "Da, na upit možemo preporučiti proverene montažere.",
+    "q5": "Da li PHOMI paneli imaju sertifikate za EU tržište?",
+    "a5": "Da, PHOMI paneli poseduju sertifikate usklađene sa EU standardima.",
+    "q6": "Da li se paneli mogu lepiti direktno na gips zid?",
+    "a6": "Da, ako je gips zid ravan i dobro obrađen, paneli se mogu lepiti direktno na njega, bez dodatnog sloja za izravnavanje — površina samo treba da bude čista, suva i bez prašine.",
+    "q7": "Gde se PHOMI paneli mogu koristiti?",
+    "a7": "Paneli se mogu koristiti na fasadi, u enterijeru, na nameštaju i drugim površinama. Za pod se ne preporučuju pojedini tipovi materijala.",
+    "cta": "Imate dodatno pitanje?",
+    "ctaLink": "Kontaktirajte nas."
   },
   "projects": {
     "usedMaterials": "Korišćeni materijali",
@@ -228,11 +245,11 @@
   },
   "seo": {
     "home": { "title": "PHOMI Srbija — fleksibilni MCM paneli za fasadu i zid", "description": "Ekološki fasadni i zidni paneli PHOMI — lagani, otporni na vatru i vlagu, brzo se ugrađuju bez podkonstrukcije." },
-    "katalog": { "title": "Katalog fasadnih i zidnih panela — PHOMI Srbija", "description": "Pregledajte PHOMI paneli po dezenu i tipu — od fasadnih obloga do zidnih 3D panela za enterijer." },
+    "katalog": { "title": "Katalog fasadnih ploča i zidnih obloga — PHOMI Srbija", "description": "Fasadne ploče, zidne obloge i dekorativni paneli za enterijer — cena, dostupnost i dezeni kamena, drveta i opeke uz svaki proizvod." },
     "dealer": { "title": "Postani diler — PHOMI Srbija", "description": "Pridružite se mreži PHOMI dilera." },
     "dealerThanks": { "title": "Hvala — PHOMI Srbija" },
     "contact": { "title": "Kontakt — PHOMI Srbija", "description": "Kontaktirajte PHOMI Srbija tim." },
     "projects": { "title": "Završeni projekti — PHOMI Srbija", "description": "Primeri izvedenih projekata sa PHOMI oblogama." },
-    "about": { "title": "O nama — PHOMI Srbija", "description": "Informacije o PHOMI kompaniji i Tom Studio 021 doo." }
+    "faq": { "title": "Česta pitanja — PHOMI Srbija", "description": "Odgovori na najčešća pitanja o PHOMI panelima — cena, isporuka, popusti, sertifikacija i ugradnja." }
   }
 }

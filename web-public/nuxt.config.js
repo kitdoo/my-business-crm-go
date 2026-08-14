@@ -6,7 +6,14 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        { rel: 'icon', type: 'image/png', href: '/images/logos/logo_blue.png' },
+        // Square favicon (logo_blue.png alone is 342x1424 — non-square
+        // images are ignored by Google's search-results favicon crawler).
+        // favicon.ico stays for browsers/crawlers that request it by
+        // convention regardless of these link tags; both derive from the
+        // same icon-512.png source, browsers scale it down as needed.
+        { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+        { rel: 'icon', type: 'image/png', sizes: '512x512', href: '/icons/icon-512.png' },
+        { rel: 'apple-touch-icon', href: '/icons/icon-512.png' },
       ],
       meta: [
         { name: 'google-site-verification', content: 'gYUYGB6P5gmYSi3WSCVRZUUw90BV1xoSeXF-kCdTMJ8' },
@@ -112,9 +119,10 @@ export default defineNuxtConfig({
     // route name (kebab-case of the file path, "index" segments dropped).
     pages: {
       katalog: { en: '/catalog', ru: '/katalog' },
+      'katalog-kategorija-category': { en: '/catalog/category/[category]', ru: '/katalog/kategorija/[category]' },
       'katalog-sku': { en: '/catalog/[sku]', ru: '/katalog/[sku]' },
       kontakt: { en: '/contact', ru: '/kontakt' },
-      'o-nama': { en: '/about', ru: '/o-nas' },
+      faq: { en: '/faq', ru: '/faq' },
       projekti: { en: '/projects', ru: '/proekty' },
       'postani-diler': { en: '/become-a-dealer', ru: '/stat-dilerom' },
       'postani-diler-hvala': { en: '/become-a-dealer/thank-you', ru: '/stat-dilerom/spasibo' },

@@ -17,7 +17,8 @@
     "solarniPaneli": "Solar facade panels",
     "displejPaneli": "Display panels",
     "usefulLinks": "Useful links",
-    "scrollTop": "Back to top"
+    "scrollTop": "Back to top",
+    "faq": "FAQ"
   },
   "home": {
     "hero": {
@@ -25,10 +26,10 @@
       "subtitle": "Eco-friendly, lightweight and durable cladding for every building."
     },
     "about": {
-      "title": "A new generation of PHOMI facade and wall panels",
-      "text": "Flexible, eco-friendly panels that combine facade, solar and digital systems.",
-      "text2": "A solution for modern facades, interiors and renovation projects where installation speed, low weight and durability are the key factors.",
-      "text3": "Enables a modern building look with a simpler build process than traditional materials."
+      "title": "Flexible ceramic for modern architecture",
+      "text": "PHOMI is a global manufacturer of flexible ceramic — a thin, pliable material made from modified clay that faithfully reproduces the texture of stone, wood, brick and concrete.",
+      "text2": "Over 4,000 designs are available, and panels bond directly to the surface — no substructure or specialized tools required.",
+      "text3": "The same system is used for facades, interiors and renovations, while solar and display variants extend it even further."
     },
     "worldPresence": {
       "title": "PHOMI around the world",
@@ -128,7 +129,7 @@
       "piece": "pc",
       "squareMeter": "m²"
     },
-    "intro": "PHOMI offers a wide range of materials — stone, wood, brick and concrete looks, as well as solar and display panels — all in one lightweight, flexible system. Equally suited to facades and interiors, delivering a modern look with fast, easy installation.",
+    "intro": "The PHOMI catalog covers facade panels and wall cladding for ventilated facades — lightweight, fire-resistant and UV-resistant, a modern material for architectural cladding. For interiors we offer decorative and textured wall panels in stone, wood, brick and concrete finishes, similar to premium stone veneer. Price and availability are shown for every product, and items not currently in stock can still be ordered in.",
     "sort": {
       "label": "Sort by",
       "inStock": "In stock first",
@@ -145,7 +146,7 @@
     "thanksTitle": "Thank you for applying!",
     "thanksText": "Your request has been received. We will contact you soon.",
     "whyTitle": "Why join the PHOMI network?",
-    "whyText1": "We are actively growing our network of partners and dealers in Serbia and the region, offering a product with over 4,000 designs, fast delivery and proven demand in the facade and interior market.",
+    "whyText1": "PHOMI Serbia, as the exclusive official dealer of the PHOMI brand for Serbia, is actively growing its network of partners and dealers in Serbia and the region, offering a product with over 4,000 designs, fast delivery and proven demand in the facade and interior market.",
     "whyText2": "We're open to different forms of collaboration — whether you're an architect, a contractor, a seller, or want to start a new line of sales, the PHOMI network is growing worldwide and has room for you.",
     "compareTitle": "Which type of collaboration fits you?",
     "partnerCardTitle": "Partner",
@@ -161,6 +162,7 @@
     "becomeCta": "Apply here."
   },
   "contact": {
+    "intro": "PHOMI Serbia is the exclusive official dealer of the PHOMI brand for Serbia, with a main showroom in Novi Sad, actively growing the market in Serbia and the region.",
     "thanks": "Thank you! Your message has been sent.",
     "address": "Veselina Masleše 56, Novi Sad, Serbia",
     "showroomLabel": "Main showroom",
@@ -168,6 +170,7 @@
     "phoneLabel": "Phone",
     "emailLabel": "Email",
     "otherLocationsTitle": "Other locations",
+    "openInMaps": "Open in Google Maps",
     "becomeDealerCta": "Want to become a dealer or partner? Find out how.",
     "copy": "Copy"
   },
@@ -203,15 +206,29 @@
       "message": "Message"
     }
   },
-  "about": {
-    "title": "About us",
-    "phomiText": "[Replace this text with the PHOMI company description.]",
-    "tomStudioText": "[Replace this text with the Tom Studio 021 doo description.]"
-  },
   "common": {
     "backHome": "Back to home",
     "prev": "Previous",
     "next": "Next"
+  },
+  "faq": {
+    "title": "FAQ",
+    "q1": "How long does delivery take?",
+    "a1": "For in-stock products, delivery within Serbia takes up to 5 business days. For items not currently in stock, lead time is up to 3 months, depending on the design and quantity.",
+    "q2": "Is there a discount for larger orders?",
+    "a2": "Orders over 100 m² may qualify for a discount — contact us for a quote tailored to your project.",
+    "q3": "Does the price include VAT?",
+    "a3": "Yes, all prices shown in the catalog include VAT.",
+    "q4": "Can you recommend installers?",
+    "a4": "Yes, on request we can recommend trusted installers.",
+    "q5": "Are PHOMI panels EU certified?",
+    "a5": "Yes, PHOMI panels are certified to EU standards.",
+    "q6": "Can panels be glued directly onto a plasterboard (drywall) wall?",
+    "a6": "Yes, if the plasterboard wall is flat and properly finished, panels can be glued directly onto it, with no extra leveling layer needed — the surface just needs to be clean, dry and dust-free.",
+    "q7": "Where can PHOMI panels be used?",
+    "a7": "Panels can be used on facades, in interiors, on furniture and other surfaces. Some material types are not recommended for floors.",
+    "cta": "Have another question?",
+    "ctaLink": "Contact us."
   },
   "projects": {
     "usedMaterials": "Materials used",
@@ -227,11 +244,11 @@
   },
   "seo": {
     "home": { "title": "PHOMI Serbia — flexible MCM facade and wall panels", "description": "Eco-friendly PHOMI facade and wall panels — lightweight, fire and moisture resistant, quick to install without a substructure." },
-    "katalog": { "title": "Catalog of facade and wall panels — PHOMI Serbia", "description": "Browse PHOMI panels by design and type — from facade cladding to 3D wall panels for interiors." },
+    "katalog": { "title": "Facade Panels & Wall Cladding Catalog — PHOMI Serbia", "description": "Facade panels, wall cladding and decorative interior panels — price, availability and stone, wood and brick textures for every product." },
     "dealer": { "title": "Become a dealer — PHOMI Serbia", "description": "Join the PHOMI dealer network." },
     "dealerThanks": { "title": "Thank you — PHOMI Serbia" },
     "contact": { "title": "Contact — PHOMI Serbia", "description": "Contact the PHOMI Serbia team." },
     "projects": { "title": "Completed projects — PHOMI Serbia", "description": "Examples of completed projects with PHOMI panels." },
-    "about": { "title": "About us — PHOMI Serbia", "description": "Information about PHOMI and Tom Studio 021 doo." }
+    "faq": { "title": "FAQ — PHOMI Serbia", "description": "Answers to frequently asked questions about PHOMI panels — pricing, delivery, discounts, certification and installation." }
   }
 }

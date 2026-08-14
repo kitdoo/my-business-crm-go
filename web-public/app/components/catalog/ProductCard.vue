@@ -19,7 +19,16 @@ const otherVariants = computed(() => (props.product.variants || []).filter((_, i
 // colors doesn't blow out the card's height — the rest collapse into a
 // single "+N" chip instead of wrapping onto more rows.
 const MAX_VARIANT_SWATCHES = 5
-const displayedVariants = computed(() => (props.product.variants || []).slice(0, MAX_VARIANT_SWATCHES))
+// In-stock variants/SKUs sort first so a shopper doesn't land on an
+// out-of-stock option (or have it pushed out of the capped swatch row) while
+// an in-stock one sits further down the unsorted list.
+function stockScore(inStock) { return inStock === true ? 0 : 1 }
+function variantHasStock(variant) { return (variant.skus || []).some((s) => s.inStock === true) }
+const sortedVariantIndices = computed(() => {
+  const variants = props.product.variants || []
+  return variants.map((_, i) => i).sort((a, b) => stockScore(variantHasStock(variants[a])) - stockScore(variantHasStock(variants[b])))
+})
+const displayedVariantIndices = computed(() => sortedVariantIndices.value.slice(0, MAX_VARIANT_SWATCHES))
 const hiddenVariantsCount = computed(() => Math.max(0, (props.product.variants?.length || 0) - MAX_VARIANT_SWATCHES))
 const selectedVariantIndex = ref(0)
 const selectedSkuIndex = ref(0)
@@ -46,6 +55,10 @@ function selectVariant(index) {
 function selectSku(index) {
   selectedSkuIndex.value = index
 }
+const sortedSkuIndices = computed(() => {
+  const skus = activeVariant.value?.skus || []
+  return skus.map((_, i) => i).sort((a, b) => stockScore(skus[a].inStock) - stockScore(skus[b].inStock))
+})
 function skuLabel(sku) {
   // "generation" is surfaced as its own badge (see activeGeneration), not
   // repeated inline in the size pill.
@@ -132,7 +145,7 @@ function decrement() {
 
       <div v-if="otherVariants.length" class="mt-2 flex gap-1.5 flex-wrap items-center">
         <button
-          v-for="(variant, i) in displayedVariants"
+          v-for="i in displayedVariantIndices"
           :key="i"
           type="button"
           class="w-7 h-7 rounded overflow-hidden border-2 shrink-0"
@@ -140,7 +153,7 @@ function decrement() {
           @click.stop.prevent="selectVariant(i)"
         >
           <img
-            :src="variant.imageIds?.[0] ? `/api/images/${variant.imageIds[0]}?w=200` : '/images/product-placeholder.svg'"
+            :src="product.variants[i].imageIds?.[0] ? `/api/images/${product.variants[i].imageIds[0]}?w=200` : '/images/product-placeholder.svg'"
             :alt="localizedText(product.name, locale)"
             class="w-full h-full object-cover"
           />
@@ -150,14 +163,14 @@ function decrement() {
 
       <div v-if="activeVariant.skus.length > 1" class="mt-2 flex gap-1.5 flex-wrap">
         <button
-          v-for="(sku, i) in activeVariant.skus"
-          :key="sku.sku"
+          v-for="i in sortedSkuIndices"
+          :key="activeVariant.skus[i].sku"
           type="button"
           class="px-2 h-6 rounded border text-xs shrink-0"
           :class="i === selectedSkuIndex ? 'border-brand-500 text-brand-700' : 'border-black/15 text-black/60 hover:border-black/30'"
           @click.stop.prevent="selectSku(i)"
         >
-          {{ skuLabel(sku) }}
+          {{ skuLabel(activeVariant.skus[i]) }}
         </button>
       </div>
 

@@ -34,6 +34,9 @@ useHead({
         addressLocality: 'Novi Sad',
         addressCountry: 'RS',
       },
+      // Google Business Profile listing for this address — same URL used
+      // as the "open in Google Maps" link on kontakt/index.vue.
+      hasMap: 'https://maps.app.goo.gl/UPMAFg4YiD6YR83A8',
       sameAs: ['https://www.instagram.com/phomi_serbia/'],
     }),
   }],

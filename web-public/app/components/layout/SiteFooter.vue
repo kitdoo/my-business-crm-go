@@ -25,6 +25,7 @@ const year = new Date().getFullYear()
         <ul class="space-y-2 text-base text-white/80">
           <li><a href="https://phomi.com/" target="_blank" rel="noopener">{{ t('footer.aboutPhomi') }}</a></li>
           <li><a href="https://tom.archi/" target="_blank" rel="noopener">{{ t('footer.aboutTomStudio') }}</a></li>
+          <li><NuxtLink :to="localePath('/kontakt')">{{ t('nav.kontakt') }}</NuxtLink></li>
         </ul>
       </div>
 
@@ -40,9 +41,9 @@ const year = new Date().getFullYear()
       <div>
         <h3 class="text-base font-semibold uppercase text-brand-300 mb-3">{{ t('footer.usefulLinks') }}</h3>
         <ul class="space-y-2 text-base text-white/80">
-          <li><NuxtLink :to="localePath('/postani-diler')">{{ t('nav.postaniDiler') }}</NuxtLink></li>
-          <li><NuxtLink :to="localePath('/kontakt')">{{ t('nav.kontakt') }}</NuxtLink></li>
           <li><NuxtLink :to="localePath('/projekti')">{{ t('nav.zavrseniProjekti') }}</NuxtLink></li>
+          <li><NuxtLink :to="localePath('/faq')">{{ t('footer.faq') }}</NuxtLink></li>
+          <li><NuxtLink :to="localePath('/postani-diler')">{{ t('nav.postaniDiler') }}</NuxtLink></li>
         </ul>
       </div>
     </div>

@@ -24,6 +24,10 @@ function nextImage() {
 
 const mapQuery = encodeURIComponent('Veselina Masleše 56, Novi Sad, Srbija')
 const mapEmbedSrc = `https://maps.google.com/maps?q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=&output=embed`
+// The Google Business Profile listing itself — a maps.app.goo.gl share link
+// can't be used as the iframe embed src above (Google blocks framing the
+// full Maps UI), so it's used as an "open in Google Maps" link instead.
+const mapPlaceUrl = 'https://maps.app.goo.gl/UPMAFg4YiD6YR83A8'
 
 const { data: partnersData, error: partnersError } = await useAsyncData('public-partners', () => $fetch('/api/partners'))
 const allItems = computed(() => partnersData.value?.items || [])
@@ -35,7 +39,8 @@ const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER
   <div class="mx-auto max-w-6xl px-4 lg:px-8 py-12 lg:py-16">
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">
       <div class="lg:col-span-2 lg:order-1">
-        <h1 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide mb-10">{{ t('nav.kontakt') }}</h1>
+        <h1 class="text-2xl lg:text-3xl font-bold uppercase tracking-wide mb-4">{{ t('nav.kontakt') }}</h1>
+        <p class="text-black/70 leading-relaxed mb-10">{{ t('contact.intro') }}</p>
 
         <h2 class="text-lg font-bold uppercase tracking-wide mb-5">{{ t('contact.showroomLabel') }}</h2>
 
@@ -45,7 +50,7 @@ const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER
             <span class="flex flex-col">
               <span class="font-bold uppercase tracking-wide">{{ t('contact.addressLabel') }}</span>
               <span class="inline-flex items-center gap-1.5">
-                {{ t('contact.address') }}
+                <a :href="mapPlaceUrl" target="_blank" rel="noopener">{{ t('contact.address') }}</a>
                 <CopyButton :value="t('contact.address')" />
               </span>
             </span>
@@ -120,6 +125,15 @@ const partners = computed(() => allItems.value.filter((p) => p.type !== 'PARTNER
       referrerpolicy="no-referrer-when-downgrade"
       :title="t('contact.address')"
     />
+    <a
+      :href="mapPlaceUrl"
+      target="_blank"
+      rel="noopener"
+      class="inline-flex items-center gap-1.5 mt-3 text-sm text-brand-700 font-medium underline underline-offset-4"
+    >
+      <UIcon name="i-lucide-map-pin" class="w-4 h-4" />
+      {{ t('contact.openInMaps') }}
+    </a>
 
     <div class="mt-14">
       <h2 class="text-lg font-bold uppercase tracking-wide mb-5">{{ t('contact.otherLocationsTitle') }}</h2>
