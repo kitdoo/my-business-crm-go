@@ -3,6 +3,14 @@ import { localizedText } from '~/utils/localizedText.js'
 
 const { t, locale } = useI18n()
 const localeHead = useSeoHead()
+// Resolved once here, synchronously in setup() — unlike useAbsoluteUrl(),
+// which calls useRuntimeConfig() itself, this plain string is safe to close
+// over from the ogImage/productJsonLd getters below. Those run lazily
+// outside setup (unhead resolves useSeoMeta getters and useHead's callback
+// on its own schedule), where useRuntimeConfig() has no Nuxt instance to
+// find and throws "composable called outside setup" — a 500 on every
+// product page (found via Search Console flagging /katalog/:sku as 500).
+const { siteUrl } = useRuntimeConfig().public
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
@@ -113,7 +121,7 @@ useSeoMeta({
   description: () => productDescription.value,
   ogTitle: () => productName.value,
   ogDescription: () => productDescription.value,
-  ogImage: () => useAbsoluteUrl(imageUrls.value[0]),
+  ogImage: () => `${siteUrl}${imageUrls.value[0]}`,
 })
 
 // Product structured data (schema.org) — price/currency come as basis
@@ -125,12 +133,12 @@ const productJsonLd = computed(() => ({
   '@type': 'Product',
   name: productName.value,
   description: productDescription.value,
-  image: imageUrls.value.map((url) => useAbsoluteUrl(url)),
+  image: imageUrls.value.map((url) => `${siteUrl}${url}`),
   sku: activeSku.value?.sku,
   brand: { '@type': 'Brand', name: 'PHOMI' },
   offers: activeSku.value?.price ? {
     '@type': 'Offer',
-    url: useAbsoluteUrl(route.fullPath),
+    url: `${siteUrl}${route.fullPath}`,
     priceCurrency: activeSku.value.price.currency,
     price: (activeSku.value.price.amount / 100).toFixed(2),
     availability: activeSku.value.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
