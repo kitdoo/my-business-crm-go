@@ -15,7 +15,8 @@ const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
 const { getProduct } = useCatalogApi()
-const { addItem, setQty, getQty, removeItem } = useCart()
+const { setQty } = useCart()
+const { sortIndicesByStock, firstInStockIndex } = useStockSort()
 
 const { data: product, error } = await useAsyncData(`product-${route.params.sku}`, () => getProduct(route.params.sku))
 if (error.value) {
@@ -49,19 +50,11 @@ const activeGeneration = computed(() => activeSku.value?.attributes?.generation)
 // In-stock SKUs sort first so a shopper doesn't land on (or have to hunt
 // past) an out-of-stock size/thickness pill when other options in the same
 // color are actually available — mirrors ProductCard.vue.
-const sortedSkuIndices = computed(() => {
-  const skus = activeVariant.value?.skus || []
-  return skus.map((_, i) => i).sort((a, b) => Number(skus[b].inStock === true) - Number(skus[a].inStock === true))
-})
-function firstInStockSkuIndex(variant) {
-  const skus = variant?.skus || []
-  const idx = skus.findIndex((s) => s.inStock === true)
-  return idx === -1 ? 0 : idx
-}
+const sortedSkuIndices = computed(() => sortIndicesByStock(activeVariant.value?.skus || [], (s) => s.inStock))
 
 function selectVariant(index) {
   selectedVariantIndex.value = index
-  selectedSkuIndex.value = firstInStockSkuIndex(product.value.variants[index])
+  selectedSkuIndex.value = firstInStockIndex(product.value.variants[index]?.skus || [], (s) => s.inStock)
   activeImage.value = 0
 }
 function selectSku(index) {
@@ -82,26 +75,7 @@ watch(activeSku, (sku) => {
   }
 })
 
-const qtyInCart = computed(() => getQty(activeSku.value.sku))
-
-// Combines variant attributes (e.g. color) and SKU attributes (e.g. size)
-// into one label so the cart/checkout message spells out exactly which
-// option the visitor picked, not just the SKU code.
-function cartOptions() {
-  const attrs = { ...(activeVariant.value?.attributes || {}), ...(activeSku.value?.attributes || {}) }
-  return Object.values(attrs).map((v) => localizedText(v, locale.value)).filter(Boolean).join(' / ')
-}
-function cartItem() {
-  return { ...product.value, sku: activeSku.value.sku, price: activeSku.value.price, options: cartOptions() }
-}
-function increment() {
-  if (qtyInCart.value) setQty(activeSku.value.sku, qtyInCart.value + 1)
-  else addItem(cartItem())
-}
-function decrement() {
-  if (qtyInCart.value <= 1) removeItem(activeSku.value.sku)
-  else setQty(activeSku.value.sku, qtyInCart.value - 1)
-}
+const { qtyInCart, cartItem, addItem, increment, decrement } = useProductCartItem(product, activeVariant, activeSku)
 
 const activeImage = ref(0)
 // Same image ids feed the big hero and the 64px thumbnail strip (see

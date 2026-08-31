@@ -6,7 +6,8 @@ const props = defineProps({
 })
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { addItem, setQty, getQty, removeItem } = useCart()
+const { setQty } = useCart()
+const { sortIndicesByStock, firstInStockIndex } = useStockSort()
 
 // Two-tier picker: first the visual Variant (color/texture — swatches),
 // then, within it, the purchasable SKU (size/thickness — pills). Variants
@@ -22,26 +23,32 @@ const MAX_VARIANT_SWATCHES = 5
 // In-stock variants/SKUs sort first so a shopper doesn't land on an
 // out-of-stock option (or have it pushed out of the capped swatch row) while
 // an in-stock one sits further down the unsorted list.
-function stockScore(inStock) { return inStock === true ? 0 : 1 }
 function variantHasStock(variant) { return (variant.skus || []).some((s) => s.inStock === true) }
-const sortedVariantIndices = computed(() => {
-  const variants = props.product.variants || []
-  return variants.map((_, i) => i).sort((a, b) => stockScore(variantHasStock(variants[a])) - stockScore(variantHasStock(variants[b])))
-})
+const sortedVariantIndices = computed(() => sortIndicesByStock(props.product.variants || [], variantHasStock))
 const displayedVariantIndices = computed(() => sortedVariantIndices.value.slice(0, MAX_VARIANT_SWATCHES))
 const hiddenVariantsCount = computed(() => Math.max(0, (props.product.variants?.length || 0) - MAX_VARIANT_SWATCHES))
+
+// The catalog grid paints cards before stock is known, then swaps in a new
+// `product` object (see CatalogPage's `items`) once it resolves — the card
+// instance survives that swap (keyed by product id), so a plain `ref` seeded
+// once at setup would stay frozen on its pre-stock pick. Deriving the
+// default as a computed instead means it always reflects the current
+// `product` prop; `userPicked*` only overrides it once the shopper actually
+// clicks something (cleared on variant switch so the new variant re-picks
+// its own default, in-stock, SKU).
+const defaultVariantIndex = computed(() => sortedVariantIndices.value[0] ?? 0)
+const userPickedVariantIndex = ref(null)
+const selectedVariantIndex = computed(() => userPickedVariantIndex.value ?? defaultVariantIndex.value)
+const activeVariant = computed(() => props.product.variants?.[selectedVariantIndex.value])
+
 // Land on an in-stock SKU by default — landing on skus[0] regardless of
 // stock made a color swap look broken (badge says unavailable) even though
 // other sizes/thicknesses within that same color were in stock.
-function firstInStockSkuIndex(variant) {
-  const skus = variant?.skus || []
-  const idx = skus.findIndex((s) => s.inStock === true)
-  return idx === -1 ? 0 : idx
-}
-const selectedVariantIndex = ref(sortedVariantIndices.value[0] ?? 0)
-const selectedSkuIndex = ref(firstInStockSkuIndex(props.product.variants?.[selectedVariantIndex.value]))
-const activeVariant = computed(() => props.product.variants?.[selectedVariantIndex.value])
+const defaultSkuIndex = computed(() => firstInStockIndex(activeVariant.value?.skus || [], (s) => s.inStock))
+const userPickedSkuIndex = ref(null)
+const selectedSkuIndex = computed(() => userPickedSkuIndex.value ?? defaultSkuIndex.value)
 const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.value])
+
 // "generation" is a SKU-level characteristic (same color+size can exist at
 // more than one generation — see products.get.js) — never a per-product
 // value, so it must follow the active size selection, not stay fixed.
@@ -56,17 +63,14 @@ const activeImages = computed(() => {
   return ids?.length ? ids.map((id) => `/api/images/${id}?w=800`) : ['/images/product-placeholder.svg']
 })
 function selectVariant(index) {
-  selectedVariantIndex.value = index
-  selectedSkuIndex.value = firstInStockSkuIndex(props.product.variants[index])
+  userPickedVariantIndex.value = index
+  userPickedSkuIndex.value = null
   activeImageIndex.value = 0
 }
 function selectSku(index) {
-  selectedSkuIndex.value = index
+  userPickedSkuIndex.value = index
 }
-const sortedSkuIndices = computed(() => {
-  const skus = activeVariant.value?.skus || []
-  return skus.map((_, i) => i).sort((a, b) => stockScore(skus[a].inStock) - stockScore(skus[b].inStock))
-})
+const sortedSkuIndices = computed(() => sortIndicesByStock(activeVariant.value?.skus || [], (s) => s.inStock))
 function skuLabel(sku) {
   // "generation" is surfaced as its own badge (see activeGeneration), not
   // repeated inline in the size pill.
@@ -85,32 +89,14 @@ function nextImage() {
   activeImageIndex.value = (activeImageIndex.value + 1) % activeImages.value.length
 }
 
-const qtyInCart = computed(() => getQty(activeSku.value.sku))
-
 // The catalog page renders cards before price/stock has loaded (see
 // katalog/index.vue's staged fetch) — inStock is null on a SKU until the
 // follow-up request resolves it. Adding to cart needs a real price, so it
 // stays disabled until then instead of momentarily adding a null-priced item.
 const stockKnown = computed(() => activeSku.value.inStock !== null)
 
-// Combines variant attributes (e.g. color) and SKU attributes (e.g. size)
-// into one label so the cart/checkout message spells out exactly which
-// option was picked, not just the SKU code.
-function cartOptions() {
-  const attrs = { ...(activeVariant.value?.attributes || {}), ...(activeSku.value?.attributes || {}) }
-  return Object.values(attrs).map((v) => localizedText(v, locale.value)).filter(Boolean).join(' / ')
-}
-function cartItem() {
-  return { ...props.product, sku: activeSku.value.sku, price: activeSku.value.price, options: cartOptions() }
-}
-function increment() {
-  if (qtyInCart.value) setQty(activeSku.value.sku, qtyInCart.value + 1)
-  else addItem(cartItem())
-}
-function decrement() {
-  if (qtyInCart.value <= 1) removeItem(activeSku.value.sku)
-  else setQty(activeSku.value.sku, qtyInCart.value - 1)
-}
+const productRef = computed(() => props.product)
+const { qtyInCart, cartItem, addItem, increment, decrement } = useProductCartItem(productRef, activeVariant, activeSku)
 </script>
 
 <template>
@@ -170,8 +156,15 @@ function decrement() {
       </div>
 
       <div v-if="activeVariant.skus.length > 1" class="mt-2 flex gap-1.5 flex-wrap">
+        <!-- Stock isn't known yet (see stockKnown) — pills would sort/settle
+             once it resolves, so a skeleton avoids showing (and clicking
+             into) a size order that's about to reshuffle. -->
+        <template v-if="!stockKnown">
+          <span v-for="i in activeVariant.skus.length" :key="i" class="h-6 w-10 rounded bg-black/5 animate-pulse" />
+        </template>
         <button
           v-for="i in sortedSkuIndices"
+          v-else
           :key="activeVariant.skus[i].sku"
           type="button"
           class="px-2 h-6 rounded border text-xs shrink-0"
