@@ -14,7 +14,17 @@ export function useProductCartItem(product, activeVariant, activeSku) {
   }
 
   function cartItem() {
-    return { ...product.value, sku: activeSku.value.sku, price: activeSku.value.price, options: cartOptions() }
+    // Override imageIds with the *active* variant's — product.value's own
+    // imageIds is the representative (first) variant's image (see
+    // products.get.js toCards), which is wrong once the shopper has
+    // switched color/variant before adding to cart.
+    return {
+      ...product.value,
+      sku: activeSku.value.sku,
+      price: activeSku.value.price,
+      options: cartOptions(),
+      imageIds: activeVariant.value?.imageIds,
+    }
   }
 
   const qtyInCart = computed(() => getQty(activeSku.value.sku))

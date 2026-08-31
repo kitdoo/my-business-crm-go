@@ -20,6 +20,7 @@ export function useCart() {
       name: localizedText(product.name, locale.value) || product.sku,
       options: product.options || '',
       price: product.price || null,
+      imageId: product.imageIds?.[0] || null,
       qty,
     })
   }

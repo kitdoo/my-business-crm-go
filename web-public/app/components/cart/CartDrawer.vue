@@ -91,6 +91,11 @@ async function onCheckoutSubmit() {
         <p v-if="!items.length" class="text-black/50 py-10 text-center">{{ t('cart.empty') }}</p>
         <ul v-else class="space-y-4">
           <li v-for="item in items" :key="item.sku" class="flex items-center gap-3 border-b border-black/10 pb-4">
+            <img
+              :src="item.imageId ? `/api/images/${item.imageId}?w=120` : '/images/product-placeholder.svg'"
+              :alt="item.name"
+              class="w-14 h-14 rounded object-cover shrink-0 bg-gray-50"
+            />
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium truncate">{{ item.name }}</p>
               <p v-if="item.options" class="text-xs text-black/50 truncate">{{ item.options }}</p>
