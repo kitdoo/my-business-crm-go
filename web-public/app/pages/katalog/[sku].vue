@@ -217,11 +217,18 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
 
         <p class="text-black/70 leading-relaxed mb-6"><LocalizedText :value="product.description" /></p>
 
-        <div v-if="activeVariant.skus.length > 1" class="mb-6">
+        <div v-if="activeVariant.skus.length" class="mb-6">
           <p class="text-sm text-black/50 mb-2">{{ t('catalog.skuOptions') }}</p>
           <div class="flex gap-2 flex-wrap">
+            <span
+              v-if="activeVariant.skus.length === 1"
+              class="px-3 h-9 flex items-center rounded-md border border-black/15 text-black/60 text-sm"
+            >
+              {{ skuLabel(activeVariant.skus[0]) }}
+            </span>
             <button
               v-for="i in sortedSkuIndices"
+              v-else
               :key="activeVariant.skus[i].sku"
               type="button"
               class="px-3 h-9 rounded-md border text-sm"

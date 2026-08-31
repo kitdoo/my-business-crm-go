@@ -155,13 +155,21 @@ const { qtyInCart, cartItem, addItem, increment, decrement } = useProductCartIte
         <span v-if="hiddenVariantsCount" class="text-xs text-black/50 px-1">{{ t('catalog.moreVariants', { n: hiddenVariantsCount }) }}</span>
       </div>
 
-      <div v-if="activeVariant.skus.length > 1" class="mt-2 flex gap-1.5 flex-wrap">
+      <div v-if="activeVariant.skus.length" class="mt-2 flex gap-1.5 flex-wrap">
         <!-- Stock isn't known yet (see stockKnown) — pills would sort/settle
              once it resolves, so a skeleton avoids showing (and clicking
-             into) a size order that's about to reshuffle. -->
-        <template v-if="!stockKnown">
+             into) a size order that's about to reshuffle. A single-SKU
+             variant has nothing to reorder or pick, so it skips straight to
+             its (non-interactive) label instead of waiting on stock too. -->
+        <template v-if="!stockKnown && activeVariant.skus.length > 1">
           <span v-for="i in activeVariant.skus.length" :key="i" class="h-6 w-10 rounded bg-black/5 animate-pulse" />
         </template>
+        <span
+          v-else-if="activeVariant.skus.length === 1"
+          class="px-2 h-6 flex items-center rounded border border-black/15 text-black/60 text-xs shrink-0"
+        >
+          {{ skuLabel(activeVariant.skus[0]) }}
+        </span>
         <button
           v-for="i in sortedSkuIndices"
           v-else
