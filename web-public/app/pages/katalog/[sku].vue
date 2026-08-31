@@ -46,9 +46,22 @@ const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.va
 // per-product value, so it must follow the active size selection.
 const activeGeneration = computed(() => activeSku.value?.attributes?.generation)
 
+// In-stock SKUs sort first so a shopper doesn't land on (or have to hunt
+// past) an out-of-stock size/thickness pill when other options in the same
+// color are actually available — mirrors ProductCard.vue.
+const sortedSkuIndices = computed(() => {
+  const skus = activeVariant.value?.skus || []
+  return skus.map((_, i) => i).sort((a, b) => Number(skus[b].inStock === true) - Number(skus[a].inStock === true))
+})
+function firstInStockSkuIndex(variant) {
+  const skus = variant?.skus || []
+  const idx = skus.findIndex((s) => s.inStock === true)
+  return idx === -1 ? 0 : idx
+}
+
 function selectVariant(index) {
   selectedVariantIndex.value = index
-  selectedSkuIndex.value = 0
+  selectedSkuIndex.value = firstInStockSkuIndex(product.value.variants[index])
   activeImage.value = 0
 }
 function selectSku(index) {
@@ -234,14 +247,14 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
           <p class="text-sm text-black/50 mb-2">{{ t('catalog.skuOptions') }}</p>
           <div class="flex gap-2 flex-wrap">
             <button
-              v-for="(sku, i) in activeVariant.skus"
-              :key="sku.sku"
+              v-for="i in sortedSkuIndices"
+              :key="activeVariant.skus[i].sku"
               type="button"
               class="px-3 h-9 rounded-md border text-sm"
               :class="i === selectedSkuIndex ? 'border-brand-500 text-brand-700' : 'border-black/15 text-black/60 hover:border-black/30'"
               @click="selectSku(i)"
             >
-              {{ skuLabel(sku) }}
+              {{ skuLabel(activeVariant.skus[i]) }}
             </button>
           </div>
         </div>

@@ -30,8 +30,16 @@ const sortedVariantIndices = computed(() => {
 })
 const displayedVariantIndices = computed(() => sortedVariantIndices.value.slice(0, MAX_VARIANT_SWATCHES))
 const hiddenVariantsCount = computed(() => Math.max(0, (props.product.variants?.length || 0) - MAX_VARIANT_SWATCHES))
-const selectedVariantIndex = ref(0)
-const selectedSkuIndex = ref(0)
+// Land on an in-stock SKU by default — landing on skus[0] regardless of
+// stock made a color swap look broken (badge says unavailable) even though
+// other sizes/thicknesses within that same color were in stock.
+function firstInStockSkuIndex(variant) {
+  const skus = variant?.skus || []
+  const idx = skus.findIndex((s) => s.inStock === true)
+  return idx === -1 ? 0 : idx
+}
+const selectedVariantIndex = ref(sortedVariantIndices.value[0] ?? 0)
+const selectedSkuIndex = ref(firstInStockSkuIndex(props.product.variants?.[selectedVariantIndex.value]))
 const activeVariant = computed(() => props.product.variants?.[selectedVariantIndex.value])
 const activeSku = computed(() => activeVariant.value?.skus?.[selectedSkuIndex.value])
 // "generation" is a SKU-level characteristic (same color+size can exist at
@@ -49,7 +57,7 @@ const activeImages = computed(() => {
 })
 function selectVariant(index) {
   selectedVariantIndex.value = index
-  selectedSkuIndex.value = 0
+  selectedSkuIndex.value = firstInStockSkuIndex(props.product.variants[index])
   activeImageIndex.value = 0
 }
 function selectSku(index) {
