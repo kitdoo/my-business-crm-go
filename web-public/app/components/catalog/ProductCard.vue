@@ -192,6 +192,7 @@ const { qtyInCart, cartItem, addItem, increment, decrement } = useProductCartIte
           :unit="product.priceUnit"
           class="font-semibold text-brand-700"
         />
+        <span v-else class="font-semibold text-black/50">{{ t('catalog.priceOnRequest') }}</span>
 
         <div class="mt-2 flex items-center justify-between gap-2">
           <div v-if="!stockKnown" class="h-5 w-20 rounded-full bg-black/5 animate-pulse" />
@@ -216,7 +217,7 @@ const { qtyInCart, cartItem, addItem, increment, decrement } = useProductCartIte
           <button
             v-else
             class="text-xs uppercase tracking-wide text-brand-700 hover:text-brand-500 flex items-center gap-1 disabled:opacity-30"
-            :disabled="!stockKnown"
+            :disabled="!stockKnown || !activeSku.price"
             :aria-label="t('cart.addToCart')"
             @click.stop.prevent="addItem(cartItem())"
           >

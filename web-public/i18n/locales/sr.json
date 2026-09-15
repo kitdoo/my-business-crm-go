@@ -125,6 +125,7 @@
     "otherVariants": "Druge opcije",
     "moreVariants": "+{n}",
     "skuOptions": "Veličina",
+    "priceOnRequest": "Cena na upit",
     "priceUnit": {
       "piece": "kom",
       "squareMeter": "m²"

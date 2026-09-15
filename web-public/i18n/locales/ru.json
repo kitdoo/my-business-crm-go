@@ -125,6 +125,7 @@
     "otherVariants": "Другие варианты",
     "moreVariants": "+{n}",
     "skuOptions": "Размер",
+    "priceOnRequest": "Цена по запросу",
     "priceUnit": {
       "piece": "шт",
       "squareMeter": "м²"

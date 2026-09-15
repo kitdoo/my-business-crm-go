@@ -125,6 +125,7 @@
     "otherVariants": "Other options",
     "moreVariants": "+{n}",
     "skuOptions": "Size",
+    "priceOnRequest": "Price on request",
     "priceUnit": {
       "piece": "pc",
       "squareMeter": "m²"

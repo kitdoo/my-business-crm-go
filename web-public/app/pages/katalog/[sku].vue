@@ -213,6 +213,7 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
           :unit="product.priceUnit"
           class="text-xl font-semibold text-brand-700 block mb-3"
         />
+        <span v-else class="text-xl font-semibold text-black/50 block mb-3">{{ t('catalog.priceOnRequest') }}</span>
         <StatusBadge :available="activeSku.inStock" class="mb-6 inline-block" />
 
         <p class="text-black/70 leading-relaxed mb-6"><LocalizedText :value="product.description" /></p>
@@ -264,7 +265,14 @@ const contactHref = computed(() => `${localePath('/kontakt')}?message=${encodeUR
               <UIcon name="i-lucide-plus" class="w-4 h-4" />
             </button>
           </div>
-          <UButton v-else variant="cta-outline" size="xl" class="py-4 text-base flex-1" @click="addItem(cartItem())">
+          <UButton
+            v-else
+            variant="cta-outline"
+            size="xl"
+            class="py-4 text-base flex-1"
+            :disabled="!activeSku.price"
+            @click="addItem(cartItem())"
+          >
             {{ t('cart.addToCart') }}
           </UButton>
           <UButton :to="contactHref" variant="cta-outline" size="xl" class="py-4 text-base flex-1">
